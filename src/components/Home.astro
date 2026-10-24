@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import source from '../data/source.json';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const docs = await getCollection('docs');
+const FAMILIES = ['ore-refining', 'mining', 'quantum-network', 'teleportation', 'charging', 'fluids-and-rocks', 'logistics'];
+const LABEL: Record<string, string> = {
+  'ore-refining': 'Ore refining', mining: 'Mining', 'quantum-network': 'Quantum network', teleportation: 'Teleportation',
+  charging: 'Charging', 'fluids-and-rocks': 'Fluids and rocks', logistics: 'Logistics',
+};
+const machines = docs
+  .filter(d => d.data.machine && !(d.data.machine.structure && d.data.machine.id !== 'ore_refinery_controller'))
+  .map(d => ({ d, fam: d.id.split('/')[1], order: d.data.sidebar?.order ?? 9 }))
+  .sort((a, b) => FAMILIES.indexOf(a.fam) - FAMILIES.indexOf(b.fam) || a.order - b.order);
+const pic = (m: any) => m.id === 'ore_refinery_controller' ? '_refinery' : (m.model ?? m.id);
+const guides = docs.filter(d => d.id.startsWith('guides/')).sort((a, b) => (a.data.sidebar?.order ?? 9) - (b.data.sidebar?.order ?? 9));
+const byId = (id: string) => docs.find(d => d.id === id);
+const tiles = ([['Overview', 'start/overview'], ['Basics', 'start/basics'], ...guides.map(g => ['Guide', g.id]), ['Reference', 'reference/crafting'],
+  ['Reference', 'reference/in-game-texts'], ['Reference', 'reference/configuration'], ['Help', 'start/faq']] as [string, string][])
+  .map(([k, id]) => [k, byId(id)] as const).filter((t): t is readonly [string, NonNullable<ReturnType<typeof byId>>] => !!t[1]);
+const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) + '…' : s);
+---
+
+<div class="me-home not-content">
+  <section class="me-hero">
+    <div>
+      <div class="me-eyebrow">Mekanism addon · {source.modVersion} · Minecraft {source.minecraft}</div>
+      <h1>Engineering,<br />at quantum scale.</h1>
+      <p>Remote mining, whole-chain ore refining, quantum networks and precise logistics. The complete wiki of Mekanism: Engineering.</p>
+      <div class="me-cta">
+        <a class="me-btn primary" href={`${base}/start/overview/`}>Start here →</a>
+        <a class="me-btn" href={`${base}/machines/ore-refining/quantum-ore-refinery/`}>The Quantum Ore Refinery</a>
+        <a class="me-btn" href="https://www.curseforge.com/minecraft/mc-mods/mekanism-engineering">CurseForge ↗</a>
+      </div>
+    </div>
+    <div data-me3d data-kind="refinery" data-mode="assembled" data-tags="hero">
+      <div class="me-stage"><img src={`${base}/icons/mekanismengineering/_refinery.png`} alt="The Quantum Ore Refinery" style="width:100%;height:100%;object-fit:contain" /></div>
+    </div>
+  </section>
+
+  <h2>The machines</h2>
+  <p class="me-sub">Swipe through {machines.length} machines and tools. Blue: Quantum. Grey: Mekanism style.</p>
+  <div class="me-rail">
+    {machines.map(({ d, fam }) => (
+      <a class:list={['me-card', { g: !d.data.machine!.quantum }]} href={`${base}/${d.id}/`}>
+        <div class="me-eyebrow">{LABEL[fam]}{d.data.machine!.isNew ? ' · new' : ''}</div>
+        <img src={`${base}/icons/mekanismengineering/${pic(d.data.machine)}.png`} alt="" loading="lazy" />
+        <h3>{d.data.title}</h3>
+        <p>{short(d.data.description)}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>Start here</h2>
+  <p class="me-sub">New to the mod? These pages take you from your first machine to a working setup.</p>
+  <div class="me-tiles">
+    {tiles.map(([kind, d]) => (
+      <a class="me-tile" href={`${base}/${d.id}/`}><div class="me-eyebrow">{kind}</div><h3>{d.data.title}</h3><p>{short(d.data.description)}</p></a>
+    ))}
+  </div>
+</div>

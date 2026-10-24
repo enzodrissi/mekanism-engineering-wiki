@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.astro/
+# made by scripts/import-wiki.mjs and scripts/render-icons.mjs at every build, from the mod's GitLab repository
+src/content/docs/start/overview.md
+src/content/docs/start/basics.md
+src/content/docs/start/faq.md
+src/content/docs/reference/configuration.md
+src/content/docs/reference/jei-jade-wthit.md
+src/content/docs/reference/crafting.md
+src/content/docs/reference/in-game-texts.md
+src/content/docs/machines/
+src/content/docs/changelog/
+src/data/source.json
+src/data/qor-levels.json
+src/assets/logo.png
+public/favicon.png
+public/wiki-images/
+public/gallery/
+public/data/
+public/mc/mekanismengineering/
+public/icons/mekanismengineering/
