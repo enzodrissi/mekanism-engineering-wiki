@@ -41,7 +41,8 @@ The ingredient icons and borrowed files are refreshed by hand when Mekanism chan
 
 `.github/workflows/deploy.yml` builds the site on every push, pull request, every night and on demand. It deploys to
 GitHub Pages only from `main` and only when the repository variable `DEPLOY` is `on`. The repository variable
-`WIKI_REF` chooses which branch or tag of the mod is published.
+`WIKI_REF` chooses which branch or tag of the mod is published. The address of the site (domain and path) is set in
+`site.config.mjs` only.
 
 Visits are counted by [GoatCounter](https://www.goatcounter.com) (no cookies): `GOATCOUNTER` in `astro.config.mjs`.
 

@@ -15,7 +15,7 @@ frequency. The Receiver, the Chargepad and the miner below draw from that freque
 
 ## 2. Stick a Quantum Energy Receiver on a machine
 
-1. With a [Quantum Energy Receiver](/mekanism-engineering-wiki/machines/quantum-network/quantum-energy-receiver/) in hand, right-click any face
+1. With a [Quantum Energy Receiver](../../quantum-energy-receiver/) in hand, right-click any face
    of the machine to power: it sticks to that face like a plate.
 2. Right-click the Receiver, open the **Frequency** tab and link the frequency.
 3. It delivers automatically, up to its tier's rate. It only moves energy, and never sends any back.
@@ -29,22 +29,22 @@ frequency. The Receiver, the Chargepad and the miner below draw from that freque
 
 ## 3. Charge your gear from the same frequency
 
-Place a [Quantum Chargepad](/mekanism-engineering-wiki/machines/charging/quantum-chargepad/), right-click it, press **Quantum** and choose
+Place a [Quantum Chargepad](../../quantum-chargepad/), right-click it, press **Quantum** and choose
 the frequency. Stand on it: every item you carry that holds energy and is not full charges in the same tick (when energy runs short, your worn armour comes first).
 
 ## 4. Power a miner, and send a refinery's ingots
 
-- The [Quantum Digital Miner](/mekanism-engineering-wiki/machines/mining/quantum-digital-miner/) can take its **Energy** from a Quantum
+- The [Quantum Digital Miner](../../quantum-digital-miner/) can take its **Energy** from a Quantum
   frequency, chosen in its Quantum link column.
-- The [Quantum Ore Refinery](/mekanism-engineering-wiki/machines/ore-refining/quantum-ore-refinery/)'s Quantum Module sends its ingots to a
+- The [Quantum Ore Refinery](../../quantum-ore-refinery/)'s Quantum Module sends its ingots to a
   Quantum or QIO frequency.
 
 ## 5. Watch the frequency
 
-Place a [Quantum Network Controller](/mekanism-engineering-wiki/machines/quantum-network/quantum-network-controller/) anywhere (it does not
+Place a [Quantum Network Controller](../../quantum-network-controller/) anywhere (it does not
 need to touch the network), pick the frequency and the **Energy** tab: it shows what goes **in**, what the frequency
 **holds** and what goes **out**, and which kinds of device take it. The
-[Quantum Network Tablet](/mekanism-engineering-wiki/machines/quantum-network/quantum-network-tablet/) is the same screen in your hand: put a
+[Quantum Network Tablet](../../quantum-network-tablet/) is the same screen in your hand: put a
 Controller alone in the crafting grid to get one, and the Tablet alone to get the Controller back.
 
 :::note

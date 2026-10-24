@@ -2,11 +2,7 @@
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 const { entry, id } = Astro.locals.starlightRoute;
 const m = entry.data.machine;
-const FAMILY: Record<string, string> = {
-  'ore-refining': 'Ore refining', mining: 'Mining', 'quantum-network': 'Quantum network', teleportation: 'Teleportation',
-  charging: 'Charging', 'fluids-and-rocks': 'Fluids and rocks', logistics: 'Logistics',
-};
-const family = FAMILY[id.split('/')[1]] ?? '';
+const family = m?.family ?? '';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // the refinery gets the full 3D viewer under its title, a block turns in 3D, an item shows its inventory picture
 const kind = !m ? null : m.id === 'ore_refinery_controller' ? 'refinery' : m.structure ? null : m.model ? 'block' : 'item';
