@@ -30,6 +30,7 @@ export default defineConfig({
         '@fontsource-variable/inter',
         '@fontsource-variable/jetbrains-mono',
         './src/styles/theme.css',
+        './src/styles/motion.css',
       ],
       components: {
         Head: './src/components/Head.astro',

@@ -1,5 +1,6 @@
 // Interactive parts of the pages: 3D views (loaded only when they come into sight) and the refinery speed calculator.
 import levels from '../data/qor-levels.json';
+import { countTo, pop, swapIn } from './motion';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 let names: Promise<Record<string, { name: string; text: string; page: string | null }>> | null = null;
@@ -52,26 +53,41 @@ function calc(el: HTMLElement) {
     <section class="me-glass"><h3></h3><div class="me-flow"></div><div class="me-kpis"></div>
     <p class="me-note" style="text-align:left">Iron ore, Mekanism's default recipes, from the table above. A job takes a stack of up to 64 ore.</p></section>`;
   const $ = (s: string) => el.querySelector(s) as HTMLElement;
+  let first = true;
   function show() {
     const t = ticks(st.level, st.acc), L = levels.find(x => x.level === st.level)!;
-    $('.me-gauge b').textContent = `${t} tick${t > 1 ? 's' : ''}`;
+    countTo($('.me-gauge b'), t, n => `${n} tick${n > 1 ? 's' : ''}`);
     $('.me-gauge small').textContent = `per x${st.level} job · ${(t / 20).toLocaleString('en', { maximumFractionDigits: 2 })} s`;
     // full arc = 1 tick, empty = 200 ticks (logarithmic, as the accelerators work)
-    $('.me-arc').setAttribute('stroke-dashoffset', String(283 * Math.log(t) / Math.log(200)));
+    // set as a style so the arc can glide (motion.css)
+    $('.me-arc').style.strokeDashoffset = String(283 * Math.log(t) / Math.log(200));
     el.querySelectorAll<HTMLButtonElement>('.me-lv button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.l! === st.level)));
-    el.querySelectorAll<HTMLButtonElement>('.me-acc button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.a! <= st.acc)));
+    // the accelerators that were switched pop, one after the other
+    let n = 0;
+    el.querySelectorAll<HTMLButtonElement>('.me-acc button').forEach(b => {
+      const on = String(+b.dataset.a! <= st.acc);
+      if (!first && b.getAttribute('aria-pressed') !== on) pop(b, 30 * n++);
+      b.setAttribute('aria-pressed', on);
+    });
     $('.me-note').textContent = st.level === 1 ? 'The x1 works a whole stack in one tick, whatever the accelerators.'
       : `${st.acc} of 8 Ore Refinery Accelerators · tap one to add or remove`;
     $('section:last-child h3').textContent = `One iron ore at x${st.level}`;
+    const flow = $('.me-flow').innerHTML, kpis = [...el.querySelectorAll('.me-kpis div')].map(d => d.textContent);
     $('.me-flow').innerHTML = L.chain.split(/, (?![^(]*\))/).map(c => c.replace(/^then /, '')).map(c => `<span>${c[0].toUpperCase() + c.slice(1)}</span>`).join('');
     const takes = L.takes === 'nothing' ? [] : L.takes.split(/, (?=\d)/);
     $('.me-kpis').innerHTML = `<div><b>${L.ingots}</b><span>ingot${L.ingots > 1 ? 's' : ''} from one ore</span></div>`
       + (takes.length ? takes.map(x => { const m = x.match(/^([\d,]+ mB) (.+)$/); return m ? `<div><b>${m[1]}</b><span>${m[2]}</span></div>` : `<div><span>${x}</span></div>`; }).join('')
         : '<div><b>0 mB</b><span>nothing from the tanks</span></div>');
+    // the values that changed fade in
+    if (!first) {
+      if ($('.me-flow').innerHTML !== flow) swapIn($('.me-flow'));
+      el.querySelectorAll('.me-kpis div').forEach((d, i) => { if (d.textContent !== kpis[i]) (kpis[i] == null ? [d] : [...d.children]).forEach(swapIn); });
+    }
+    first = false;
   }
   el.addEventListener('click', e => {
     const b = (e.target as HTMLElement).closest('button'); if (!b) return;
-    if (b.dataset.l) st.level = +b.dataset.l;
+    if (b.dataset.l) { if (+b.dataset.l !== st.level) pop(b); st.level = +b.dataset.l; }
     if (b.dataset.a) { const a = +b.dataset.a; st.acc = st.acc === a ? a - 1 : a; }
     show();
   });
