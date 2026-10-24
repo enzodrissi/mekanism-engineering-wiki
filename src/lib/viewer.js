@@ -167,7 +167,7 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     for (const m of marks) {
       const p = stage.toScreen(centre(m.b));
       m.el.style.left = p.x + 'px'; m.el.style.top = p.y + 'px';
-      m.el.style.opacity = state.only && m.b.userData.dy + 1 !== state.only ? 0.25 : 1;
+      m.el.style.opacity = state.mode === 'layers' && m.b.userData.dy + 1 !== state.only ? 0.25 : 1;
     }
     for (const t of tagEls) {
       const p = stage.toScreen(centre(t.b));
