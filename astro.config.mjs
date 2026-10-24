@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import rehypeTables from './src/lib/rehype-tables.mjs';
 
 // Visitor counter: GoatCounter (no cookies, no consent banner). Empty = no counter.
 export const GOATCOUNTER = 'mekanism-engineering-wiki';
@@ -9,6 +10,7 @@ export default defineConfig({
   site: 'https://enzodrissi.github.io',
   base: '/mekanism-engineering-wiki',
   trailingSlash: 'always',
+  markdown: { rehypePlugins: [rehypeTables] },
   integrations: [
     starlight({
       title: 'Mekanism: Engineering',
@@ -34,6 +36,7 @@ export default defineConfig({
         attrs: { 'data-goatcounter': `https://${GOATCOUNTER}.goatcounter.com/count`, async: true, src: 'https://gc.zgo.at/count.js' },
       }] : [],
       lastUpdated: false,
+      expressiveCode: { defaultProps: { wrap: true } },
       pagination: true,
       sidebar: [
         {

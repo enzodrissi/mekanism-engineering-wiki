@@ -29,7 +29,7 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
       <p>Remote mining, whole-chain ore refining, quantum networks and precise logistics. The complete wiki of Mekanism: Engineering.</p>
       <div class="me-cta">
         <a class="me-btn primary" href={`${base}/start/overview/`}>Start here →</a>
-        <a class="me-btn" href={`${base}/machines/ore-refining/quantum-ore-refinery/`}>The Quantum Ore Refinery</a>
+        <a class="me-btn" href={`${base}/guides/first-ore-refinery/`}>First refinery</a>
         <a class="me-btn" href="https://www.curseforge.com/minecraft/mc-mods/mekanism-engineering">CurseForge ↗</a>
       </div>
     </div>
@@ -39,7 +39,10 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
   </section>
 
   <h2>The machines</h2>
-  <p class="me-sub">Swipe through {machines.length} machines and tools. Blue: Quantum. Grey: Mekanism style.</p>
+  <p class="me-sub">{machines.length} machines and tools. Blue: Quantum. Grey: Mekanism style.</p>
+  <div class="me-rail-wrap">
+  <button type="button" class="me-rail-btn prev" aria-label="Previous machines">←</button>
+  <button type="button" class="me-rail-btn next" aria-label="Next machines">→</button>
   <div class="me-rail">
     {machines.map(({ d, fam }) => (
       <a class:list={['me-card', { g: !d.data.machine!.quantum }]} href={`${base}/${d.id}/`}>
@@ -50,6 +53,7 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
       </a>
     ))}
   </div>
+  </div>
 
   <h2>Start here</h2>
   <p class="me-sub">New to the mod? These pages take you from your first machine to a working setup.</p>
@@ -59,3 +63,11 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
     ))}
   </div>
 </div>
+
+<script>
+  for (const wrap of document.querySelectorAll('.me-rail-wrap')) {
+    const rail = wrap.querySelector('.me-rail') as HTMLElement;
+    wrap.querySelector('.prev')?.addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * 0.8, behavior: 'smooth' }));
+    wrap.querySelector('.next')?.addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' }));
+  }
+</script>

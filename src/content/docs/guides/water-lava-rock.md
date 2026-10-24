@@ -16,13 +16,13 @@ through the far end of a Mekanism Mechanical Pipe network.
 3. Feed the back face with energy, and connect a pipe or tank to the output face (right by default).
 
 Water flows without end. Lava sources are consumed, unless you install a **Source Stabilizer Upgrade** (shift +
-right-click the pump with it): then lava stays in place and never runs out. With a Filter Upgrade, pumping water gives
+right-click the pump with it): then lava stays in place and never runs out, for four times the energy. With a Filter Upgrade, pumping water gives
 heavy water.
 
 ## 2. Make rock: the Petrogenic Synthesizer
 
 The [Petrogenic Synthesizer](/mekanism-engineering-wiki/machines/fluids-and-rocks/petrogenic-synthesizer/) turns water and lava into one
-chosen rock at a time: water on its left face, lava on its right face, energy at the back, and finished blocks out
+chosen rock at a time. By default: water on its left face, lava on its right face, energy at the back, and finished blocks out
 of the front. Pick the product on its screen. Some of the 13 products:
 
 | Product | Water / block | Lava / block |
@@ -46,7 +46,7 @@ times less water and lava per block at full speed. Four Synthesizers go into its
 3. Energy into the port at the back centre; an item pipe or inventory on either front side.
 4. Click one of the eight product cells to choose its product (shift-click a product to set every line at once).
 
-:::tip[No pumps at all]
+:::tip[Fewer pumps, or none]
 The Plant's **Hydro Condenser Upgrade** makes water from energy and its **Magma Synthesizer Upgrade** makes lava from
 a lot of energy. Up to four of each, installed with shift + right-click.
 :::

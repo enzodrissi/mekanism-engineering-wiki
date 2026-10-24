@@ -243,3 +243,61 @@ header.header { backdrop-filter: blur(12px); }
 .me-hero [data-me3d] .me-stage { margin-top: 0.5rem; }
 .me-info a { color: var(--sl-color-accent); }
 .me-texts summary img { width: 1.6rem; height: 1.6rem; vertical-align: -0.4rem; margin: 0 0.5rem 0 0.2rem; image-rendering: pixelated; border-radius: 0; display: inline; }
+
+/* ---------- tables (classes set at build time by src/lib/rehype-tables.mjs) ---------- */
+.sl-markdown-content td code { white-space: normal; overflow-wrap: anywhere; }
+.sl-markdown-content table.me-facts { display: table; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--me-line); background: var(--me-glass); }
+.me-facts tr { background: transparent !important; }
+.me-facts td { border-bottom: 1px solid var(--me-line); vertical-align: top; }
+.me-facts tr:last-child td { border-bottom: 0; }
+.me-facts td:first-child { width: 9rem; font: 600 0.7rem var(--sl-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sl-color-accent); padding-top: 0.75rem; }
+@media (max-width: 40rem) {
+  .me-facts td:first-child { width: 6.5rem; }
+  .me-facts td { padding-inline: 0.6rem; }
+}
+.me-scroll :is(td, th) { min-width: 5.5rem; }
+.me-scroll :is(td, th):first-child { min-width: 7.5rem; }
+.sl-markdown-content table.me-scroll {
+  background:
+    linear-gradient(to right, var(--sl-color-black) 30%, transparent) left / 2rem 100%,
+    linear-gradient(to left, var(--sl-color-black) 30%, transparent) right / 2rem 100%,
+    radial-gradient(farthest-side at 0 50%, rgba(100, 209, 199, 0.4), transparent) left / 0.8rem 100%,
+    radial-gradient(farthest-side at 100% 50%, rgba(100, 209, 199, 0.4), transparent) right / 0.8rem 100%;
+  background-repeat: no-repeat; background-attachment: local, local, scroll, scroll;
+}
+@media (max-width: 50rem) {
+  .sl-markdown-content table.me-stack, .me-stack tbody, .me-stack tr, .me-stack td { display: block; width: 100%; }
+  .me-stack thead { display: none; }
+  .me-stack tr { border: 1px solid var(--me-line); border-radius: 14px; margin: 0.6rem 0; padding: 0.5rem 0.8rem; background: var(--me-glass) !important; }
+  .me-stack td { border: 0; padding: 0.25rem 0; min-width: 0; }
+  .me-stack td::before { content: attr(data-label); display: block; font: 600 0.68rem var(--sl-font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-color-accent); }
+  .me-stack td:first-child { font-weight: 650; color: var(--sl-color-white); }
+}
+
+/* ---------- fixes after the visual check ---------- */
+:root[data-theme='dark'] { --sl-color-bg-nav: #080d16; }
+.me-stage .me-hint { top: calc(100% + 0.35rem); bottom: auto; }
+.me-ref .me-stage, .me-head-visual .me-stage, .me-hero .me-stage { margin-bottom: 2.4rem; }
+.me-calc { align-items: start; }
+.me-texts summary { padding-left: 1.3rem; text-indent: -1.3rem; }
+.me-card .me-eyebrow { font-size: 0.7rem; }
+.me-texts dt { font-size: 0.72rem; }
+:root[data-theme='light'] .me-slot { background: #c3ccda; }
+@media (max-width: 40rem) { .me-home .me-eyebrow { letter-spacing: 0.1em; } }
+.me-cta .me-btn { padding: 0.65rem 0.95rem; font-size: 0.86rem; }
+/* the home page uses the whole width of large screens */
+body:has(.me-home) .sl-container { max-width: min(96rem, 100%); }
+@media (min-width: 120rem) { .me-home { font-size: 1.12rem; } .me-card { width: 18rem; } .me-hero .me-stage { height: 38rem; } }
+.me-rail-wrap { position: relative; }
+.me-rail { -webkit-mask-image: linear-gradient(to right, #000 92%, transparent); mask-image: linear-gradient(to right, #000 92%, transparent); }
+.me-rail-btn { display: none; }
+@media (hover: hover) and (min-width: 50rem) {
+  .me-rail-btn { display: grid; place-items: center; position: absolute; top: 40%; z-index: 3; width: 2.6rem; height: 2.6rem; border-radius: 50%;
+    border: 1px solid var(--me-line); background: rgba(8, 13, 22, 0.9); color: var(--sl-color-white); cursor: pointer; font-size: 1.1rem; }
+  .me-rail-btn:hover { border-color: var(--me-teal); }
+  .me-rail-btn.prev { left: -1.2rem; } .me-rail-btn.next { right: -1.2rem; }
+}
+@media (max-width: 50rem) { .sl-markdown-content .me-stack td + td { margin-top: 0.35rem; } }
+.content-panel:has(> .sl-container:empty) { display: none; }
+body:has(.me-home) .content-panel { border-top: 0; }
+@media (min-width: 72rem) { body:has(.me-home) .sl-container { padding-inline: 1.5rem; } }

@@ -133,13 +133,13 @@ const MARKS = [
 export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded', markers = true, tags = null } = {}) {
   host.classList.add('me-ref');
   host.innerHTML = `<div class="me-stage"><span class="me-pill me-hint">⟲ Drag to turn · tap a block</span><div class="me-loading">Loading the 3D view…</div></div>`
+    + '<div class="me-info" hidden></div>'
     + (markers ? '<ul class="me-legend"></ul>' : '')
     + `<div class="me-ref-bar"><div class="me-seg" role="group" aria-label="View">
         <button type="button" data-mode="assembled">Assembled</button><button type="button" data-mode="exploded">Exploded</button>
         <button type="button" data-mode="layers">Layer by layer</button></div>
        <button type="button" class="me-pill me-reset" style="cursor:pointer">⟳ Reset view</button></div>
-       <div class="me-layers" hidden></div>
-       <div class="me-info" hidden></div>`;
+       <div class="me-layers" hidden></div>`;
   const stageEl = host.querySelector('.me-stage');
   const stage = new Stage(stageEl, { yaw: 35, pitch: 32, pad: 0.05 });
   const { root, blocks } = await buildRefinery(MC, { accelerators: 8, module: true });
@@ -186,19 +186,23 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   }
   host.querySelector('.me-seg').addEventListener('click', e => {
     const m = e.target.closest('button')?.dataset.mode; if (!m) return;
+    unselect();
     state.mode = m; if (m === 'layers' && !state.only) state.only = 1; apply(true);
   });
-  layersEl.addEventListener('click', e => { const n = +e.target.closest('button')?.dataset.layer; if (n) { state.only = n; apply(false); } });
+  layersEl.addEventListener('click', e => { const n = +e.target.closest('button')?.dataset.layer; if (n) { unselect(); state.only = n; apply(false); } });
   host.querySelector('.me-reset').addEventListener('click', () => stage.frame());
 
   // tap a block: its card
   const info = host.querySelector('.me-info');
   let lit = null;
+  function unselect() {
+    if (lit) lit.traverse(m => m.material && m.material.color.setScalar(1));
+    lit = null; info.hidden = true;
+  }
   onTap(stage.canvas, ev => {
     const b = stage.pick(ev, blocks);
-    if (lit) lit.traverse(m => m.material && m.material.color.setScalar(1));
-    lit = b;
-    if (!b) { info.hidden = true; stage.draw(); return; }
+    unselect(); lit = b;
+    if (!b) { stage.draw(); return; }
     b.traverse(m => m.material && m.material.color.setRGB(0.75, 1.15, 1.1));
     const id = b.userData.id, n = names[id] || {};
     const many = counts[id] > 1 ? `${counts[id]} in the structure` : 'One in the structure';
@@ -207,6 +211,8 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
       + (n.text ? `<p>${n.text.replace(/</g, '&lt;')}</p>` : '')
       + (n.page ? `<a href="${BASE}/${n.page}/">Open its page →</a>` : '') + '</div>';
     info.hidden = false; stage.draw();
+    const r = info.getBoundingClientRect();
+    if (r.bottom > innerHeight || r.top < 0) info.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
 
   stage.resize(); apply(true);

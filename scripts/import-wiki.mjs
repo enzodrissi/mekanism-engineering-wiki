@@ -17,6 +17,8 @@ const REF = process.env.WIKI_REF || 'wip/1.2/rqe-ecran';
 const BASE = '/mekanism-engineering-wiki';
 const NS = 'mekanismengineering';
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
+// edit and source links point to a lasting branch, not to the work branch being imported
+const EDIT_REF = process.env.WIKI_EDIT_REF || 'main';
 
 // ---------- 1. archive ----------
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'me-wiki-'));
@@ -135,8 +137,8 @@ function gameTexts(ids) {
 // ---------- 5. pages ----------
 const PAGES = {
   'Home': { to: 'start/overview', order: 1, title: 'Overview' },
-  'Getting-Started': { to: 'start/basics', order: 2, title: 'Rules every machine shares' },
-  'FAQ': { to: 'start/faq', order: 9 },
+  'Getting-Started': { to: 'start/basics', order: 2, title: 'Getting started' },
+  'FAQ': { to: 'start/faq', order: 9, description: 'Answers to the questions players ask most.' },
   'Configuration': { to: 'reference/configuration', order: 1 },
   'JEI-Jade-WTHIT': { to: 'reference/jei-jade-wthit', order: 2 },
   'Quantum-Ore-Refinery': { to: 'machines/ore-refining/quantum-ore-refinery', order: 1, ids: ['ore_refinery_controller'], structure: true, quantum: true, isNew: true },
@@ -171,9 +173,10 @@ const changelogs = fs.readdirSync(path.join(SRC, 'docs/publication')).filter(f =
 const ver = f => f.match(/_(\d[\d.]*)\.md$/)[1];
 const cmp = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
 const isDraft = v => /BROUILLON|NON PUBLIÉ|\bTBD\b/.test(rd(`docs/publication/CURSEFORGE_CHANGELOG_${v}.md`));
+const drafts = changelogs.map(ver).filter(v => cmp(v, '1.0.0') >= 0 && isDraft(v) && process.env.INCLUDE_DRAFT_CHANGELOG !== '1');
 const published = changelogs.map(ver).filter(v => cmp(v, '1.0.0') >= 0 && (!isDraft(v) || process.env.INCLUDE_DRAFT_CHANGELOG === '1')).sort(cmp).reverse();
 
-function rewrite(md, from) {
+function rewrite(md, from, pageIds = null) {
   // links between pages, to anchors and to files of the GitLab repository
   md = md.replace(/\]\(([^)\s]+?)\)/g, (all, href) => {
     if (/^(https?:|mailto:|#)/.test(href)) return all;
@@ -183,12 +186,20 @@ function rewrite(md, from) {
     if (file.startsWith('images/')) return `](${BASE}/wiki-images/${file.slice(7)})`;
     const rel = file.match(/releases\/(\d[\d.]*)\.md$/);
     if (rel) { const v = published.find(x => x === rel[1] || x === rel[1] + '.0'); return `](${BASE}/changelog/${v ? v.replace(/\./g, '-') + '/' : ''})`; }
-    return `](${GITLAB}/-/blob/${REF}/docs/wiki/${href})`;
+    return `](${GITLAB}/-/blob/${EDIT_REF}/docs/wiki/${href})`;
   });
   // a recipe image followed by its pattern block becomes a crafting grid made from the mod's recipe file
-  md = md.replace(/!\[[^\]]*\]\([^)]*\/wiki-images\/([a-z_]+)-recipe\.png\)\s*\n+```\n[\s\S]*?```\n/g, (all, id) => {
+  md = md.replace(/!\[[^\]]*\]\([^)]*\/wiki-images\/([a-z_]+)-recipe\.png\)\s*\n+```\n[\s\S]*?```\n((?:\n?- `.`: .*\n)*)/g, (all, id) => {
     const rid = recipes[id] ? id : RECIPE_FOR_IMAGE[id];
     return recipes[rid] ? recipeHtml(rid) + '\n' : all;
+  });
+  // a pattern block alone: the page's recipes with exactly that pattern (several tiers share one)
+  md = md.replace(/```\n((?:[A-Z ]{1,3}\n){1,3})```\n((?:\n?- `.`: .*\n)*)/g, (all, block, legend) => {
+    const pattern = block.trim().split('\n').join('|');
+    const ids = (pageIds || []).filter(i => recipes[i] && recipes[i].pattern.join('|') === pattern);
+    if (!ids.length) return all;
+    if (ids.length === 1) return recipeHtml(ids[0]) + '\n';
+    return ids.map(i => `**${nameOf(recipes[i].result)}**\n\n${recipeHtml(i)}\n`).join('\n') + legend;
   });
   return md;
 }
@@ -200,12 +211,15 @@ for (const [from, p] of Object.entries(PAGES)) {
   let md = fs.readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->\n?/g, '');
   const h1 = md.match(/^# (.+)$/m); const title = p.title || (h1 ? h1[1].replace(/:.*/, '').trim() : from);
   md = md.replace(/^# .+\n+/m, '');
+  md = md.replace(/(\n\d+\. [^\n]*(?:\n {3}[^\n]*)*\n) {3}(\d+\. )/g, '$1$2');
   const lead = md.match(/^> (.+(?:\n> .+)*)/m);
-  const description = lead ? lead[1].replace(/\n> /g, ' ').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim() : '';
+  const plain = t => t.replace(/\n> /g, ' ').replace(/\n/g, ' ').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*`]/g, '').trim();
+  const para = md.match(/^(?!#|>|\||-|!|\d|```|<)([^\n]+(?:\n(?!\n)[^\n]+)*)/m);
+  const description = p.description || (lead ? plain(lead[1]) : para ? plain(para[1]).replace(/^(.{40,}?\.)\s.*$/, '$1') : '');
   if (lead && p.ids) md = md.replace(lead[0], '');
   // the main render of a machine page moves into the page header (3D view or render)
   if (p.ids) md = md.replace(/^!\[[^\]]*\]\(images\/[a-z_]+\.png\)\n+/m, '');
-  md = rewrite(md, from);
+  md = rewrite(md, from, p.ids);
   if (from === 'Quantum-Ore-Refinery') {
     md = md.replace(/(The time is `200 × 50\^\(−n\/8\)`[^\n]*\n[^\n]*\n)/, `$1\n<div class="me-qor-calc not-content"></div>\n`);
   }
@@ -216,7 +230,7 @@ for (const [from, p] of Object.entries(PAGES)) {
   const fm = ['---', `title: ${JSON.stringify(title)}`, description && `description: ${JSON.stringify(description)}`,
     `sidebar:\n  order: ${p.order}${p.isNew ? "\n  badge:\n    text: New\n    variant: tip" : ''}`,
     p.ids && `machine:\n  id: ${JSON.stringify(p.ids[0])}\n  quantum: ${!!p.quantum}\n  structure: ${!!p.structure}${p.model ? `\n  model: ${JSON.stringify(p.model)}` : ''}${p.isNew ? '\n  isNew: true' : ''}`,
-    `editUrl: ${JSON.stringify(`${GITLAB}/-/blob/${REF}/docs/wiki/${from}.md`)}`,
+    `editUrl: ${JSON.stringify(`${GITLAB}/-/blob/${EDIT_REF}/docs/wiki/${from}.md`)}`,
     '---'].filter(Boolean).join('\n');
   write(path.join(OUT_DOCS, p.to + '.md'), fm + '\n\n' + md.trim() + '\n');
   written++;
@@ -234,7 +248,7 @@ sidebar:
 ---
 
 The notes of every published version, newest first, as posted on CurseForge.
-
+${drafts.length ? `\nThe notes of version ${drafts.join(', ')} are being written and appear here when it is released.\n` : ''}
 ${published.map(v => `- [Version ${v}](${BASE}/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
 `);
 for (const v of sorted) {
@@ -247,7 +261,12 @@ for (const v of sorted) {
 // ---------- 7. reference pages made from the data files: every recipe, every in-game text ----------
 const pageOf = {};
 for (const p of Object.values(PAGES)) for (const i of p.ids || []) pageOf[i] = p.to;
-const byPage = Object.keys(recipes).sort((a, b) => nameOf(`${NS}:${a}`).localeCompare(nameOf(`${NS}:${b}`)));
+const TIER = { basic: 1, advanced: 2, elite: 3, ultimate: 4 };
+const sortKey = id => nameOf(recipes[id].result).replace(/^(Basic|Advanced|Elite|Ultimate) (.*)$/, (m, t, rest) => `${rest} ${TIER[t.toLowerCase()]}`);
+const byPage = Object.keys(recipes).sort((a, b) => sortKey(a).localeCompare(sortKey(b)) || recipes[b].pattern.length - recipes[a].pattern.length);
+const heading = id => { const r = recipes[id], same = Object.values(recipes).filter(x => x.result === r.result).length > 1;
+  const one = Object.values(r.key);
+  return nameOf(r.result) + (same && one.length === 1 && r.pattern.length === 1 ? ` (from ${one[0].name})` : ''); };
 write(path.join(OUT_DOCS, 'reference/crafting.md'), `---
 title: "All crafting recipes"
 description: "Every crafting table recipe of the mod, read from its recipe files: hover or tap a slot to see the item."
@@ -259,7 +278,7 @@ Every recipe below is read from the mod's own recipe files at each update of thi
 of a kind (any steel ingot, any elite circuit...) shows the one Mekanism makes. Hover or tap a slot to see its name.
 
 ${byPage.map(id => { const page = pageOf[id] || pageOf[recipes[id].result.split(':')[1]];
-  return `## ${nameOf(recipes[id].result)}\n\n${recipeHtml(id)}\n${page ? `\n[Read the page](${BASE}/${page}/)\n` : ''}`; }).join('\n')}`);
+  return `## ${heading(id)}\n\n${recipeHtml(id)}\n${page ? `\n[Read the page](${BASE}/${page}/)\n` : ''}`; }).join('\n')}`);
 const allIds = [...new Set(Object.values(PAGES).flatMap(p => p.ids || []))];
 const texts = gameTexts(allIds.map(i => `${NS}:${i}`));
 write(path.join(OUT_DOCS, 'reference/in-game-texts.md'), `---

@@ -21,7 +21,8 @@ any block to see its name. The full drawing, the block counts and every recipe a
 2. Build the rest: casing, pillars, girders, conveyors, eight ports, seven process modules, four tank cells of two
    blocks each, and as many accelerators as you like (up to eight). An accelerator place may also hold a plain casing.
 3. While something is wrong, the controller's screen says which block is wrong or missing and where. When the last
-   block goes in, the screen says "Multiblock formed".
+   block goes in, the screen says "Multiblock formed" (and redstone dust runs along the edges, if Mekanism's effect is
+   on).
 
 :::tip
 The drawing turns with the controller in quarter turns and is never mirrored. The machine checks the structure about
@@ -72,8 +73,9 @@ Each accelerator place that holds an **Ore Refinery Accelerator** makes a job sh
 
 ## 6. Send the ingots to your network (optional)
 
-Add the **Ore Refinery Quantum Module** on the front row, two blocks above the controller, and choose a frequency on
-its screen: the ingots then go to a Quantum (Inventory) frequency or into a QIO network, every half second, through a
+Add the **Ore Refinery Quantum Module** at the output end of the structure, in the place of the Output Port or in the
+cell right above it (see [Structure and parts](/mekanism-engineering-wiki/machines/ore-refining/structure/#ports)), and choose a frequency on its
+screen: the ingots then go to a Quantum (Inventory) frequency or into a QIO network, every half second, through a
 buffer of 64 stacks. Nothing is lost when the destination is full. See
 [The Quantum Module](/mekanism-engineering-wiki/machines/ore-refining/quantum-ore-refinery/#the-quantum-module).
 

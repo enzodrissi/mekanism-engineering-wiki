@@ -10,8 +10,8 @@ frequencies, with the same Public, Trusted and Private rules, so one frequency c
 
 ## 1. Fill a frequency with energy
 
-Set up a Mekanism **Quantum Entangloporter** on a frequency and feed it energy, as you would in Mekanism. Every block
-below draws from that frequency's buffer.
+Set up a Mekanism **Quantum Entangloporter** on a frequency, as you would in Mekanism, and put energy into that
+frequency. The Receiver, the Chargepad and the miner below draw from that frequency's energy buffer.
 
 ## 2. Stick a Quantum Energy Receiver on a machine
 
@@ -32,7 +32,7 @@ below draws from that frequency's buffer.
 Place a [Quantum Chargepad](/mekanism-engineering-wiki/machines/charging/quantum-chargepad/), right-click it, press **Quantum** and choose
 the frequency. Stand on it: every item you carry that holds energy and is not full charges in the same tick (when energy runs short, your worn armour comes first).
 
-## 4. Power a miner or a refinery
+## 4. Power a miner, and send a refinery's ingots
 
 - The [Quantum Digital Miner](/mekanism-engineering-wiki/machines/mining/quantum-digital-miner/) can take its **Energy** from a Quantum
   frequency, chosen in its Quantum link column.
@@ -48,6 +48,6 @@ need to touch the network), pick the frequency and the **Energy** tab: it shows 
 Controller alone in the crafting grid to get one, and the Tablet alone to get the Controller back.
 
 :::note
-Breaking a Receiver, a Chargepad or a refinery controller never keeps its frequency in the item: you choose it again
+Breaking a Receiver, a Chargepad or a refinery controller (its Quantum Module's frequency) never keeps the frequency in the item: you choose it again
 after placing it, so nobody can pick up your block and use your private network.
 :::

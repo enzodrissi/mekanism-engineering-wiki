@@ -62,7 +62,7 @@ function calc(el: HTMLElement) {
     $('.me-note').textContent = st.level === 1 ? 'The x1 works a whole stack in one tick, whatever the accelerators.'
       : `${st.acc} of 8 Ore Refinery Accelerators · tap one to add or remove`;
     $('section:last-child h3').textContent = `One iron ore at x${st.level}`;
-    $('.me-flow').innerHTML = L.chain.split(/, (?![^(]*\))/).map(c => `<span>${c}</span>`).join('');
+    $('.me-flow').innerHTML = L.chain.split(/, (?![^(]*\))/).map(c => c.replace(/^then /, '')).map(c => `<span>${c[0].toUpperCase() + c.slice(1)}</span>`).join('');
     const takes = L.takes === 'nothing' ? [] : L.takes.split(/, (?=\d)/);
     $('.me-kpis').innerHTML = `<div><b>${L.ingots}</b><span>ingot${L.ingots > 1 ? 's' : ''} from one ore</span></div>`
       + (takes.length ? takes.map(x => { const m = x.match(/^([\d,]+ mB) (.+)$/); return m ? `<div><b>${m[1]}</b><span>${m[2]}</span></div>` : `<div><span>${x}</span></div>`; }).join('')

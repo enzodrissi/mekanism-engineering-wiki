@@ -27,7 +27,7 @@ port and set **Export** to **Local** and **Auto-eject** to ON.
 
 In the **Quantum link** column, choose the source for **Energy**, **Import** and **Export** independently: Local, a
 Quantum frequency (shared with your Quantum Entangloporters) or QIO. A Quantum frequency holds one item type and one
-energy pool at a time, so QIO is the natural choice for mined items. Then click **Start**.
+energy pool at a time. Then click **Start**.
 
 :::caution[Chunk loading]
 The miner never loads chunks on its own. With an **Anchor Upgrade** it keeps its own chunk and the chunk it is mining
