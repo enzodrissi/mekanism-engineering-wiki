@@ -5,6 +5,7 @@ dist/
 src/content/docs/*
 !src/content/docs/index.mdx
 !src/content/docs/guides/
+!src/content/docs/404.md
 src/data/sidebar.json
 src/data/source.json
 src/data/qor-levels.json

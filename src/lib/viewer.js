@@ -119,13 +119,13 @@ export async function mountBlock(host) {
 // what the numbered markers point at, as in the frozen design
 const MARKS = [
   [d => /controller/.test(d.id), 'Controller'],
-  [d => /input_port/.test(d.id) && d.dx === 1, 'Input Port (one of 5)'],
+  [d => /input_port/.test(d.id) && d.dx === 1, 'Input Port (at least 5)'],
   [d => /module_dissolution/.test(d.id), 'Process modules (7)'],
   [d => /tank_water/.test(d.id) && d.dy === 2, 'Water Tank'],
   [d => /accelerator/.test(d.id) && d.dx === -7, 'Accelerators (8 places)'],
   [d => /module_quantum/.test(d.id), 'Quantum Module (optional)'],
-  [d => /output_port/.test(d.id), 'Output Port'],
-  [d => /girder/.test(d.id) && d.dx === -3 && d.dz === 0, 'Girders (roof)'],
+  [d => /output_port/.test(d.id), 'Output Port (optional)'],
+  [d => /girder/.test(d.id) && d.dx === -5 && d.dz === 0, 'Girders (roof)'],
 ];
 
 /**

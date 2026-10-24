@@ -41,11 +41,14 @@ console.log('Source', REF, commit.slice(0, 8));
 // ---------- 2. clean generated folders ----------
 const OUT_DOCS = path.join(ROOT, 'src/content/docs');
 // every page is made here except the home page and the guides, which are written by hand in this repository
-const HAND_WRITTEN = ['index.mdx', 'guides'];
+const HAND_WRITTEN = ['index.mdx', 'guides', '404.md'];
 for (const g of fs.existsSync(OUT_DOCS) ? fs.readdirSync(OUT_DOCS) : []) if (!HAND_WRITTEN.includes(g)) fs.rmSync(path.join(OUT_DOCS, g), { recursive: true, force: true });
 const PUB = path.join(ROOT, 'public');
 for (const g of ['wiki-images', 'gallery', `mc/${NS}`, 'data']) fs.rmSync(path.join(PUB, g), { recursive: true, force: true });
-const write = (file, text) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, text); };
+// "≈" around a lone symbol: the typographic quotes would turn both into closing quotes, so they are written as opening and
+// closing quotes here (never inside code or an HTML tag)
+const symbolQuotes = md => md.split(/(```[\s\S]*?```|`[^`\n]*`|<[^>\n]+>)/).map((part, i) => (i % 2 ? part : part.replace(/"([^\s"\w]{1,3})"/g, '\u201c$1\u201d'))).join('');
+const write = (file, text) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, file.endsWith('.md') ? symbolQuotes(text) : text); };
 const copyDir = (from, to) => fs.existsSync(from) && fs.cpSync(from, to, { recursive: true });
 
 // ---------- 3. data the pages and the 3D views use ----------

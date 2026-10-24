@@ -41,7 +41,8 @@ export default defineConfig({
         attrs: { 'data-goatcounter': `https://${GOATCOUNTER}.goatcounter.com/count`, async: true, src: 'https://gc.zgo.at/count.js' },
       }] : [],
       lastUpdated: false,
-      expressiveCode: { defaultProps: { wrap: true } },
+      // code blocks keep their lines (the refinery's layer drawing is a grid): a long line scrolls sideways
+      expressiveCode: { defaultProps: { wrap: false } },
       pagination: true,
       sidebar: [
         {
