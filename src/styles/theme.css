@@ -411,3 +411,7 @@ body:has(.me-home) .content-panel { border-top: 0; }
   .me-craft *, .me-craft::backdrop, .me-craft-card { animation: none !important; }
   .me-bom li button, .me-bom-go, .me-craft-x { transition: none; }
 }
+
+/* ---------- 3D motion (src/lib/viewer.js): markers and labels wait for the structure to finish building ---------- */
+.me-mk, .me-tag { transition: opacity 0.5s ease; }
+.me-intro .me-mk, .me-intro .me-tag { opacity: 0 !important; }

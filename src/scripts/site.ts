@@ -16,7 +16,6 @@ async function mount3d(el: HTMLElement) {
         [(d: any) => /module_quantum/.test(d.id), 'Quantum Module'],
       ] : null;
       await viewer.mountRefinery(el, { blocks: await blockNames(), mode: el.dataset.mode || 'exploded', markers: !tags, tags });
-      if (tags) el.querySelector('.me-ref-bar')?.remove();
     }
   } catch (e) {
     console.warn('3D view', e);
