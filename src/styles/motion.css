@@ -1,0 +1,103 @@
+/* Motion: page to page transitions, entrances, scroll reveals and small hover effects.
+   Only transform and opacity move (and the gauge arc). With reduced motion nothing here applies,
+   the site looks exactly as theme.css draws it. The scroll reveal is driven by src/scripts/motion.ts. */
+:root {
+  --me-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --me-glow-a: rgba(91, 140, 255, 0.16);
+  --me-glow-b: rgba(100, 209, 199, 0.07);
+  --me-shine: rgba(100, 209, 199, 0.13);
+  --me-lift: rgba(100, 209, 199, 0.32);
+}
+:root[data-theme='light'] {
+  --me-glow-a: rgba(91, 140, 255, 0.13);
+  --me-glow-b: rgba(15, 125, 116, 0.06);
+  --me-shine: rgba(15, 125, 116, 0.09);
+  --me-lift: rgba(40, 80, 150, 0.24);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---------- page to page: the header and the sidebar stay, only the page fades and rises ---------- */
+  @view-transition { navigation: auto; }
+  header.header { view-transition-name: me-header; }
+  .sl-menu-button { view-transition-name: me-menu; }
+  .sidebar-pane { view-transition-name: me-sidebar; }
+  main { view-transition-name: me-main; }
+  /* set by motion.ts when the page is left: the old page fades out where it is, even scrolled down */
+  .me-vt-old main { view-transition-name: me-main-old; }
+  @media (max-width: 71.99rem) { mobile-starlight-toc nav { view-transition-name: me-toc; } }
+  @media (min-width: 72rem) { .right-sidebar { view-transition-name: me-toc; } }
+
+  ::view-transition-group(me-header), ::view-transition-group(me-menu), ::view-transition-group(me-sidebar) { animation: none; }
+  ::view-transition-old(me-header), ::view-transition-old(me-menu) { display: none; }
+  ::view-transition-new(me-header), ::view-transition-new(me-menu) { animation: none; }
+  /* the sidebar cross-fades, so the current page highlight moves softly */
+  ::view-transition-old(me-sidebar), ::view-transition-new(me-sidebar),
+  ::view-transition-old(me-toc), ::view-transition-new(me-toc),
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 300ms; }
+  ::view-transition-group(me-main) { animation-duration: 380ms; animation-timing-function: var(--me-ease); }
+  ::view-transition-old(me-main), ::view-transition-old(me-main-old) { animation: me-page-out 180ms ease-out both; }
+  ::view-transition-new(me-main) { animation: me-page-in 380ms var(--me-ease) 90ms both; }
+  @keyframes me-page-out { to { opacity: 0; transform: translateY(-6px); } }
+  @keyframes me-page-in { from { opacity: 0; transform: translateY(12px); } }
+
+  /* ---------- entrance on load: titles rise one after the other ---------- */
+  @keyframes me-rise { from { opacity: 0; transform: translateY(14px); } }
+  .me-hero > div:first-child > *, .me-head > div:first-child > *, .sl-container > h1#_top {
+    animation: me-rise 650ms var(--me-ease) calc(60ms + var(--me-i, 0) * 75ms) both;
+  }
+  :is(.me-hero, .me-head) > div:first-child > :nth-child(2) { --me-i: 1; }
+  :is(.me-hero, .me-head) > div:first-child > :nth-child(3) { --me-i: 2; }
+  :is(.me-hero, .me-head) > div:first-child > :nth-child(4) { --me-i: 3; }
+
+  /* one soft light sweep across the hero title, a band on top of the same gradient */
+  .me-hero > div:first-child > h1, :root[data-theme='light'] .me-hero h1 {
+    background-image: linear-gradient(105deg, transparent 42%, rgba(214, 255, 250, 0.95) 50%, transparent 58%), linear-gradient(180deg, var(--sl-color-white), #9fc1ff);
+    background-size: 250% 100%, 100% 100%; background-repeat: no-repeat; background-position: -3% 0, 0 0;
+    -webkit-background-clip: text; background-clip: text;
+    animation: me-rise 650ms var(--me-ease) 135ms both, me-sweep 1500ms cubic-bezier(0.4, 0, 0.2, 1) 900ms both;
+  }
+  :root[data-theme='light'] .me-hero h1 {
+    background-image: linear-gradient(105deg, transparent 42%, rgba(60, 170, 220, 0.95) 50%, transparent 58%), linear-gradient(180deg, #0a1322, #2a5bc0);
+  }
+  @keyframes me-sweep { from { background-position: 103% 0, 0 0; } to { background-position: -3% 0, 0 0; } }
+
+  /* ---------- a very slow glow drifting behind the hero ---------- */
+  .me-hero { position: relative; isolation: isolate; }
+  .me-hero::before { content: ''; position: absolute; z-index: -1; left: -8%; top: -12%; width: 70%; height: 90%; pointer-events: none;
+    background: radial-gradient(closest-side, var(--me-glow-a), var(--me-glow-b) 55%, transparent);
+    animation: me-drift 22s ease-in-out infinite alternate; }
+  @keyframes me-drift { from { transform: translate(-4%, -2%) scale(1); } to { transform: translate(6%, 5%) scale(1.08); } }
+  @media (min-width: 60rem) { .me-hero::before { width: 55%; height: 110%; } }
+
+  /* ---------- scroll reveal: motion.ts hides blocks below the fold, then plays them in ---------- */
+  @media screen { .me-rv { opacity: 0; transform: translateY(16px); } }
+
+  /* ---------- micro-interactions ---------- */
+  .me-btn { transition: transform 0.2s var(--me-ease), box-shadow 0.2s; }
+  .me-btn:active { transform: scale(0.97); transition-duration: 0.08s; }
+  .me-btn.primary { position: relative; overflow: hidden; isolation: isolate; }
+  .me-btn.primary::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; transform: translateX(-110%);
+    background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.5) 50%, transparent 75%); }
+  .me-btn.primary:hover::after { transform: translateX(110%); transition: transform 0.8s cubic-bezier(0.45, 0, 0.25, 1); }
+
+  .me-card, .me-tile { position: relative; transition: transform 0.3s var(--me-ease), border-color 0.2s; }
+  .me-tile::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+    box-shadow: 0 16px 32px -18px var(--me-lift); transition: opacity 0.3s; }
+  .me-tile:hover::after { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    /* the card leans toward the pointer (vars set by motion.ts), a soft light follows it */
+    .me-card.me-tilt { transform: perspective(900px) rotateX(var(--me-rx, 0deg)) rotateY(var(--me-ry, 0deg)) translateY(-3px); transition: transform 0.12s ease-out, border-color 0.2s; }
+    .me-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+      background: radial-gradient(13rem circle at var(--me-mx, 50%) var(--me-my, 0%), var(--me-shine), transparent 70%); }
+    .me-card:hover::after { opacity: 1; }
+  }
+
+  .me-slot[data-name]:hover::after, .me-slot[data-name]:focus::after { animation: me-tip 0.18s var(--me-ease) both; }
+  @keyframes me-tip { from { opacity: 0; transform: translate(-50%, 4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  .me-seg button { transition: background-color 0.25s, color 0.25s; }
+  .sidebar-content a, starlight-toc a, mobile-starlight-toc a { transition: color 0.25s, background-color 0.25s; }
+
+  /* refinery speed calculator: the gauge arc glides, motion.ts counts the number */
+  .me-arc { transition: stroke-dashoffset 0.6s var(--me-ease); }
+}
