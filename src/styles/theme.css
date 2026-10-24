@@ -301,3 +301,17 @@ body:has(.me-home) .sl-container { max-width: min(96rem, 100%); }
 .content-panel:has(> .sl-container:empty) { display: none; }
 body:has(.me-home) .content-panel { border-top: 0; }
 @media (min-width: 72rem) { body:has(.me-home) .sl-container { padding-inline: 1.5rem; } }
+
+/* ---------- the machines on phones: a grid of whole cards instead of a rail of cut ones ---------- */
+/* flat items (tablet, teleporter, companion) at a whole multiple of their 16-pixel texture, like a block's size */
+.me-card img.flat { height: 5rem; margin: 1.25rem 0; }
+@media (max-width: 50rem) {
+  .me-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; overflow: visible; padding: 0.3rem 0 0;
+    -webkit-mask-image: none; mask-image: none; }
+  .me-card { width: auto; padding: 0.8rem; border-radius: 18px; }
+  .me-card img { height: 5.5rem; }
+  .me-card img.flat { height: 4rem; margin: 0.75rem 0; }
+  .me-card h3 { font-size: 0.95rem; }
+  .me-card p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.76rem; }
+  .me-card .me-eyebrow { font-size: 0.6rem; letter-spacing: 0.08em; }
+}
