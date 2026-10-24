@@ -1,8 +1,9 @@
 // Makes the wiki's tables read well on a phone, at build time:
 // - a table with an empty header row (the facts box at the top of a machine page) becomes a facts box without header;
-// - a table of sentences with four columns or more becomes a list of cards on narrow screens (each cell keeps its
-//   column name in data-label);
-// - any other table keeps its columns and scrolls sideways instead of squeezing them.
+// - a table of sentences with four columns or more, or with three columns of long sentences, becomes a list of cards on
+//   narrow screens (each cell keeps its column name in data-label);
+// - any other table keeps its columns and scrolls sideways instead of squeezing them; a table of short values only
+//   (a row of numbers) keeps narrow columns.
 const text = n => (n.type === 'text' ? n.value : (n.children || []).map(text).join(''));
 const kids = (n, tag) => (n.children || []).filter(c => c.type === 'element' && c.tagName === tag);
 const addClass = (n, c) => { n.properties.className = [...(n.properties.className || []), c]; };
@@ -18,10 +19,14 @@ function table(node) {
     return;
   }
   const longest = Math.max(0, ...rows.flatMap(r => kids(r, 'td').map(td => text(td).length)));
-  if (labels.length >= 4 && longest > 30) {
+  if ((labels.length >= 4 && longest > 30) || (labels.length === 3 && longest > 60)) {
     addClass(node, 'me-stack');
     for (const r of rows) kids(r, 'td').forEach((td, i) => { td.properties['data-label'] = labels[i] || ''; });
-  } else addClass(node, 'me-scroll');
+  } else {
+    addClass(node, 'me-scroll');
+    const values = [...labels.slice(1), ...rows.flatMap(r => kids(r, 'td').slice(1).map(text))];
+    if (values.length && values.every(v => v.trim().length <= 8)) addClass(node, 'me-narrow');
+  }
 }
 
 export default function rehypeTables() {

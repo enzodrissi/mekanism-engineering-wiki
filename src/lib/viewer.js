@@ -172,13 +172,13 @@ export async function mountBlock(host) {
 // what the numbered markers point at, as in the frozen design
 const MARKS = [
   [d => /controller/.test(d.id), 'Controller'],
-  [d => /input_port/.test(d.id) && d.dx === 1, 'Input Port (one of 5)'],
+  [d => /input_port/.test(d.id) && d.dx === 1, 'Input Port (at least 5)'],
   [d => /module_dissolution/.test(d.id), 'Process modules (7)'],
   [d => /tank_water/.test(d.id) && d.dy === 2, 'Water Tank'],
   [d => /accelerator/.test(d.id) && d.dx === -7, 'Accelerators (8 places)'],
   [d => /module_quantum/.test(d.id), 'Quantum Module (optional)'],
-  [d => /output_port/.test(d.id), 'Output Port'],
-  [d => /girder/.test(d.id) && d.dx === -3 && d.dz === 0, 'Girders (roof)'],
+  [d => /output_port/.test(d.id), 'Output Port (optional)'],
+  [d => /girder/.test(d.id) && d.dx === -5 && d.dz === 0, 'Girders (roof)'],
 ];
 
 /**
@@ -348,6 +348,20 @@ const loadRecipes = () => (recipesP ??= fetch(`${BASE}/data/recipes.json`).then(
 const itemIcon = id => { const [ns, p] = id.split(':'); return `${BASE}/icons/${ns}/${p}.png`; };
 const escH = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 let craftDlg = null;
+const recipeOf = (recipes, id) => Object.values(recipes).find(r => r.result === `mekanismengineering:${id}`);
+/** How many of a block the whole structure takes: the ones placed, plus the ones the crafts of its other blocks eat. */
+function totalNeed(id, ctx, recipes, seen = new Set()) {
+  if (seen.has(id)) return 0;
+  seen.add(id);
+  let n = ctx.count[id] || 0;
+  for (const other of ctx.ids) {
+    if (other === id) continue;
+    const r = recipeOf(recipes, other); if (!r) continue;
+    const uses = r.pattern.join('').split('').filter(c => r.key[c] && r.key[c].item === `mekanismengineering:${id}`).length;
+    if (uses) n += Math.ceil(totalNeed(other, ctx, recipes, new Set(seen)) / r.count) * uses;
+  }
+  return n || 1;
+}
 
 function craftDialog() {
   if (craftDlg) return craftDlg;
@@ -384,7 +398,7 @@ async function openCraft(id, ctx, dir = 0) {
   const r = recipes[rid];
   const { ids, count, names } = ctx;
   const i = ids.indexOf(id), name = (names[id] || {}).name || (r && r.name) || id, page = (names[id] || {}).page;
-  const need = count[id] || 1;
+  const placed = count[id] || 1, need = totalNeed(id, ctx, recipes), used = need - placed;
   let body = '<p class="me-craft-none">No crafting table recipe for this block.</p>';
   if (r) {
     const rows = r.pattern.length === 1 && r.pattern[0].length === 1 ? ['   ', ` ${r.pattern[0]} `, '   '] : r.pattern.map(p => p.padEnd(3));
@@ -401,7 +415,7 @@ async function openCraft(id, ctx, dir = 0) {
     const made = crafts * r.count;
     body = `<div class="me-craft-recipe"><div class="me-grid">${cells.map(slot).join('')}</div><span class="me-arrow">→</span>`
       + `<span class="me-slot me-out" data-name="${escH(r.name)}">${pic({ show: r.result, name: r.name })}${r.count > 1 ? `<i>${r.count}</i>` : ''}</span></div>`
-      + `<p class="me-craft-need">The structure needs <b>${need}</b>. ${r.count > 1 ? `One craft makes ${r.count}, so craft it <b>${crafts}</b> times${made > need ? ` (${made - need} left over)` : ''}.` : need > 1 ? `Craft it <b>${crafts}</b> times.` : 'Craft it once.'}</p>`
+      + `<p class="me-craft-need">${used > 0 ? `The structure places ${placed}, and the crafts of its other blocks use ${used} more: <b>${need}</b> in all.` : `The structure needs <b>${need}</b>.`} ${r.count > 1 ? `One craft makes ${r.count}, so craft it <b>${crafts}</b> times${made > need ? ` (${made - need} left over)` : ''}.` : need > 1 ? `Craft it <b>${crafts}</b> times.` : 'Craft it once.'}</p>`
       + `<h4>${crafts > 1 ? `For ${crafts} crafts` : 'For one craft'}</h4><ul class="me-craft-list">`
       + Object.values(per).map(({ ing, n }) => `<li${local(ing) ? ` data-go="${local(ing)}" tabindex="0" role="button"` : ''}>${pic(ing)}<b>${n * crafts}</b><span>${escH(ing.name)}</span></li>`).join('')
       + '</ul>';
