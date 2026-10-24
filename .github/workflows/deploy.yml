@@ -1,0 +1,56 @@
+name: Build and deploy the wiki
+
+# Builds the site from the mod's GitLab repository (text, images, models, recipes) at every push, every pull request,
+# every night and on demand. It is published to GitHub Pages only from main, and only once the repository variable
+# DEPLOY is set to "on" (Settings > Secrets and variables > Actions > Variables).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # the branch or tag of the mod whose wiki is published
+      WIKI_REF: ${{ vars.WIKI_REF || 'wip/1.2/rqe-ecran' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Import the wiki from GitLab
+        run: npm run import
+      - name: Draw the item icons
+        run: npm run icons
+      - run: npm run build
+      - run: npm run check-links
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY == 'on'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
