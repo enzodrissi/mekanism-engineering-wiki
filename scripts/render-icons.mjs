@@ -42,15 +42,30 @@ function fileFor(urlPath) {
   return null;
 }
 const TYPES = { '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.html': 'text/html' };
-const PAGE = `<!doctype html><meta charset="utf-8"><canvas id="c" width="128" height="128"></canvas>
+const PAGE = `<!doctype html><meta charset="utf-8"><canvas id="c" width="160" height="160"></canvas>
 <script type="importmap">{"imports":{"three":"/three/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import { loadModel, buildBlock, flatItem, guiTransform } from '/lib/mcmodel.js';
 const base = '/mc', canvas = document.getElementById('c');
+// drawn with a margin (160 px for the 128 px icon, same scale), then cut to 128 px around what was drawn: a block whose
+// inventory pose reaches the edge (the 3 x 3 pump) is never cut, and every icon is centred the same way
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
-renderer.setSize(128, 128, false); renderer.setClearColor(0, 0); renderer.outputColorSpace = THREE.SRGBColorSpace;
-const cam = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, -10, 10); cam.position.z = 5;
+renderer.setSize(160, 160, false); renderer.setClearColor(0, 0); renderer.outputColorSpace = THREE.SRGBColorSpace;
+const cam = new THREE.OrthographicCamera(-0.625, 0.625, 0.625, -0.625, -10, 10); cam.position.z = 5;
+function centred() {
+  const big = document.createElement('canvas'); big.width = big.height = 160;
+  const g2 = big.getContext('2d'); g2.drawImage(canvas, 0, 0);
+  const px = g2.getImageData(0, 0, 160, 160).data;
+  let x0 = 160, y0 = 160, x1 = -1, y1 = -1;
+  for (let y = 0; y < 160; y++) for (let x = 0; x < 160; x++) if (px[(y * 160 + x) * 4 + 3] > 8) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  const out = document.createElement('canvas'); out.width = out.height = 128;
+  if (x1 < 0) return out.toDataURL('image/png');
+  const k = Math.min(1, 124 / (x1 - x0 + 1), 124 / (y1 - y0 + 1)), w = (x1 - x0 + 1) * k, h = (y1 - y0 + 1) * k;
+  const o = out.getContext('2d'); o.imageSmoothingEnabled = k < 1;
+  o.drawImage(big, x0, y0, x1 - x0 + 1, y1 - y0 + 1, Math.round((128 - w) / 2), Math.round((128 - h) / 2), w, h);
+  return out.toDataURL('image/png');
+}
 window.renderIcon = async (id, entityModel) => {
   const [ns, p] = id.split(':');
   let model = await loadModel(base, ns + ':item/' + p);
@@ -66,7 +81,7 @@ window.renderIcon = async (id, entityModel) => {
   const scene = new THREE.Scene(), g = new THREE.Group();
   g.add(obj); g.applyMatrix4(guiTransform(model)); scene.add(g);
   renderer.render(scene, cam);
-  return canvas.toDataURL('image/png');
+  return centred();
 };
 // loads every model a blockstate can use, so that the files they borrow are known
 window.touchBlockstates = async ids => {
@@ -138,6 +153,10 @@ async function draw(ids) {
 const modItems = fs.readdirSync(path.join(PUB, 'mc', NS, 'models/item')).filter(f => f.endsWith('.json')).map(f => `${NS}:${f.slice(0, -5)}`);
 fs.rmSync(path.join(PUB, 'icons', NS), { recursive: true, force: true });
 console.log(`Mod icons: ${await draw(modItems)} / ${modItems.length}`);
+// blocks the game draws with more than their model shows (their screens and armoured ports): their picture is the
+// in-game render of the mod's wiki
+const IN_GAME = ['quantum_network_controller', 'radioactive_quantum_entangloporter'];
+for (const id of IN_GAME) fs.copyFileSync(path.join(PUB, 'wiki-images', id + '.png'), path.join(PUB, 'icons', NS, id + '.png'));
 for (const [only, file, w, h] of [[0, '_refinery', 720, 420], [1, '_layer1', 320, 140], [2, '_layer2', 320, 140], [3, '_layer3', 320, 140], [4, '_layer4', 320, 140]]) {
   const url = await page.evaluate(([o, w, h]) => window.renderRefinery(o, w, h), [only, w, h]);
   fs.writeFileSync(path.join(PUB, 'icons', NS, file + '.png'), Buffer.from(url.split(',')[1], 'base64'));

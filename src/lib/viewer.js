@@ -157,6 +157,7 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     return { b, el, label };
   }) : [];
   if (markers) host.querySelector('.me-legend').innerHTML = marks.map((m, i) => `<li><i>${i + 1}</i>${m.label}</li>`).join('');
+  if (markers) host.append(billOfMaterials(blocks, names));
   const tagEls = (tags || []).map(([f, label]) => {
     const b = blocks.find(x => f(x.userData)); const el = document.createElement('span');
     el.className = 'me-tag'; el.textContent = label; stageEl.appendChild(el); return { b, el };
@@ -219,4 +220,25 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
 
   stage.resize(); apply(true);
   return stage;
+}
+
+// the order of the bill of materials: the controller, the frame, the ports, the chain of modules, the tanks, the options
+const BOM_ORDER = ['controller', 'casing', 'girder', 'pillar', 'conveyor', 'input_port', 'output_port', 'energy_port', 'module_dissolution',
+  'module_washing', 'module_crystallization', 'module_injection', 'module_purification', 'module_enrichment', 'module_smelting',
+  'tank_water', 'tank_sulfuric_acid', 'tank_hydrogen_chloride', 'tank_oxygen', 'accelerator', 'module_quantum'];
+/** What the structure is made of, counted from the blocks of the 3D view itself. */
+function billOfMaterials(blocks, names) {
+  const count = {};
+  for (const b of blocks) count[b.userData.id] = (count[b.userData.id] || 0) + 1;
+  const rank = id => { const i = BOM_ORDER.findIndex(o => id.endsWith(o)); return i < 0 ? 99 : i; };
+  const optional = id => id.endsWith('module_quantum');
+  const required = Object.entries(count).reduce((n, [id, c]) => n + (optional(id) ? 0 : c), 0);
+  const el = document.createElement('section');
+  el.className = 'me-bom';
+  el.innerHTML = `<h3>Bill of materials</h3><p><b>${required}</b> blocks to place, plus the optional Quantum Module.`
+    + ' The accelerator places can hold an Ore Refinery Casing instead.</p><ul>'
+    + Object.keys(count).sort((a, b) => rank(a) - rank(b)).map(id => `<li${optional(id) ? ' class="opt"' : ''}><img src="${icon(id)}" alt="" loading="lazy">`
+      + `<b>×${count[id]}</b><span>${(names[id] || {}).name || id}${optional(id) ? ' <em>optional</em>' : ''}</span></li>`).join('')
+    + '</ul>';
+  return el;
 }

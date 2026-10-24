@@ -44,7 +44,7 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
     {machines.map(({ d, fam }) => (
       <a class:list={['me-card', { g: !d.data.machine!.quantum }]} href={`${base}/${d.id}/`}>
         <div class="me-eyebrow">{fam}{d.data.machine!.isNew ? ' · new' : ''}</div>
-        <img class:list={{ flat: !d.data.machine!.model && !d.data.machine!.structure }} src={`${base}/icons/mekanismengineering/${pic(d.data.machine)}.png`} alt="" loading="lazy" />
+        <img class:list={{ flat: !d.data.machine!.model && !d.data.machine!.structure && !d.data.machine!.photo }} src={`${base}/icons/mekanismengineering/${pic(d.data.machine)}.png`} alt="" loading="lazy" />
         <h3>{d.data.title}</h3>
         <p>{short(d.data.description)}</p>
       </a>

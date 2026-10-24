@@ -16,6 +16,8 @@ export const collections = {
           structure: z.boolean(),
           model: z.string().optional(),
           isNew: z.boolean().optional(),
+          // pictured by its in-game render instead of its model (scripts/render-icons.mjs)
+          photo: z.boolean().optional(),
         }).optional(),
       }),
     }),

@@ -155,8 +155,8 @@ const PAGES = {
   'Digital-Miner-Companion': { to: 'digital-miner-companion', family: 'mining', order: 2, ids: ['digital_miner_surveyor'] },
   'Quantum-Energy-Receiver': { to: 'quantum-energy-receiver', family: 'quantum-network', order: 1, quantum: true, model: 'ultimate_quantum_energy_receiver',
     ids: ['basic_quantum_energy_receiver', 'advanced_quantum_energy_receiver', 'elite_quantum_energy_receiver', 'ultimate_quantum_energy_receiver'] },
-  'Radioactive-Quantum-Entangloporter': { to: 'radioactive-quantum-entangloporter', family: 'quantum-network', order: 2, quantum: true, ids: ['radioactive_quantum_entangloporter'], model: 'radioactive_quantum_entangloporter' },
-  'Quantum-Network-Controller': { to: 'quantum-network-controller', family: 'quantum-network', order: 3, quantum: true, ids: ['quantum_network_controller'], model: 'quantum_network_controller' },
+  'Radioactive-Quantum-Entangloporter': { to: 'radioactive-quantum-entangloporter', family: 'quantum-network', order: 2, quantum: true, ids: ['radioactive_quantum_entangloporter'], photo: true },
+  'Quantum-Network-Controller': { to: 'quantum-network-controller', family: 'quantum-network', order: 3, quantum: true, ids: ['quantum_network_controller'], photo: true },
   'Quantum-Network-Tablet': { to: 'quantum-network-tablet', family: 'quantum-network', order: 4, quantum: true, isNew: true, ids: ['quantum_network_tablet'] },
   'Quantum-Portable-Teleporter': { to: 'quantum-portable-teleporter', family: 'teleportation', order: 1, quantum: true, ids: ['quantum_portable_teleporter'] },
   'Quantum-Chargepad': { to: 'quantum-chargepad', family: 'charging', order: 1, quantum: true, ids: ['quantum_chargepad'], model: 'quantum_chargepad' },
@@ -232,7 +232,7 @@ for (const [from, p] of Object.entries(PAGES)) {
   if (p.ids) md += gameTexts(p.ids.map(i => `${NS}:${i}`));
   const fm = ['---', `title: ${JSON.stringify(title)}`, description && `description: ${JSON.stringify(description)}`,
     `sidebar:\n  order: ${p.order}${p.isNew ? "\n  badge:\n    text: New\n    variant: tip" : ''}`,
-    p.ids && `machine:\n  id: ${JSON.stringify(p.ids[0])}\n  family: ${JSON.stringify(FAMILIES[p.family])}\n  quantum: ${!!p.quantum}\n  structure: ${!!p.structure}${p.model ? `\n  model: ${JSON.stringify(p.model)}` : ''}${p.isNew ? '\n  isNew: true' : ''}`,
+    p.ids && `machine:\n  id: ${JSON.stringify(p.ids[0])}\n  family: ${JSON.stringify(FAMILIES[p.family])}\n  quantum: ${!!p.quantum}\n  structure: ${!!p.structure}${p.model ? `\n  model: ${JSON.stringify(p.model)}` : ''}${p.isNew ? '\n  isNew: true' : ''}${p.photo ? '\n  photo: true' : ''}`,
     `editUrl: ${JSON.stringify(`${GITLAB}/-/blob/${EDIT_REF}/docs/wiki/${from}.md`)}`,
     '---'].filter(Boolean).join('\n');
   write(path.join(OUT_DOCS, p.to + '.md'), fm + '\n\n' + md.trim() + '\n');
