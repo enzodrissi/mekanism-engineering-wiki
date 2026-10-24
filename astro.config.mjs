@@ -1,14 +1,19 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import fs from 'node:fs';
 import rehypeTables from './src/lib/rehype-tables.mjs';
+import { SITE, BASE } from './site.config.mjs';
+
+const sidebarFile = new URL('./src/data/sidebar.json', import.meta.url);
+const machines = fs.existsSync(sidebarFile) ? JSON.parse(fs.readFileSync(sidebarFile, 'utf8')) : [];
 
 // Visitor counter: GoatCounter (no cookies, no consent banner). Empty = no counter.
 export const GOATCOUNTER = 'mekanism-engineering-wiki';
 
 export default defineConfig({
-  site: 'https://mekanism-engineering.github.io',
-  base: '/wiki',
+  site: SITE,
+  base: BASE || '/',
   trailingSlash: 'always',
   markdown: { rehypePlugins: [rehypeTables] },
   integrations: [
@@ -42,25 +47,15 @@ export default defineConfig({
         {
           label: 'Start here',
           items: [
-            'start/overview',
-            'start/basics',
+            'overview',
+            'getting-started',
             { label: 'Guides', items: [{ autogenerate: { directory: 'guides' } }] },
-            'start/faq',
+            'faq',
           ],
         },
-        {
-          label: 'Machines',
-          items: [
-            { label: 'Ore refining', items: [{ autogenerate: { directory: 'machines/ore-refining' } }] },
-            { label: 'Mining', items: [{ autogenerate: { directory: 'machines/mining' } }] },
-            { label: 'Quantum network', items: [{ autogenerate: { directory: 'machines/quantum-network' } }] },
-            { label: 'Teleportation', items: [{ autogenerate: { directory: 'machines/teleportation' } }] },
-            { label: 'Charging', items: [{ autogenerate: { directory: 'machines/charging' } }] },
-            { label: 'Fluids and rocks', items: [{ autogenerate: { directory: 'machines/fluids-and-rocks' } }] },
-            { label: 'Logistics', items: [{ autogenerate: { directory: 'machines/logistics' } }] },
-          ],
-        },
-        { label: 'Reference', items: [{ autogenerate: { directory: 'reference' } }] },
+        // one group per machine family, written by scripts/import-wiki.mjs
+        { label: 'Machines', items: machines },
+        { label: 'Reference', items: ['crafting', 'in-game-texts', 'configuration', 'jei-jade-wthit'] },
         { label: 'Changelog', collapsed: true, items: [{ autogenerate: { directory: 'changelog' } }] },
       ],
     }),

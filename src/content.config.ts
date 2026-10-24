@@ -11,6 +11,7 @@ export const collections = {
         // set by scripts/import-wiki.mjs on the pages of a block or an item
         machine: z.object({
           id: z.string(),
+          family: z.string().optional(),
           quantum: z.boolean(),
           structure: z.boolean(),
           model: z.string().optional(),

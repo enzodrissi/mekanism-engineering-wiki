@@ -7,7 +7,7 @@ sidebar:
 
 ## 1. Pump the fluids
 
-The [Industrial Fluid Pump](/wiki/machines/fluids-and-rocks/industrial-fluid-pump/) is a 3 × 3 × 3 pump that draws
+The [Industrial Fluid Pump](../../industrial-fluid-pump/) is a 3 × 3 × 3 pump that draws
 through the far end of a Mekanism Mechanical Pipe network.
 
 1. Clear a 3 × 3 × 3 space and place the pump.
@@ -21,7 +21,7 @@ heavy water.
 
 ## 2. Make rock: the Petrogenic Synthesizer
 
-The [Petrogenic Synthesizer](/wiki/machines/fluids-and-rocks/petrogenic-synthesizer/) turns water and lava into one
+The [Petrogenic Synthesizer](../../petrogenic-synthesizer/) turns water and lava into one
 chosen rock at a time. By default: water on its left face, lava on its right face, energy at the back, and finished blocks out
 of the front. Pick the product on its screen. Some of the 13 products:
 
@@ -33,11 +33,11 @@ of the front. Pick the product on its screen. Some of the 13 products:
 | Basalt | 500 mB | 500 mB |
 | Deepslate | 250 mB | 500 mB |
 
-The full list, with times and energy, is on [its page](/wiki/machines/fluids-and-rocks/petrogenic-synthesizer/#what-it-does).
+The full list, with times and energy, is on [its page](../../petrogenic-synthesizer/#what-it-does).
 
 ## 3. Scale up: the Petrogenic Synthesis Plant
 
-The [Petrogenic Synthesis Plant](/wiki/machines/fluids-and-rocks/petrogenic-synthesis-plant/) is the Synthesizer at
+The [Petrogenic Synthesis Plant](../../petrogenic-synthesis-plant/) is the Synthesizer at
 industrial scale: **eight independent production lines**, sixteen times the output for the same upgrades, and ten
 times less water and lava per block at full speed. Four Synthesizers go into its recipe.
 

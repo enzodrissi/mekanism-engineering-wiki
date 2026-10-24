@@ -6,6 +6,7 @@
 //   WIKI_ARCHIVE=path/to/archive.tar.gz node ... uses a local archive instead
 import fs from 'node:fs';
 import path from 'node:path';
+import { BASE } from '../site.config.mjs';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import * as tar from 'tar';
@@ -14,7 +15,6 @@ import sharp from 'sharp';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const PROJECT = '86415165';
 const REF = process.env.WIKI_REF || 'wip/1.2/rqe-ecran';
-const BASE = '/wiki';
 const NS = 'mekanismengineering';
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
 // edit and source links point to a lasting branch, not to the work branch being imported
@@ -40,9 +40,9 @@ console.log('Source', REF, commit.slice(0, 8));
 
 // ---------- 2. clean generated folders ----------
 const OUT_DOCS = path.join(ROOT, 'src/content/docs');
-const GEN = ['start/overview.md', 'start/basics.md', 'start/faq.md', 'reference/configuration.md', 'reference/jei-jade-wthit.md',
-  'reference/crafting.md', 'reference/in-game-texts.md', 'machines', 'changelog'];
-for (const g of GEN) fs.rmSync(path.join(OUT_DOCS, g), { recursive: true, force: true });
+// every page is made here except the home page and the guides, which are written by hand in this repository
+const HAND_WRITTEN = ['index.mdx', 'guides'];
+for (const g of fs.existsSync(OUT_DOCS) ? fs.readdirSync(OUT_DOCS) : []) if (!HAND_WRITTEN.includes(g)) fs.rmSync(path.join(OUT_DOCS, g), { recursive: true, force: true });
 const PUB = path.join(ROOT, 'public');
 for (const g of ['wiki-images', 'gallery', `mc/${NS}`, 'data']) fs.rmSync(path.join(PUB, g), { recursive: true, force: true });
 const write = (file, text) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, text); };
@@ -135,33 +135,36 @@ function gameTexts(ids) {
 }
 
 // ---------- 5. pages ----------
+// every page is at /wiki/<to>/; the machines are grouped by family in the sidebar (src/data/sidebar.json)
+const FAMILIES = { 'ore-refining': 'Ore refining', mining: 'Mining', 'quantum-network': 'Quantum network', teleportation: 'Teleportation',
+  charging: 'Charging', 'fluids-and-rocks': 'Fluids and rocks', logistics: 'Logistics' };
 const PAGES = {
-  'Home': { to: 'start/overview', order: 1, title: 'Overview' },
-  'Getting-Started': { to: 'start/basics', order: 2, title: 'Getting started' },
-  'FAQ': { to: 'start/faq', order: 9, description: 'Answers to the questions players ask most.' },
-  'Configuration': { to: 'reference/configuration', order: 1 },
-  'JEI-Jade-WTHIT': { to: 'reference/jei-jade-wthit', order: 2 },
-  'Quantum-Ore-Refinery': { to: 'machines/ore-refining/quantum-ore-refinery', order: 1, ids: ['ore_refinery_controller'], structure: true, quantum: true, isNew: true },
-  'Quantum-Ore-Refinery-Structure': { to: 'machines/ore-refining/structure', order: 2, title: 'Structure and parts', structure: true,
+  'Home': { to: 'overview', order: 1, title: 'Overview' },
+  'Getting-Started': { to: 'getting-started', order: 2, title: 'Getting started' },
+  'FAQ': { to: 'faq', order: 9, description: 'Answers to the questions players ask most.' },
+  'Configuration': { to: 'configuration', order: 1 },
+  'JEI-Jade-WTHIT': { to: 'jei-jade-wthit', order: 2 },
+  'Quantum-Ore-Refinery': { to: 'quantum-ore-refinery', family: 'ore-refining', order: 1, ids: ['ore_refinery_controller'], structure: true, quantum: true, isNew: true },
+  'Quantum-Ore-Refinery-Structure': { to: 'quantum-ore-refinery/structure', family: 'ore-refining', order: 2, title: 'Structure and parts', structure: true,
     ids: ['ore_refinery_casing', 'ore_refinery_pillar', 'ore_refinery_girder', 'ore_refinery_conveyor', 'ore_refinery_glass', 'ore_refinery_input_port',
       'ore_refinery_output_port', 'ore_refinery_energy_port', 'ore_refinery_accelerator', 'ore_refinery_tank_sulfuric_acid', 'ore_refinery_tank_water',
       'ore_refinery_tank_hydrogen_chloride', 'ore_refinery_tank_oxygen', 'ore_refinery_module_dissolution', 'ore_refinery_module_washing',
       'ore_refinery_module_crystallization', 'ore_refinery_module_injection', 'ore_refinery_module_purification', 'ore_refinery_module_enrichment',
       'ore_refinery_module_smelting', 'ore_refinery_module_quantum'] },
-  'Quantum-Digital-Miner': { to: 'machines/mining/quantum-digital-miner', order: 1, ids: ['quantum_digital_miner'], quantum: true, model: 'quantum_digital_miner' },
-  'Digital-Miner-Companion': { to: 'machines/mining/digital-miner-companion', order: 2, ids: ['digital_miner_surveyor'] },
-  'Quantum-Energy-Receiver': { to: 'machines/quantum-network/quantum-energy-receiver', order: 1, quantum: true, model: 'ultimate_quantum_energy_receiver',
+  'Quantum-Digital-Miner': { to: 'quantum-digital-miner', family: 'mining', order: 1, ids: ['quantum_digital_miner'], quantum: true, model: 'quantum_digital_miner' },
+  'Digital-Miner-Companion': { to: 'digital-miner-companion', family: 'mining', order: 2, ids: ['digital_miner_surveyor'] },
+  'Quantum-Energy-Receiver': { to: 'quantum-energy-receiver', family: 'quantum-network', order: 1, quantum: true, model: 'ultimate_quantum_energy_receiver',
     ids: ['basic_quantum_energy_receiver', 'advanced_quantum_energy_receiver', 'elite_quantum_energy_receiver', 'ultimate_quantum_energy_receiver'] },
-  'Radioactive-Quantum-Entangloporter': { to: 'machines/quantum-network/radioactive-quantum-entangloporter', order: 2, quantum: true, ids: ['radioactive_quantum_entangloporter'], model: 'radioactive_quantum_entangloporter' },
-  'Quantum-Network-Controller': { to: 'machines/quantum-network/quantum-network-controller', order: 3, quantum: true, ids: ['quantum_network_controller'], model: 'quantum_network_controller' },
-  'Quantum-Network-Tablet': { to: 'machines/quantum-network/quantum-network-tablet', order: 4, quantum: true, isNew: true, ids: ['quantum_network_tablet'] },
-  'Quantum-Portable-Teleporter': { to: 'machines/teleportation/quantum-portable-teleporter', order: 1, quantum: true, ids: ['quantum_portable_teleporter'] },
-  'Quantum-Chargepad': { to: 'machines/charging/quantum-chargepad', order: 1, quantum: true, ids: ['quantum_chargepad'], model: 'quantum_chargepad' },
-  'Quantum-Fluid-Pump': { to: 'machines/fluids-and-rocks/industrial-fluid-pump', order: 1, ids: ['quantum_fluid_pump', 'source_stabilizer_upgrade'], model: 'quantum_fluid_pump' },
-  'Petrogenic-Synthesizer': { to: 'machines/fluids-and-rocks/petrogenic-synthesizer', order: 2, ids: ['petrogenic_synthesizer'], model: 'petrogenic_synthesizer' },
-  'Petrogenic-Synthesis-Plant': { to: 'machines/fluids-and-rocks/petrogenic-synthesis-plant', order: 3, ids: ['petrogenic_synthesis_plant', 'hydro_condenser_upgrade', 'magma_synthesizer_upgrade'], model: 'petrogenic_synthesis_plant' },
-  'Precision-Logistical-Distributor': { to: 'machines/logistics/precision-logistical-distributor', order: 1, ids: ['precision_logistical_distributor'], model: 'precision_logistical_distributor' },
-  'Precision-Upgrade-Controller': { to: 'machines/logistics/precision-upgrade-controller', order: 2, ids: ['precision_upgrade_controller'], model: 'precision_upgrade_controller' },
+  'Radioactive-Quantum-Entangloporter': { to: 'radioactive-quantum-entangloporter', family: 'quantum-network', order: 2, quantum: true, ids: ['radioactive_quantum_entangloporter'], model: 'radioactive_quantum_entangloporter' },
+  'Quantum-Network-Controller': { to: 'quantum-network-controller', family: 'quantum-network', order: 3, quantum: true, ids: ['quantum_network_controller'], model: 'quantum_network_controller' },
+  'Quantum-Network-Tablet': { to: 'quantum-network-tablet', family: 'quantum-network', order: 4, quantum: true, isNew: true, ids: ['quantum_network_tablet'] },
+  'Quantum-Portable-Teleporter': { to: 'quantum-portable-teleporter', family: 'teleportation', order: 1, quantum: true, ids: ['quantum_portable_teleporter'] },
+  'Quantum-Chargepad': { to: 'quantum-chargepad', family: 'charging', order: 1, quantum: true, ids: ['quantum_chargepad'], model: 'quantum_chargepad' },
+  'Quantum-Fluid-Pump': { to: 'industrial-fluid-pump', family: 'fluids-and-rocks', order: 1, ids: ['quantum_fluid_pump', 'source_stabilizer_upgrade'], model: 'quantum_fluid_pump' },
+  'Petrogenic-Synthesizer': { to: 'petrogenic-synthesizer', family: 'fluids-and-rocks', order: 2, ids: ['petrogenic_synthesizer'], model: 'petrogenic_synthesizer' },
+  'Petrogenic-Synthesis-Plant': { to: 'petrogenic-synthesis-plant', family: 'fluids-and-rocks', order: 3, ids: ['petrogenic_synthesis_plant', 'hydro_condenser_upgrade', 'magma_synthesizer_upgrade'], model: 'petrogenic_synthesis_plant' },
+  'Precision-Logistical-Distributor': { to: 'precision-logistical-distributor', family: 'logistics', order: 1, ids: ['precision_logistical_distributor'], model: 'precision_logistical_distributor' },
+  'Precision-Upgrade-Controller': { to: 'precision-upgrade-controller', family: 'logistics', order: 2, ids: ['precision_upgrade_controller'], model: 'precision_upgrade_controller' },
 };
 // the recipe of each item, by the id the wiki uses for its recipe image (images/<id>-recipe.png)
 const RECIPE_FOR_IMAGE = { digital_miner_companion: 'digital_miner_companion', quantum_energy_receiver: 'basic_quantum_energy_receiver' };
@@ -229,12 +232,17 @@ for (const [from, p] of Object.entries(PAGES)) {
   if (p.ids) md += gameTexts(p.ids.map(i => `${NS}:${i}`));
   const fm = ['---', `title: ${JSON.stringify(title)}`, description && `description: ${JSON.stringify(description)}`,
     `sidebar:\n  order: ${p.order}${p.isNew ? "\n  badge:\n    text: New\n    variant: tip" : ''}`,
-    p.ids && `machine:\n  id: ${JSON.stringify(p.ids[0])}\n  quantum: ${!!p.quantum}\n  structure: ${!!p.structure}${p.model ? `\n  model: ${JSON.stringify(p.model)}` : ''}${p.isNew ? '\n  isNew: true' : ''}`,
+    p.ids && `machine:\n  id: ${JSON.stringify(p.ids[0])}\n  family: ${JSON.stringify(FAMILIES[p.family])}\n  quantum: ${!!p.quantum}\n  structure: ${!!p.structure}${p.model ? `\n  model: ${JSON.stringify(p.model)}` : ''}${p.isNew ? '\n  isNew: true' : ''}`,
     `editUrl: ${JSON.stringify(`${GITLAB}/-/blob/${EDIT_REF}/docs/wiki/${from}.md`)}`,
     '---'].filter(Boolean).join('\n');
   write(path.join(OUT_DOCS, p.to + '.md'), fm + '\n\n' + md.trim() + '\n');
   written++;
 }
+
+// the sidebar of the machines: one group per family, in the order above
+const machinePages = Object.values(PAGES).filter(p => p.family).sort((a, b) => a.order - b.order);
+write(path.join(ROOT, 'src/data/sidebar.json'), JSON.stringify(Object.entries(FAMILIES).map(([f, label]) =>
+  ({ label, items: machinePages.filter(p => p.family === f).map(p => p.to) })), null, 1));
 
 // ---------- 6. changelog: only versions whose public notes are final ----------
 const sorted = published;
@@ -267,7 +275,7 @@ const byPage = Object.keys(recipes).sort((a, b) => sortKey(a).localeCompare(sort
 const heading = id => { const r = recipes[id], same = Object.values(recipes).filter(x => x.result === r.result).length > 1;
   const one = Object.values(r.key);
   return nameOf(r.result) + (same && one.length === 1 && r.pattern.length === 1 ? ` (from ${one[0].name})` : ''); };
-write(path.join(OUT_DOCS, 'reference/crafting.md'), `---
+write(path.join(OUT_DOCS, 'crafting.md'), `---
 title: "All crafting recipes"
 description: "Every crafting table recipe of the mod, read from its recipe files: hover or tap a slot to see the item."
 sidebar:
@@ -281,7 +289,7 @@ ${byPage.map(id => { const page = pageOf[id] || pageOf[recipes[id].result.split(
   return `## ${heading(id)}\n\n${recipeHtml(id)}\n${page ? `\n[Read the page](${BASE}/${page}/)\n` : ''}`; }).join('\n')}`);
 const allIds = [...new Set(Object.values(PAGES).flatMap(p => p.ids || []))];
 const texts = gameTexts(allIds.map(i => `${NS}:${i}`));
-write(path.join(OUT_DOCS, 'reference/in-game-texts.md'), `---
+write(path.join(OUT_DOCS, 'in-game-texts.md'), `---
 title: "In-game texts"
 description: "The small print of every block and item: the Shift description, the tooltips and the JEI information pages, word for word."
 sidebar:
