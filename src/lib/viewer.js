@@ -212,7 +212,10 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     const where = b.userData.dy === 3 ? 'top layer' : `layer ${b.userData.dy + 1}`;
     info.innerHTML = `<img src="${icon(id)}" alt=""><div><em>Selected · ${many} · ${where}</em><b>${n.name || b.userData.name}</b>`
       + (n.text ? `<p>${n.text.replace(/</g, '&lt;')}</p>` : '')
-      + (n.page ? `<a href="${BASE}/${n.page}/">Open its page →</a>` : '') + '</div>';
+      + '<span class="me-info-links">' + (markers ? '<button type="button" class="me-info-craft">See its craft</button>' : '')
+      + (n.page ? `<a href="${BASE}/${n.page}/">Open its page →</a>` : '') + '</span></div>';
+    const craftBtn = info.querySelector('.me-info-craft');
+    if (craftBtn) craftBtn.onclick = () => openCraft(id, { ids: bomOrder(Object.keys(counts)), count: counts, names });
     info.hidden = false; stage.draw();
     const r = info.getBoundingClientRect();
     if (r.bottom > innerHeight || r.top < 0) info.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -226,19 +229,111 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
 const BOM_ORDER = ['controller', 'casing', 'girder', 'pillar', 'conveyor', 'input_port', 'output_port', 'energy_port', 'module_dissolution',
   'module_washing', 'module_crystallization', 'module_injection', 'module_purification', 'module_enrichment', 'module_smelting',
   'tank_water', 'tank_sulfuric_acid', 'tank_hydrogen_chloride', 'tank_oxygen', 'accelerator', 'module_quantum'];
-/** What the structure is made of, counted from the blocks of the 3D view itself. */
+/** What the structure is made of, counted from the blocks of the 3D view itself: tap a block to see its craft. */
 function billOfMaterials(blocks, names) {
   const count = {};
   for (const b of blocks) count[b.userData.id] = (count[b.userData.id] || 0) + 1;
-  const rank = id => { const i = BOM_ORDER.findIndex(o => id.endsWith(o)); return i < 0 ? 99 : i; };
-  const optional = id => id.endsWith('module_quantum');
+  const optional = id => /module_quantum|output_port/.test(id);
+  // the ports go where the player wants on the back of the two lower floors: a port left out is a casing
+  const RULE = { input_port: 'at least 5', energy_port: 'at least 1', output_port: 'optional', module_quantum: 'optional' };
+  const rule = id => RULE[Object.keys(RULE).find(k => id.endsWith(k))];
   const required = Object.entries(count).reduce((n, [id, c]) => n + (optional(id) ? 0 : c), 0);
+  const ids = bomOrder(Object.keys(count));
   const el = document.createElement('section');
   el.className = 'me-bom';
-  el.innerHTML = `<h3>Bill of materials</h3><p><b>${required}</b> blocks to place, plus the optional Quantum Module.`
-    + ' The accelerator places can hold an Ore Refinery Casing instead.</p><ul>'
-    + Object.keys(count).sort((a, b) => rank(a) - rank(b)).map(id => `<li${optional(id) ? ' class="opt"' : ''}><img src="${icon(id)}" alt="" loading="lazy">`
-      + `<b>×${count[id]}</b><span>${(names[id] || {}).name || id}${optional(id) ? ' <em>optional</em>' : ''}</span></li>`).join('')
-    + '</ul>';
+  const short = id => ((names[id] || {}).name || id).replace(/^(Quantum )?Ore Refinery /, '');
+  el.innerHTML = `<h3>Bill of materials</h3><p><b>${required}</b> blocks to place, plus the optional output port and Quantum Module. Tap a block to see its craft.</p><ul>`
+    + ids.map(id => `<li${optional(id) ? ' class="opt"' : ''}><button type="button" data-id="${id}" aria-label="${(names[id] || {}).name || id}: see its craft"><img src="${icon(id)}" alt="" loading="lazy">`
+      + `<b>×${count[id]}</b><span>${short(id)}${rule(id) ? `<em>${rule(id)}</em>` : ''}</span>`
+      + '<i class="me-bom-go" aria-hidden="true"></i></button></li>').join('')
+    + '</ul><ul class="me-bom-notes">'
+    + '<li>Ports go anywhere on the back of the two lower floors: at least 5 input ports and 1 energy port. A port you leave out is a casing.</li>'
+    + '<li>With the Quantum Module on, the output port is a backup buffer. Without one, ore processing stops when the network can\'t take the result.</li>'
+    + '<li>Each accelerator place can hold a casing instead.</li></ul>';
+  el.addEventListener('click', e => {
+    const id = e.target.closest('button[data-id]')?.dataset.id;
+    if (id) openCraft(id, { ids, count, names });
+  });
+  loadRecipes();
   return el;
+}
+const bomOrder = ids => {
+  const rank = id => { const i = BOM_ORDER.findIndex(o => id.endsWith(o)); return i < 0 ? 99 : i; };
+  return ids.sort((a, b) => rank(a) - rank(b));
+};
+
+// ---------- the crafting card: one dialog for the page, opened from the bill of materials or the 3D view ----------
+let recipesP = null;
+const loadRecipes = () => (recipesP ??= fetch(`${BASE}/data/recipes.json`).then(r => r.json()).catch(() => ({})));
+const itemIcon = id => { const [ns, p] = id.split(':'); return `${BASE}/icons/${ns}/${p}.png`; };
+const escH = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+let craftDlg = null;
+
+function craftDialog() {
+  if (craftDlg) return craftDlg;
+  const d = document.createElement('dialog');
+  d.className = 'me-craft not-content';
+  d.setAttribute('aria-labelledby', 'me-craft-title');
+  document.body.append(d);
+  // one set of listeners: the card is redrawn for each block, its buttons say where to go
+  d.addEventListener('click', e => {
+    if (e.target === d || e.target.closest('.me-craft-x')) { d.close(); return; }
+    const t = e.target.closest('[data-go]:not([disabled])');
+    if (t) openCraft(t.dataset.go, d.ctx, +(t.dataset.dir || 1));
+  });
+  d.addEventListener('close', () => document.documentElement.classList.remove('me-craft-open'));
+  d.addEventListener('keydown', e => {
+    const t = e.target.closest?.('li[data-go]');
+    if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCraft(t.dataset.go, d.ctx, 1); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); d.querySelector(e.key === 'ArrowRight' ? '.me-craft-next' : '.me-craft-prev')?.click(); }
+  });
+  // swipe sideways on a phone: the next or previous block
+  let x0 = null;
+  d.addEventListener('touchstart', e => { x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+  d.addEventListener('touchend', e => {
+    if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 60) d.querySelector(dx < 0 ? '.me-craft-next' : '.me-craft-prev')?.click();
+  });
+  return (craftDlg = d);
+}
+
+async function openCraft(id, ctx, dir = 0) {
+  const d = craftDialog();
+  const recipes = await loadRecipes();
+  const rid = Object.keys(recipes).find(k => recipes[k].result === `mekanismengineering:${id}`);
+  const r = recipes[rid];
+  const { ids, count, names } = ctx;
+  const i = ids.indexOf(id), name = (names[id] || {}).name || (r && r.name) || id, page = (names[id] || {}).page;
+  const need = count[id] || 1;
+  let body = '<p class="me-craft-none">No crafting table recipe for this block.</p>';
+  if (r) {
+    const rows = r.pattern.length === 1 && r.pattern[0].length === 1 ? ['   ', ` ${r.pattern[0]} `, '   '] : r.pattern.map(p => p.padEnd(3));
+    while (rows.length < 3) rows.push('   ');
+    const cells = rows.flatMap(row => [...row].map(c => (c === ' ' ? null : r.key[c])));
+    const local = ing => ing && ing.item && ing.item.startsWith('mekanismengineering:') && ids.includes(ing.item.split(':')[1]) ? ing.item.split(':')[1] : null;
+    const pic = ing => `<img src="${itemIcon(ing.show || ing.item || '')}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:${escH(JSON.stringify(ing.name.replace(/^any /, '').slice(0, 2)))}}))">`;
+    const slot = (ing, n) => !ing ? `<span class="me-slot" style="--i:${n}"></span>`
+      : local(ing) ? `<button type="button" class="me-slot me-slot-go" style="--i:${n}" data-name="${escH(ing.name)}" data-go="${local(ing)}" aria-label="${escH(ing.name)}: see its craft">${pic(ing)}</button>`
+      : `<span class="me-slot" tabindex="0" style="--i:${n}" data-name="${escH(ing.name)}">${pic(ing)}</span>`;
+    const crafts = Math.ceil(need / r.count);
+    const per = {};
+    for (const c of cells) if (c) (per[c.name] ??= { ing: c, n: 0 }).n++;
+    const made = crafts * r.count;
+    body = `<div class="me-craft-recipe"><div class="me-grid">${cells.map(slot).join('')}</div><span class="me-arrow">→</span>`
+      + `<span class="me-slot me-out" data-name="${escH(r.name)}">${pic({ show: r.result, name: r.name })}${r.count > 1 ? `<i>${r.count}</i>` : ''}</span></div>`
+      + `<p class="me-craft-need">The structure needs <b>${need}</b>. ${r.count > 1 ? `One craft makes ${r.count}, so craft it <b>${crafts}</b> times${made > need ? ` (${made - need} left over)` : ''}.` : need > 1 ? `Craft it <b>${crafts}</b> times.` : 'Craft it once.'}</p>`
+      + `<h4>${crafts > 1 ? `For ${crafts} crafts` : 'For one craft'}</h4><ul class="me-craft-list">`
+      + Object.values(per).map(({ ing, n }) => `<li${local(ing) ? ` data-go="${local(ing)}" tabindex="0" role="button"` : ''}>${pic(ing)}<b>${n * crafts}</b><span>${escH(ing.name)}</span></li>`).join('')
+      + '</ul>';
+  }
+  d.innerHTML = `<div class="me-craft-card${dir ? (dir > 0 ? ' me-from-right' : ' me-from-left') : ''}">`
+    + `<header><img src="${icon(id)}" alt=""><div><em>Craft${i >= 0 ? ` · ${i + 1} of ${ids.length}` : ''}</em><h3 id="me-craft-title">${escH(name)}</h3></div>`
+    + '<button type="button" class="me-craft-x" aria-label="Close">×</button></header>'
+    + body
+    + `<footer><button type="button" class="me-craft-prev" data-go="${ids[i - 1] || ''}" data-dir="-1" ${i > 0 ? '' : 'disabled'}>← Previous</button>`
+    + (page && location.pathname !== `${BASE}/${page}/` ? `<a href="${BASE}/${page}/">Open its page</a>` : '<span></span>')
+    + `<button type="button" class="me-craft-next" data-go="${ids[i + 1] || ''}" ${i >= 0 && i < ids.length - 1 ? '' : 'disabled'}>Next →</button></footer></div>`;
+  d.ctx = ctx;
+  if (!d.open) { d.showModal(); document.documentElement.classList.add('me-craft-open'); }
+  (d.querySelector(dir > 0 ? '.me-craft-next:not([disabled])' : dir < 0 ? '.me-craft-prev:not([disabled])' : '.me-craft-x') || d.querySelector('.me-craft-x')).focus({ preventScroll: true });
 }

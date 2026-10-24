@@ -1,10 +1,10 @@
 // The Quantum Ore Refinery in 3D, block by block, with the mod's real models and textures.
-// Drawing: RefineryTemplate.TEXT; blocks and states: RefineryBuildPlan + RefineryBuilder.oriented (what /mekeng build places) + StackableBlock.
+// Drawing: RefineryTemplate.TEXT with one energy port, the least the structure takes (owner's rule, 24 October 2026); blocks and states: RefineryBuildPlan + RefineryBuilder.oriented (what /mekeng build places) + StackableBlock.
 import * as THREE from 'three';
 import { buildBlock, variantFor } from './mcmodel.js';
 
 export const TEXT = `
-P  C  G  F  C  G  G  E  E  P
+P  C  G  F  C  G  G  E  C  P
 I  C  C  C  C  C  C  C  C  O
 P  K  Di Wa Cr In Pu En Sm P
 
