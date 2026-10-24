@@ -301,3 +301,7 @@ body:has(.me-home) .sl-container { max-width: min(96rem, 100%); }
 .content-panel:has(> .sl-container:empty) { display: none; }
 body:has(.me-home) .content-panel { border-top: 0; }
 @media (min-width: 72rem) { body:has(.me-home) .sl-container { padding-inline: 1.5rem; } }
+
+/* ---------- 3D motion (src/lib/viewer.js): markers and labels wait for the structure to finish building ---------- */
+.me-mk, .me-tag { transition: opacity 0.5s ease; }
+.me-intro .me-mk, .me-intro .me-tag { opacity: 0 !important; }

@@ -89,6 +89,56 @@ export class Stage {
   }
 }
 
+// ---------- motion: every animation draws only while it runs, and none runs when the reader asks for less motion ----------
+const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const easeBack = t => { const c = 1.35; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+/** Runs `step(t)` (t from 0 to 1) on each frame for `ms`, then resolves. */
+function tween(ms, step) {
+  return new Promise(done => {
+    if (still()) { step(1); done(); return; }
+    const t0 = performance.now();
+    const tick = now => { const t = Math.min(1, (now - t0) / ms); step(t); if (t < 1) requestAnimationFrame(tick); else done(); };
+    requestAnimationFrame(tick);
+  });
+}
+/** The camera as it is now, to animate from it to where `frame()` would put it. */
+function camState(stage) {
+  const c = stage.cam;
+  return { pos: c.position.clone(), target: stage.controls.target.clone(), zoom: c.zoom, box: [c.left, c.right, c.top, c.bottom] };
+}
+function setCam(stage, a, b, t) {
+  const c = stage.cam, k = easeInOut(t);
+  c.position.lerpVectors(a.pos, b.pos, k); stage.controls.target.lerpVectors(a.target, b.target, k);
+  c.zoom = a.zoom + (b.zoom - a.zoom) * k;
+  [c.left, c.right, c.top, c.bottom] = a.box.map((v, i) => v + (b.box[i] - v) * k);
+  c.updateProjectionMatrix(); c.lookAt(stage.controls.target); c.updateMatrixWorld();
+}
+/** Turns the camera around its target by `deg` degrees (around the vertical axis). */
+function turn(stage, from, deg) {
+  const off = from.pos.clone().sub(from.target).applyAxisAngle(new THREE.Vector3(0, 1, 0), deg * Math.PI / 180);
+  stage.cam.position.copy(from.target).add(off); stage.cam.lookAt(from.target); stage.cam.updateMatrixWorld();
+}
+/** A slow sway of the camera while the view is on screen, until the reader takes the controls. */
+function sway(stage, host) {
+  if (still()) return;
+  let on = true, seen = false, last = 0, t0 = performance.now(), from = camState(stage);
+  const stop = () => { on = false; };
+  stage.controls.addEventListener('start', stop);
+  new IntersectionObserver(([e]) => { seen = e.isIntersecting; if (seen && on) requestAnimationFrame(tick); }).observe(host);
+  function tick(now) {
+    if (!on || !seen || document.hidden) return;
+    if (now - last > 33) { // 30 frames a second is plenty for a slow sway, and spares phones
+      last = now;
+      turn(stage, from, Math.sin((now - t0) / 2600) * 9);
+      stage.draw();
+    }
+    requestAnimationFrame(tick);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && on && seen) requestAnimationFrame(tick); });
+}
+
 /** Calls `fn` on taps (not on drags) of the canvas. */
 function onTap(canvas, fn) {
   let down = null;
@@ -113,6 +163,9 @@ export async function mountBlock(host) {
   stage.root.add(obj);
   stage.resize(); stage.frame();
   host.querySelector(':scope > img')?.remove();
+  const end = camState(stage);
+  host.classList.add('me-live');
+  await tween(1100, t => { const k = easeOut(t); turn(stage, end, -70 * (1 - k)); stage.cam.zoom = 0.82 + 0.18 * k; stage.cam.updateProjectionMatrix(); stage.draw(); });
   return stage;
 }
 
@@ -142,11 +195,13 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
         <button type="button" data-mode="layers">Layer by layer</button></div>
        <button type="button" class="me-pill me-reset" style="cursor:pointer">⟳ Reset view</button></div>
        <div class="me-layers" hidden></div>`;
+  if (tags) host.querySelector('.me-ref-bar').style.display = 'none'; // the home page shows the structure only
   const stageEl = host.querySelector('.me-stage');
   const stage = new Stage(stageEl, { yaw: 35, pitch: 32, pad: 0.05 });
   const { root, blocks } = await buildRefinery(MC, { accelerators: 8, module: true });
   stage.root.add(root);
-  stageEl.querySelector('.me-loading').remove();
+  stageEl.querySelector('.me-loading')?.remove();
+  stageEl.classList.add('me-intro');
   const counts = {};
   for (const b of blocks) counts[b.userData.id] = (counts[b.userData.id] || 0) + 1;
 
@@ -177,19 +232,31 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   const state = { mode, only: mode === 'layers' ? 1 : 0 };
   const layersEl = host.querySelector('.me-layers');
   layersEl.innerHTML = [1, 2, 3, 4].map(n => `<button type="button" data-layer="${n}" aria-pressed="false"><img src="${icon('_layer' + n)}" alt="" loading="lazy">Layer ${n}</button>`).join('');
-  function apply(reframe) {
+  let gliding = 0;
+  function apply(reframe, glide = false) {
     const gap = state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6;
+    const was = glide ? blocks.map(b => b.position.y) : null, cam = glide && reframe ? camState(stage) : null;
     arrange(blocks, { gap, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 });
     root.updateMatrixWorld(true);
     for (const b of host.querySelectorAll('.me-seg button')) b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
     layersEl.hidden = state.mode !== 'layers';
     for (const b of layersEl.querySelectorAll('button')) b.setAttribute('aria-pressed', String(+b.dataset.layer === state.only));
     if (reframe) stage.frame(); else stage.draw();
+    if (!glide) return;
+    // the layers glide to their new place and the camera follows
+    const to = blocks.map(b => b.position.y), end = cam && camState(stage), run = ++gliding;
+    tween(650, t => {
+      if (run !== gliding) return;
+      const k = easeInOut(t);
+      blocks.forEach((b, i) => { b.position.y = was[i] + (to[i] - was[i]) * k; });
+      if (cam) setCam(stage, cam, end, t);
+      stage.draw();
+    });
   }
   host.querySelector('.me-seg').addEventListener('click', e => {
     const m = e.target.closest('button')?.dataset.mode; if (!m) return;
     unselect();
-    state.mode = m; if (m === 'layers' && !state.only) state.only = 1; apply(true);
+    state.mode = m; if (m === 'layers' && !state.only) state.only = 1; apply(true, true);
   });
   layersEl.addEventListener('click', e => { const n = +e.target.closest('button')?.dataset.layer; if (n) { unselect(); state.only = n; apply(false); } });
   host.querySelector('.me-reset').addEventListener('click', () => stage.frame());
@@ -218,5 +285,18 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   });
 
   stage.resize(); apply(true);
+  // the structure builds itself: the blocks fall into place, bottom layer first, sweeping from the controller
+  host.classList.add('me-live');
+  const rest = blocks.map(b => b.position.y);
+  const delay = b => b.userData.dy * 0.16 + (b.userData.dx + 8) * 0.018 + b.userData.dz * 0.03;
+  const span = Math.max(...blocks.map(delay)) + 0.5;
+  await tween(span * 1000, t => {
+    const now = t * span;
+    blocks.forEach((b, i) => { const k = Math.min(1, Math.max(0, (now - delay(b)) / 0.5)); b.position.y = rest[i] + (1 - easeBack(k)) * 7; b.visible = k > 0; });
+    stage.draw();
+  });
+  blocks.forEach((b, i) => { b.position.y = rest[i]; b.visible = true; });
+  stageEl.classList.remove('me-intro'); stage.draw();
+  if (tags) sway(stage, stageEl);
   return stage;
 }
