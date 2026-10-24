@@ -27,6 +27,7 @@ async function mount3d(el: HTMLElement) {
 function lazy3d() {
   const els = [...document.querySelectorAll<HTMLElement>('[data-me3d]')];
   if (!els.length) return;
+  import('../lib/viewer.js').then(v => v.preload());
   const io = new IntersectionObserver(entries => {
     for (const e of entries) if (e.isIntersecting) { io.unobserve(e.target); mount3d(e.target as HTMLElement); }
   }, { rootMargin: '300px' });

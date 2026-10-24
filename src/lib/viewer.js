@@ -2,11 +2,13 @@
 // Transparent background, orthographic camera like an isometric drawing, drag to turn, pinch or wheel to zoom, tap a block.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildBlock, loadModel, JOINED } from './mcmodel.js';
+import { buildBlock, loadModel, JOINED, preloadFiles } from './mcmodel.js';
 import { buildRefinery, arrange } from './refinery.js';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 export const MC = `${BASE}/mc`;
+/** Downloads the 3D code and files as soon as a page has a 3D view, while the reader is still at the top. */
+export const preload = () => preloadFiles(MC);
 export const icon = id => `${BASE}/icons/mekanismengineering/${id}.png`;
 
 /** A canvas with a camera that turns around its content; it draws only when something changes. */

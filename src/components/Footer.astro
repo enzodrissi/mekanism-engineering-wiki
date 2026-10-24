@@ -7,7 +7,7 @@ const date = new Date(source.imported).toISOString().slice(0, 10);
 <Default><slot /></Default>
 <p class="me-foot-note">
   Written from the mod's own wiki and data files (<a href={`https://gitlab.com/enzodr/mekanism-engineering/-/commit/${source.commit}`}>{source.commit.slice(0, 8)}</a>, {date}).
-  Mod {source.modVersion} for Minecraft {source.minecraft} and Mekanism {source.mekanism}.
+  Mod v{source.modVersion} for Minecraft {source.minecraft} and Mekanism {source.mekanism}.
   Block and item pictures are drawn from the game's models and textures; Mekanism's are under the MIT licence.
   Not an official Minecraft product, not approved by or associated with Mojang or Microsoft.
 </p>

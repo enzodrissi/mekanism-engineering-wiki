@@ -256,14 +256,14 @@ sidebar:
 ---
 
 The notes of every published version, newest first, as posted on CurseForge.
-${drafts.length ? `\nThe notes of version ${drafts.join(', ')} are being written and appear here when it is released.\n` : ''}
-${published.map(v => `- [Version ${v}](${BASE}/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
+${drafts.length ? `\nThe notes of ${drafts.map(v => 'v' + v).join(', ')} are being written and appear here when it is released.\n` : ''}
+${published.map(v => `- [v${v}](${BASE}/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
 `);
 for (const v of sorted) {
   let md = rd(`docs/publication/CURSEFORGE_CHANGELOG_${v}.md`);
   md = md.replace(/<!--[\s\S]*?-->\n?/g, '').replace(/^# .+\n+/m, '');
   write(path.join(OUT_DOCS, `changelog/${v.replace(/\./g, '-')}.md`),
-    `---\ntitle: ${JSON.stringify('Version ' + v)}\nsidebar:\n  order: ${order++}\n---\n${rewrite(md, 'changelog').trim()}\n`);
+    `---\ntitle: ${JSON.stringify('v' + v)}\nsidebar:\n  order: ${order++}\n---\n${rewrite(md, 'changelog').trim()}\n`);
 }
 
 // ---------- 7. reference pages made from the data files: every recipe, every in-game text ----------
@@ -316,6 +316,20 @@ const levels = [...qor.matchAll(/^\| \*\*x(\d)\*\* \| ([^|]+) \| (\d+) \| ([^|]+
   .map(m => ({ level: +m[1], chain: m[2].trim(), ingots: +m[3], takes: m[4].trim() }));
 if (levels.length !== 5) throw new Error('the level table of the Quantum Ore Refinery page changed: ' + levels.length + ' rows');
 write(path.join(ROOT, 'src/data/qor-levels.json'), JSON.stringify(levels, null, 1));
+
+// every model, blockstate and texture the 3D views can use, in one file: online, a hundred small files fetched one after
+// the other take far too long (src/lib/mcmodel.js reads this file first)
+const bundle = {};
+const walkMc = dir => {
+  for (const f of fs.readdirSync(dir)) {
+    const file = path.join(dir, f), rel = path.relative(path.join(PUB, 'mc'), file).split(path.sep).join('/');
+    if (fs.statSync(file).isDirectory()) { if (!rel.endsWith('textures/gui')) walkMc(file); continue; }
+    bundle[rel] = f.endsWith('.png') ? 'data:image/png;base64,' + fs.readFileSync(file).toString('base64')
+      : /\.(json|mcmeta)$/.test(f) ? JSON.parse(fs.readFileSync(file, 'utf8')) : fs.readFileSync(file, 'utf8');
+  }
+};
+walkMc(path.join(PUB, 'mc'));
+write(path.join(PUB, 'data/mc.json'), JSON.stringify(bundle));
 
 write(path.join(ROOT, 'src/data/source.json'), JSON.stringify({ ref: REF, commit, modVersion: props.mod_version,
   minecraft: props.minecraft_version, mekanism: props.mekanism_version, imported: new Date().toISOString() }, null, 2));

@@ -10,14 +10,25 @@ const loader = new THREE.TextureLoader();
 const split = id => (id.includes(':') ? id.split(':') : ['minecraft', id]);
 const fileUrl = (base, kind, id, ext) => { const [ns, p] = split(id); return `${base}/${ns}/${kind}/${p}${ext}`; };
 
+// all the files in one download when the site has it (data/mc.json, next to the mc folder), else one file at a time
+const bundles = new Map();
+async function fromBundle(url) {
+  const m = url.match(/^(.*)\/mc\/(.+)$/);
+  if (!m) return undefined;
+  if (!bundles.has(m[1])) bundles.set(m[1], fetch(`${m[1]}/data/mc.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({})));
+  return (await bundles.get(m[1]))[m[2]];
+}
+/** Starts downloading the files of the 3D views before a view needs them. */
+export const preloadFiles = base => fromBundle(`${base}/_`);
+
 async function getJson(url, optional = false) {
-  if (!jsonCache.has(url)) jsonCache.set(url, fetch(url).then(r => (r.ok ? r.json() : null)));
+  if (!jsonCache.has(url)) jsonCache.set(url, fromBundle(url).then(b => b !== undefined ? b : fetch(url).then(r => (r.ok ? r.json() : null))));
   const j = await jsonCache.get(url);
   if (!j && !optional) throw new Error('missing ' + url);
   return j;
 }
 async function getText(url) {
-  if (!textCache.has(url)) textCache.set(url, fetch(url).then(r => (r.ok ? r.text() : '')));
+  if (!textCache.has(url)) textCache.set(url, fromBundle(url).then(b => typeof b === 'string' ? b : fetch(url).then(r => (r.ok ? r.text() : ''))));
   return textCache.get(url);
 }
 
@@ -49,11 +60,12 @@ function resolveTex(textures, ref) {
 }
 
 export async function getTexture(base, id) {
-  if (!texCache.has(id)) texCache.set(id, new Promise((ok, ko) => loader.load(fileUrl(base, 'textures', id, '.png'), t => {
+  const url = fileUrl(base, 'textures', id, '.png');
+  if (!texCache.has(id)) texCache.set(id, fromBundle(url).then(b => new Promise((ok, ko) => loader.load(b || url, t => {
     t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false;
     t.colorSpace = THREE.SRGBColorSpace;
     t.userData.frames = Math.max(1, Math.round(t.image.height / t.image.width)); ok(t);
-  }, undefined, () => ko(new Error('missing texture ' + id)))));
+  }, undefined, () => ko(new Error('missing texture ' + id))))));
   return texCache.get(id);
 }
 
