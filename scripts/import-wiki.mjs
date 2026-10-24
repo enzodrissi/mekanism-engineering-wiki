@@ -331,7 +331,10 @@ const walkMc = dir => {
 walkMc(path.join(PUB, 'mc'));
 write(path.join(PUB, 'data/mc.json'), JSON.stringify(bundle));
 
-write(path.join(ROOT, 'src/data/source.json'), JSON.stringify({ ref: REF, commit, modVersion: props.mod_version,
+// the version as the mod's release is named (CurseForge notes "1.2" for a jar numbered 1.2.0)
+const shortVersion = props.mod_version.replace(/\.0$/, '');
+const modVersion = changelogs.some(f => ver(f) === shortVersion) ? shortVersion : props.mod_version;
+write(path.join(ROOT, 'src/data/source.json'), JSON.stringify({ ref: REF, commit, modVersion,
   minecraft: props.minecraft_version, mekanism: props.mekanism_version, imported: new Date().toISOString() }, null, 2));
 console.log(`Imported ${written} pages, ${Object.keys(recipes).length} recipes, ${sorted.length} changelog versions checked.`);
 fs.rmSync(work, { recursive: true, force: true });
