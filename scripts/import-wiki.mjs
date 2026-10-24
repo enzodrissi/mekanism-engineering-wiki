@@ -14,7 +14,7 @@ import sharp from 'sharp';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const PROJECT = '86415165';
 const REF = process.env.WIKI_REF || 'wip/1.2/rqe-ecran';
-const BASE = '/mekanism-engineering-wiki';
+const BASE = '/wiki';
 const NS = 'mekanismengineering';
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
 // edit and source links point to a lasting branch, not to the work branch being imported

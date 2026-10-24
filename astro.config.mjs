@@ -7,8 +7,8 @@ import rehypeTables from './src/lib/rehype-tables.mjs';
 export const GOATCOUNTER = 'mekanism-engineering-wiki';
 
 export default defineConfig({
-  site: 'https://enzodrissi.github.io',
-  base: '/mekanism-engineering-wiki',
+  site: 'https://mekanism-engineering.github.io',
+  base: '/wiki',
   trailingSlash: 'always',
   markdown: { rehypePlugins: [rehypeTables] },
   integrations: [

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const DIST = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../dist');
-const BASE = '/mekanism-engineering-wiki';
+const BASE = '/wiki';
 const pages = [];
 const walk = d => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); fs.statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') && pages.push(p); } };
 walk(DIST);

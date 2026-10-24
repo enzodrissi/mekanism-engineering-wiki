@@ -14,7 +14,7 @@ takes you through your first one, in the order you will need things. Every detai
 
 The structure is a fixed drawing that you build layer by layer: tap **Layer by layer** above to see each one, and tap
 any block to see its name. The full drawing, the block counts and every recipe are on
-[Structure and parts](/mekanism-engineering-wiki/machines/ore-refining/structure/).
+[Structure and parts](/wiki/machines/ore-refining/structure/).
 
 1. Place the **Quantum Ore Refinery Controller** first. It sits on the bottom front row, second block from the left as
    you face it, and turns to face you when you place it: the structure stands **behind** it and to its right.
@@ -39,7 +39,7 @@ Levels **x1** and **x2** need no chemical at all, so this is already a working r
 
 ## 3. Choose how it works
 
-The Home screen has two controls ([details](/mekanism-engineering-wiki/machines/ore-refining/quantum-ore-refinery/#choosing-the-level)):
+The Home screen has two controls ([details](/wiki/machines/ore-refining/quantum-ore-refinery/#choosing-the-level)):
 
 - **Level cap** (x1 to x5, x5 until you click): the most the machine may work at.
 - **Always run**, OFF by default. **OFF**: it waits until the tanks hold everything the capped level needs. **ON**: it
@@ -74,12 +74,12 @@ Each accelerator place that holds an **Ore Refinery Accelerator** makes a job sh
 ## 6. Send the ingots to your network (optional)
 
 Add the **Ore Refinery Quantum Module** at the output end of the structure, in the place of the Output Port or in the
-cell right above it (see [Structure and parts](/mekanism-engineering-wiki/machines/ore-refining/structure/#ports)), and choose a frequency on its
+cell right above it (see [Structure and parts](/wiki/machines/ore-refining/structure/#ports)), and choose a frequency on its
 screen: the ingots then go to a Quantum (Inventory) frequency or into a QIO network, every half second, through a
 buffer of 64 stacks. Nothing is lost when the destination is full. See
-[The Quantum Module](/mekanism-engineering-wiki/machines/ore-refining/quantum-ore-refinery/#the-quantum-module).
+[The Quantum Module](/wiki/machines/ore-refining/quantum-ore-refinery/#the-quantum-module).
 
 ## Next
 
-- [Quantum Ore Refinery](/mekanism-engineering-wiki/machines/ore-refining/quantum-ore-refinery/): the interface, automation and troubleshooting.
-- [Mine far away with the Quantum Digital Miner](/mekanism-engineering-wiki/guides/remote-mining/): feed the refinery from a miner.
+- [Quantum Ore Refinery](/wiki/machines/ore-refining/quantum-ore-refinery/): the interface, automation and troubleshooting.
+- [Mine far away with the Quantum Digital Miner](/wiki/guides/remote-mining/): feed the refinery from a miner.
