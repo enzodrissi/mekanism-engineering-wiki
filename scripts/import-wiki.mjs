@@ -47,21 +47,22 @@ const REF = process.env.WIKI_REF || (process.env.WIKI_ARCHIVE ? 'local archive' 
 const NS = 'mekanismengineering';
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
 const SITE_REPO = 'https://github.com/mekanism-engineering/mekanism-engineering.github.io';
-// The 1.2 also ships for Minecraft 1.20.1 with Forge, from a branch of its own whose wiki text is the same. Its requirements,
-// read from that branch's gradle.properties and META-INF/mods.toml (wip/1.2/port-1201, 25 Oct 2026):
-const MC_1201 = { minecraft: '1.20.1', loader: 'Forge', mekanism: '1.20.1-10.4.16.80', ranges: {
-  'Minecraft Java Edition': '1.20.1 exactly', Java: '17', 'Mod loader': 'Forge 47.1.106 up to, but excluding, 47.2',
+// The 1.2 also ships for Minecraft 1.20.1, with NeoForge's 1.20.1 build (neo_version 1.20.1-47.1.106, ModDevGradle legacyforge), from a
+// branch of its own whose wiki text is the same. Its requirements, read from that branch's gradle.properties and META-INF/mods.toml
+// (wip/1.2/port-1201, 25 Oct 2026):
+const MC_1201 = { minecraft: '1.20.1', loader: 'NeoForge', mekanism: '1.20.1-10.4.16.80', ranges: {
+  'Minecraft Java Edition': '1.20.1 exactly', Java: '17', 'Mod loader': 'NeoForge 47.1.106 up to, but excluding, 47.2 (not Forge)',
   Mekanism: '10.4.13 up to, but excluding, 10.4.17' }, rangesFr: {
-  'Minecraft Java Edition': '1.20.1 exactement', Java: '17', 'Chargeur de mods': 'Forge 47.1.106 jusqu\'à 47.2 exclu',
+  'Minecraft Java Edition': '1.20.1 exactement', Java: '17', 'Chargeur de mods': 'NeoForge 47.1.106 jusqu\'à 47.2 exclu (pas Forge)',
   Mekanism: '10.4.13 jusqu\'à 10.4.17 exclu' } };
 // the overview names both Minecraft versions, and its table of requirements gets a column for each
 // "10.7.15 up to, but excluding, 10.7.20" is shortened so two columns of it stay readable on a phone
 const short = range => range.replace(/ up to, but excluding, /, ' to below ');
 const MC_TEXT = {
-  en: { said: /for Minecraft ([\d.]+) with NeoForge/, also: v => `for Minecraft ${v} with NeoForge and Minecraft ${MC_1201.minecraft} with ${MC_1201.loader}`,
+  en: { said: /for Minecraft ([\d.]+) with NeoForge/, also: v => `for Minecraft ${v} and ${MC_1201.minecraft} with NeoForge`,
     table: /\| Component \| Accepted range \|\n\|---\|---\|\n((?:\|.*\|\n)+)/, head: 'Component', loader: 'Mod loader', ranges: MC_1201.ranges,
     jar: 'Each Minecraft version has its own jar: take the one made for your game.' },
-  fr: { said: /pour Minecraft ([\d.]+) avec NeoForge/, also: v => `pour Minecraft ${v} avec NeoForge et Minecraft ${MC_1201.minecraft} avec ${MC_1201.loader}`,
+  fr: { said: /pour Minecraft ([\d.]+) avec NeoForge/, also: v => `pour Minecraft ${v} et ${MC_1201.minecraft} avec NeoForge`,
     table: /\| Composant \| Plage acceptée \|\n\|---\|---\|\n((?:\|.*\|\n)+)/, head: 'Composant', loader: 'Chargeur de mods', ranges: MC_1201.rangesFr,
     jar: 'Chaque version de Minecraft a son propre jar : prendre celui qui correspond à son jeu.' },
 };
