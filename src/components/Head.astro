@@ -7,6 +7,7 @@ import source from '../data/source.json';
 {/* kept out of search engines until the version shown is released (scripts/import-wiki.mjs) */}
 {!source.released && <meta name="robots" content="noindex" />}
 <meta name="theme-color" content="#060a11" />
+<link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.png`} />
 <script>
   import '../scripts/site.ts';
 </script>

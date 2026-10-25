@@ -15,7 +15,6 @@ import { BASE } from '../site.config.mjs';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import * as tar from 'tar';
-import sharp from 'sharp';
 import crypto from 'node:crypto';
 import GithubSlugger from 'github-slugger';
 
@@ -118,11 +117,8 @@ const copyDir = (from, to) => fs.existsSync(from) && fs.cpSync(from, to, { recur
 // ---------- 3. data the pages and the 3D views use ----------
 copyDir(path.join(SRC, 'docs/wiki/images'), path.join(PUB, 'wiki-images'));
 copyDir(path.join(SRC, 'docs/publication/assets/gallery'), path.join(PUB, 'gallery'));
-// the mod's avatar (its CurseForge picture) is the site's logo and icon
-const avatar = path.join(SRC, 'docs/publication/assets/engineering-avatar.png');
-fs.mkdirSync(path.join(ROOT, 'src/assets'), { recursive: true });
-await sharp(avatar).resize(160, 160, { kernel: 'nearest' }).png().toFile(path.join(ROOT, 'src/assets/logo.png'));
-await sharp(avatar).resize(64, 64, { kernel: 'nearest' }).png().toFile(path.join(PUB, 'favicon.png'));
+// the site's logo and icon (src/assets/logo.png, public/favicon.png) are kept in this repository: they are the mod's
+// current logo, the project picture on GitLab, byte for byte. The avatar files under docs/publication are older logos.
 const A = path.join(SRC, `src/main/resources/assets/${NS}`);
 for (const d of ['models', 'blockstates', 'textures']) copyDir(path.join(A, d), path.join(PUB, `mc/${NS}`, d));
 const lang = JSON.parse(rd(`src/main/resources/assets/${NS}/lang/en_us.json`));
