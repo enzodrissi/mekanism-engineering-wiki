@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import source from '../data/source.json';
 import families from '../data/sidebar.json';
 import { tr } from '../lib/i18n.js';
-import { FEATURES, hasSection } from '../lib/features.mjs';
+import { FEATURES, NEWS, hasSection, FILTER_ICON } from '../lib/features.mjs';
 const lng = Astro.locals.starlightRoute?.lang === 'fr' ? 'fr' : 'en';
 const t = (en: string, vars?: Record<string, unknown>) => tr(lng, en, vars);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -23,6 +23,9 @@ const tiles = ([['Overview', 'overview'], ['Basics', 'getting-started'], ...guid
   .map(([k, id]) => [k, byId(id)] as const).filter((t): t is readonly [string, NonNullable<ReturnType<typeof byId>>] => !!t[1]);
 // the big additions of the version (src/lib/features.mjs), each while its section is still on its page
 const spots = FEATURES.map(f => ({ ...f, ...f[lng], doc: byId(f.page) })).filter(f => f.doc && hasSection(f.doc.body, f));
+// the new multiblock, shown first in the "What's new" block, while its page exists
+const mb = { ...NEWS.multiblock, ...NEWS.multiblock[lng], doc: byId(NEWS.multiblock.page) };
+const news = NEWS[lng];
 const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) + '…' : s);
 ---
 
@@ -42,22 +45,58 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
     </div>
   </section>
 
-  {spots.map(f => (
-    <section class="me-spot">
-      <div class="me-spot-text">
-        <img src={`${base}/icons/mekanismengineering/${f.icon}.png`} alt={f.machine} loading="lazy" />
-        <div class="me-eyebrow">{f.badge} · {f.machine}</div>
-        <h2>{f.title}</h2>
-        <p>{f.lead}</p>
-        <a class="me-btn primary" href={`${base}/${f.doc.id}/#${f.anchor}`}>{f.open} →</a>
+  {(mb.doc || spots.length > 0) && (
+    <section class="me-news" aria-labelledby="me-news-title">
+      <div class="me-news-head">
+        <div class="me-eyebrow">{news.eyebrow}</div>
+        <h2 id="me-news-title">{news.title}</h2>
       </div>
-      <div class="me-feature-cards">
-        {f.cards.map(([title, say], i) => (
-          <div class="me-feature-card"><span class="me-feature-num">{i + 1}</span><b>{title}</b><p set:html={say} /></div>
+      <div class="me-news-grid">
+        {mb.doc && (
+          <article class="me-news-card">
+            <a class="me-news-visual me-news-shot" href={`${base}/${mb.doc.id}/`} tabindex="-1" aria-hidden="true">
+              <img src={`${base}/${mb.shot}`} alt="" loading="lazy" width="1920" height="1080" />
+            </a>
+            <div class="me-news-body">
+              <div class="me-eyebrow"><span class="me-news-badge">{mb.badge}</span> {mb.family}</div>
+              <h3>{mb.title}</h3>
+              <p class="me-news-lead">{mb.lead}</p>
+              <ul class="me-news-points">
+                {mb.points.map(([title, say], i) => (
+                  <li><span class="me-feature-num">{i + 1}</span><div><b>{title}</b><p set:html={say} /></div></li>
+                ))}
+              </ul>
+              <a class="me-btn primary" href={`${base}/${mb.doc.id}/`}>{mb.open} →</a>
+            </div>
+          </article>
+        )}
+        {spots.map(f => (
+          <article class="me-news-card">
+            <a class="me-news-visual me-news-ores" href={`${base}/${f.doc.id}/#${f.anchor}`} tabindex="-1" aria-hidden="true">
+              <img src={`${base}/icons/mekanismengineering/${f.icon}.png`} alt="" loading="lazy" />
+              <span class="me-news-chips">
+                {f.ores[0].map(o => <span class="me-news-chip"><Fragment set:html={FILTER_ICON} />{o}</span>)}
+                {f.ores[1].map(o => <span class="me-news-chip opt">{o}</span>)}
+              </span>
+              <span class="me-news-note">{f.oresNote}</span>
+            </a>
+            <div class="me-news-body">
+              <div class="me-eyebrow"><span class="me-news-badge">{news.filters}</span> {f.machine}</div>
+              <h3>{f.title}</h3>
+              <p class="me-news-lead">{f.lead}</p>
+              <ul class="me-news-points">
+                {f.cards.map(([title, say], i) => (
+                  <li><span class="me-feature-num">{i + 1}</span><div><b>{title}</b><p set:html={say} /></div></li>
+                ))}
+              </ul>
+              <a class="me-btn primary" href={`${base}/${f.doc.id}/#${f.anchor}`}>{f.open} →</a>
+            </div>
+          </article>
         ))}
       </div>
+      <a class="me-news-all" href={`${base}/${pre}${NEWS.changelog}/`}>{news.all}</a>
     </section>
-  ))}
+  )}
 
   <h2>{t('The machines')}</h2>
   <p class="me-sub">{t('{n} machines and tools. Blue: Quantum. Copper: Mekanism style.', { n: machines.length })}</p>

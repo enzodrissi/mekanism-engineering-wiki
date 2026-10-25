@@ -520,8 +520,8 @@ starlight-lang-select select { width: 8.4rem; }
 @media (max-width: 23.5rem) { .site-title { font-size: 0.9rem !important; } .site-title img { height: 1.6rem !important; } }
 
 /* ---------- the big additions of a version (src/lib/features.mjs): Quantum colours, teal light on navy ---------- */
-.me-new, .sl-markdown-content .me-feature, .me-spot { --me-f-line: rgba(100, 209, 199, 0.42); --me-f-glow: rgba(100, 209, 199, 0.16); --me-f-card: rgba(6, 10, 17, 0.5); }
-:root[data-theme='light'] :is(.me-new, .sl-markdown-content .me-feature, .me-spot) { --me-f-line: rgba(15, 125, 116, 0.4); --me-f-glow: rgba(15, 125, 116, 0.12); --me-f-card: #ffffff; }
+.me-new, .sl-markdown-content .me-feature, .me-news { --me-f-line: rgba(100, 209, 199, 0.42); --me-f-glow: rgba(100, 209, 199, 0.16); --me-f-card: rgba(6, 10, 17, 0.5); }
+:root[data-theme='light'] :is(.me-new, .sl-markdown-content .me-feature, .me-news) { --me-f-line: rgba(15, 125, 116, 0.4); --me-f-glow: rgba(15, 125, 116, 0.12); --me-f-card: #ffffff; }
 .me-feature-num { flex: none; display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; margin-right: 0.55rem;
   background: linear-gradient(135deg, var(--me-teal), #4a84ec); color: var(--me-ink); font: 700 0.75rem/1 var(--sl-font-mono); vertical-align: 0.1em; }
 .me-feature-cards { display: grid; gap: 0.7rem; }
@@ -555,13 +555,46 @@ starlight-lang-select select { width: 8.4rem; }
 .sl-markdown-content .me-feature .me-feature-cards { margin: 1rem 0 0.2rem; }
 @media (max-width: 40rem) { .sl-markdown-content .me-feature { padding: 1rem 1rem 1.1rem; margin-inline: -0.25rem; } }
 
-/* home: under the hero */
-.me-spot { display: grid; gap: 1.1rem 1.8rem; margin-top: 2.6rem; padding: 1.3rem; border-radius: 24px; border: 1px solid var(--me-f-line);
+/* home, under the hero: what's new in the version (NEWS in src/lib/features.mjs). Two equal cards, the new multiblock first:
+   side by side on wide screens, one above the other on phones; the link to the changelog under both */
+.me-news { margin-top: 2.6rem; padding: 1.3rem; border-radius: 24px; border: 1px solid var(--me-f-line);
   background: radial-gradient(70% 90% at 0% 0%, var(--me-f-glow), transparent 70%), linear-gradient(160deg, var(--me-q1), var(--me-q2));
   box-shadow: 0 24px 70px -36px rgba(100, 209, 199, 0.55); }
-.me-spot-text img { float: right; width: 5rem; height: 5rem; margin: 0 0 0.4rem 0.8rem; image-rendering: pixelated; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.4)); }
-.me-home .me-spot h2 { margin: 0.45rem 0 0; font-size: clamp(1.45rem, 3.4vw, 2rem); line-height: 1.15; }
-.me-spot-text p { color: var(--sl-color-gray-2); font-size: 0.95rem; line-height: 1.55; margin: 0.6rem 0 1rem; }
-@media (min-width: 60rem) { .me-spot { grid-template-columns: 0.9fr 1.1fr; align-items: center; padding: 1.6rem 1.7rem; } .me-spot .me-feature-cards { grid-template-columns: 1fr; } }
-@media (min-width: 120rem) { .me-spot .me-feature-cards { grid-template-columns: 1fr 1fr; } }
-@media (prefers-reduced-motion: reduce) { .me-new { transition: none; } }
+.me-home .me-news h2 { margin: 0.4rem 0 0; font-size: clamp(1.55rem, 4vw, 2.3rem); line-height: 1.12; letter-spacing: -0.03em; }
+.me-news-grid { display: grid; gap: 1rem; margin-top: 1.1rem; }
+@media (min-width: 48rem) { .me-news-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.me-news-card { container-type: inline-size; display: flex; flex-direction: column; min-width: 0; border-radius: 20px; overflow: hidden; background: var(--me-f-card); border: 1px solid var(--me-t-line); }
+.me-news-visual { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: 1px solid var(--me-t-line);
+  background: radial-gradient(70% 80% at 30% 40%, rgba(100, 209, 199, 0.22), transparent 70%), linear-gradient(160deg, #13274a, #060a11); }
+/* the controller's screen, cut out of the 1920 × 1080 gallery picture: x 1148 to 1720, y 390 to 712 */
+.me-news-shot img { position: absolute; max-width: none; width: 335.66%; height: auto; left: -200.7%; top: -121.21%; transition: transform 0.3s; transform-origin: 60% 60%; }
+.me-news-card:hover .me-news-shot img { transform: scale(1.03); }
+.me-news-ores { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: center; align-items: center; gap: 0.5rem 1.1rem; padding: 1rem 1.2rem; text-decoration: none; }
+/* sized on the card's width (a container query), so that the picture fills its band from phone to 4K */
+.me-news-ores img { width: clamp(5rem, 25cqi, 11rem); height: clamp(5rem, 25cqi, 11rem); object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55)); grid-row: span 2; align-self: center; }
+.me-news-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; align-self: end; }
+.me-news-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.55rem; border-radius: 99px; font: 600 clamp(0.62rem, 2.15cqi, 0.95rem)/1.2 var(--sl-font-mono);
+  color: #041018; background: linear-gradient(135deg, var(--me-teal), #4a84ec); }
+.me-news-chip svg { width: 0.75rem; height: 0.75rem; }
+.me-news-chip.opt { color: #c9fbf5; background: rgba(100, 209, 199, 0.1); border: 1px dashed rgba(100, 209, 199, 0.55); padding: calc(0.25rem - 1px) calc(0.55rem - 1px); }
+.me-news-note { align-self: start; font: 500 clamp(0.6rem, 1.8cqi, 0.8rem)/1.35 var(--sl-font-mono); color: #8fb3c9; letter-spacing: 0.02em; }
+.me-news-body { display: flex; flex-direction: column; flex: 1; padding: 1rem 1.1rem 1.15rem; }
+.me-news-body .me-eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.55rem; font-size: 0.66rem; letter-spacing: 0.12em; }
+.me-news-badge { padding: 0.15rem 0.5rem; border-radius: 99px; color: var(--me-ink); background: linear-gradient(135deg, var(--me-teal), #4a84ec); font-weight: 700; }
+.me-news-body h3 { font: 700 clamp(1.3rem, 2.6vw, 1.6rem)/1.15 var(--me-head); margin: 0.55rem 0 0; color: var(--sl-color-white); }
+.me-news-lead { color: var(--sl-color-gray-2); font-size: 0.92rem; line-height: 1.55; margin: 0.5rem 0 0; }
+.me-news-points { list-style: none; padding: 0; margin: 0.8rem 0 1.1rem; display: grid; gap: 0.6rem; }
+.me-news-points li { display: flex; align-items: flex-start; margin: 0; }
+.me-news-points li .me-feature-num { margin-top: 0.05rem; }
+.me-news-points b { font: 650 0.98rem/1.3 var(--me-head); color: var(--sl-color-white); }
+.me-news-points p { font-size: 0.84rem; line-height: 1.5; color: var(--me-card-text); margin: 0.15rem 0 0; }
+.me-news-points p b { font: inherit; font-weight: 650; }
+.me-news-body > .me-btn { margin-top: auto; align-self: flex-start; }
+.me-news-all { display: flex; width: fit-content; margin: 1rem auto 0; padding: 0.45rem 0.9rem; border-radius: 99px; border: 1px solid var(--me-f-line);
+  font: 600 0.78rem var(--sl-font-mono); letter-spacing: 0.04em; color: var(--sl-color-accent); text-decoration: none; background: var(--me-glass); transition: border-color 0.15s, transform 0.15s; }
+.me-news-all:hover { border-color: var(--me-teal); transform: translateY(-1px); color: var(--sl-color-accent); }
+@media (max-width: 40rem) { .me-news { padding: 1rem 0.8rem; margin-inline: -0.25rem; } .me-news-body { padding: 0.9rem 0.95rem 1rem; } }
+@container (max-width: 25rem) { .me-news-ores { gap: 0.35rem 0.75rem; padding: 0.7rem 0.85rem; } .me-news-chips { gap: 0.25rem; } .me-news-chip { padding: 0.15rem 0.4rem; }
+  .me-news-chip.opt { padding: calc(0.15rem - 1px) calc(0.4rem - 1px); } .me-news-chip svg { display: none; } }
+@media (min-width: 120rem) { .me-news { padding: 1.7rem 1.8rem; } }
+@media (prefers-reduced-motion: reduce) { .me-new, .me-news-all, .me-news-shot img { transition: none; } }
