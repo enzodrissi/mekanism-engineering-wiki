@@ -38,7 +38,6 @@ export class Stage {
     new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; this._kick(); }).observe(host);
     document.addEventListener('visibilitychange', () => this._kick());
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', () => this._kick());
-    host.dispatchEvent(new CustomEvent('me-stage', { bubbles: true, detail: this })); // the drawing behind it (src/scripts/stage-bg.ts)
   }
   onDraw(fn) { this.listeners.push(fn); }
   resize() {

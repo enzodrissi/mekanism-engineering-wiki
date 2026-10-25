@@ -18,8 +18,8 @@ any block to see its name. The full drawing, the block counts and every recipe a
 
 1. Place the **Quantum Ore Refinery Controller** first. It sits on the bottom front row, second block from the left as
    you face it, and turns to face you when you place it: the structure stands **behind** it and to its right.
-2. Build the rest: casing, pillars, girders, conveyors, eight ports, seven process modules, four tank cells of two
-   blocks each, and as many accelerators as you like (up to eight). An accelerator place may also hold a plain casing.
+2. Build the rest: casing, pillars, girders, conveyors, the ports (at least five Input Ports, at least one Energy Port
+   and, if you want one, an Output Port), seven process modules, four tank cells of two blocks each, and as many accelerators as you like (up to eight). An accelerator place may also hold a plain casing.
 3. While something is wrong, the controller's screen says which block is wrong or missing and where. When the last
    block goes in, the screen says "Multiblock formed" (and redstone dust runs along the edges, if Mekanism's effect is
    on).
@@ -31,7 +31,7 @@ once a second and never loads a chunk to do it.
 
 ## 2. Give it energy and ore
 
-1. Bring **energy** to either of the two Energy Ports (Joules or Forge Energy, from a cable or an energy block).
+1. Bring **energy** to an Energy Port (Joules or Forge Energy, from a cable or an energy block).
 2. Feed **ore** to an Input Port in its default **Items** mode, or put ore in the nine ore slots by hand.
 3. Take the ingots from the Output Port with a pipe, hopper or chest placed against it.
 
