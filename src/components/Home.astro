@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import source from '../data/source.json';
 import families from '../data/sidebar.json';
 import { tr } from '../lib/i18n.js';
+import { FEATURES, hasSection } from '../lib/features.mjs';
 const lng = Astro.locals.starlightRoute?.lang === 'fr' ? 'fr' : 'en';
 const t = (en: string, vars?: Record<string, unknown>) => tr(lng, en, vars);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -20,6 +21,8 @@ const byId = (id: string) => docs.find(d => d.id === id || d.id === pre + id);
 const tiles = ([['Overview', 'overview'], ['Basics', 'getting-started'], ...guides.map(g => ['Guide', g.id]), ['Reference', 'crafting'],
   ['Reference', 'in-game-texts'], ['Reference', 'configuration'], ['Help', 'faq']] as [string, string][])
   .map(([k, id]) => [k, byId(id)] as const).filter((t): t is readonly [string, NonNullable<ReturnType<typeof byId>>] => !!t[1]);
+// the big additions of the version (src/lib/features.mjs), each while its section is still on its page
+const spots = FEATURES.map(f => ({ ...f, ...f[lng], doc: byId(f.page) })).filter(f => f.doc && hasSection(f.doc.body, f));
 const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) + '…' : s);
 ---
 
@@ -38,6 +41,23 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
       <div class="me-stage"><img src={`${base}/icons/mekanismengineering/_refinery.png`} alt={t('The Quantum Ore Refinery')} style="width:100%;height:100%;object-fit:contain" /></div>
     </div>
   </section>
+
+  {spots.map(f => (
+    <section class="me-spot">
+      <div class="me-spot-text">
+        <img src={`${base}/icons/mekanismengineering/${f.icon}.png`} alt={f.machine} loading="lazy" />
+        <div class="me-eyebrow">{f.badge} · {f.machine}</div>
+        <h2>{f.title}</h2>
+        <p>{f.lead}</p>
+        <a class="me-btn primary" href={`${base}/${f.doc.id}/#${f.anchor}`}>{f.open} →</a>
+      </div>
+      <div class="me-feature-cards">
+        {f.cards.map(([title, say], i) => (
+          <div class="me-feature-card"><span class="me-feature-num">{i + 1}</span><b>{title}</b><p set:html={say} /></div>
+        ))}
+      </div>
+    </section>
+  ))}
 
   <h2>{t('The machines')}</h2>
   <p class="me-sub">{t('{n} machines and tools. Blue: Quantum. Copper: Mekanism style.', { n: machines.length })}</p>

@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import fs from 'node:fs';
 import rehypeTables from './src/lib/rehype-tables.mjs';
+import rehypeFeatures from './src/lib/rehype-features.mjs';
 import { SITE, BASE } from './site.config.mjs';
 
 const sidebarFile = new URL('./src/data/sidebar.json', import.meta.url);
@@ -15,7 +16,7 @@ export default defineConfig({
   site: SITE,
   base: BASE || '/',
   trailingSlash: 'always',
-  markdown: { rehypePlugins: [rehypeTables] },
+  markdown: { rehypePlugins: [rehypeTables, rehypeFeatures] },
   integrations: [
     starlight({
       title: 'Mekanism: Engineering',

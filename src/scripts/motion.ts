@@ -14,7 +14,7 @@ function reveal() {
   // a jump to an anchor, a reload or back/forward lands mid-page: show it as it is
   const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
   if (location.hash || (nav && nav.type !== 'navigate') || !('IntersectionObserver' in window)) return;
-  const own = [...document.querySelectorAll<HTMLElement>('.sl-markdown-content :is(table, .me-recipe, .me-texts), .me-home :is(h2, .me-sub, .me-card, .me-tile)')];
+  const own = [...document.querySelectorAll<HTMLElement>('.sl-markdown-content :is(.me-tbl, .me-recipe, .me-texts), .me-home :is(h2, .me-sub, .me-card, .me-tile)')];
   const blocks = [...document.querySelectorAll<HTMLElement>('.sl-markdown-content > *')].filter(el => !own.some(o => el.contains(o)));
   const els = [...blocks, ...own].filter((el, _, all) =>
     !el.closest('[data-me3d]') && !el.querySelector('[data-me3d]') && !all.some(o => o !== el && o.contains(el)));

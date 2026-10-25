@@ -1,6 +1,7 @@
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 import { tr } from '../lib/i18n.js';
+import { featuresOf, hasSection, FILTER_ICON } from '../lib/features.mjs';
 const { entry, id, lang } = Astro.locals.starlightRoute;
 const t = (en: string) => tr(lang === 'fr' ? 'fr' : 'en', en);
 const m = entry.data.machine;
@@ -11,6 +12,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const scene = m?.id === 'digital_miner_surveyor' ? { item: 'quantum_digital_miner', focus: 'companion' } : null;
 const kind = !m ? null : m.id === 'ore_refinery_controller' ? 'refinery' : m.structure ? null : m.model || scene ? 'block' : 'item';
 const item = m?.model ?? m?.id;
+// a big addition of this page (src/lib/features.mjs): a banner under the header leads to its section
+const feats = featuresOf(id.replace(/^fr\//, ''), lang === 'fr' ? 'fr' : 'en').filter(f => hasSection(entry.body, f));
 ---
 
 {
@@ -21,6 +24,17 @@ const item = m?.model ?? m?.id;
         <div class="me-eyebrow">{family}{m.isNew ? ` · ${t('New')}` : ''}{m.quantum ? ' · Quantum' : ''}</div>
         <h1 id="_top">{entry.data.title}</h1>
         {entry.data.description && <p class="me-lead">{entry.data.description}</p>}
+        {feats.map(f => (
+          <a class="me-new not-content" href={`#${f.anchor}`}>
+            <span class="me-new-icon" set:html={FILTER_ICON} />
+            <span class="me-new-text">
+              <span class="me-eyebrow">{f.badge}</span>
+              <b>{f.title}</b>
+              <span class="me-new-lead">{f.lead}</span>
+            </span>
+            <span class="me-new-go">{f.more} ↓</span>
+          </a>
+        ))}
       </div>
       {kind === 'refinery' && <div class="not-content" data-me3d data-kind="refinery" data-mode="exploded" />}
       {kind === 'block' && (

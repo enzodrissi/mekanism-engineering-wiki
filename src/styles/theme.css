@@ -272,40 +272,67 @@ header.header { backdrop-filter: blur(12px); }
 .me-info a { color: var(--sl-color-accent); }
 .me-texts summary img { width: 1.6rem; height: 1.6rem; flex: none; margin: 0; image-rendering: pixelated; border-radius: 0; display: block; }
 
-/* ---------- tables (classes set at build time by src/lib/rehype-tables.mjs) ---------- */
+/* ---------- tables (classes set at build time by src/lib/rehype-tables.mjs) ----------
+   Every table sits in a card, div.me-tbl, that scrolls sideways when the table is wider than the column; the table fills the
+   card. All cells line up on the baseline of their first line, whatever the size of their text, and share one padding.
+   .me-tbl-facts: the facts box at the top of a machine page (labels on the left, side by side from 40rem, stacked below);
+   .me-tbl-stack: a table of sentences, a list of cards below 50rem; .me-tbl-scroll: any other table. */
+.sl-markdown-content .me-tbl { --me-tbl-bg: #0a111d; --me-tbl-head: rgba(100, 209, 199, 0.07); --me-tbl-zebra: rgba(120, 170, 255, 0.035);
+  border: 1px solid var(--me-line); border-radius: 16px; overflow-x: auto; scrollbar-width: thin;
+  /* the edge that hides more of the table glows while it can scroll (covers move with the content, glows stay put) */
+  background:
+    linear-gradient(to right, var(--me-tbl-bg) 30%, transparent) left / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--me-tbl-bg) 30%, transparent) right / 2rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(100, 209, 199, 0.35), transparent) left / 0.8rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(100, 209, 199, 0.35), transparent) right / 0.8rem 100% no-repeat scroll,
+    var(--me-tbl-bg); }
+:root[data-theme='light'] .sl-markdown-content .me-tbl { --me-tbl-bg: #ffffff; --me-tbl-head: rgba(15, 125, 116, 0.06); --me-tbl-zebra: rgba(40, 80, 150, 0.03); }
+.sl-markdown-content .me-tbl > table { display: table; width: 100%; margin: 0; overflow: visible; border-collapse: separate; border-spacing: 0; font-size: 0.92em; line-height: 1.6; }
+.sl-markdown-content .me-tbl tr { background: transparent; }
+.sl-markdown-content .me-tbl tbody tr:nth-child(2n) { background: var(--me-tbl-zebra); }
+.sl-markdown-content .me-tbl :is(th, td) { padding: 0.7rem 1rem; vertical-align: baseline; text-align: start; border: 0; border-bottom: 1px solid var(--me-line); }
+.sl-markdown-content .me-tbl :is(th, td):first-child { padding-inline-start: 1.15rem; }
+.sl-markdown-content .me-tbl :is(th, td):last-child { padding-inline-end: 1.15rem; }
+.sl-markdown-content .me-tbl tbody tr:last-child td { border-bottom: 0; }
+.sl-markdown-content .me-tbl thead th { background: var(--me-tbl-head); font: 600 0.7rem/1.4 var(--sl-font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--sl-color-accent); text-wrap: balance; padding-block: 0.65rem; }
 .sl-markdown-content td code { white-space: normal; overflow-wrap: anywhere; }
 /* a key or a value in a table that scrolls stays whole: the table scrolls instead of cutting it every few letters */
 .sl-markdown-content table.me-scroll td code { white-space: nowrap; overflow-wrap: normal; }
 @media (min-width: 50rem) { .sl-markdown-content table.me-stack td code { white-space: nowrap; overflow-wrap: normal; } }
-.me-scroll.me-narrow :is(td, th):not(:first-child) { min-width: 2.6rem; }
+.sl-markdown-content .me-tbl .me-scroll :is(td, th) { min-width: 5.5rem; }
+.sl-markdown-content .me-tbl .me-scroll :is(td, th):first-child { min-width: 7.5rem; }
+.sl-markdown-content .me-tbl .me-scroll.me-narrow :is(td, th):not(:first-child) { min-width: 2.6rem; }
 .sl-markdown-content :is(h1, h2, h3) code { white-space: nowrap; }
 @media (max-width: 40rem) { .sl-markdown-content :is(h2, h3) code { font-size: 0.8em; } .me-stack td:empty { display: none; } }
 .sl-markdown-content td:empty::after { content: '—'; color: var(--sl-color-gray-4); }
 .me-foot-note a { color: var(--sl-color-accent); }
-.sl-markdown-content table.me-facts { display: table; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--me-line); background: var(--me-glass); }
-.me-facts tr { background: transparent !important; }
-.me-facts td { border-bottom: 1px solid var(--me-line); vertical-align: top; }
-.me-facts tr:last-child td { border-bottom: 0; }
-.me-facts td:first-child { width: 9rem; font: 600 0.7rem var(--sl-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sl-color-accent); padding-top: 0.75rem; }
+
+/* facts box: the label column is as wide as its longest label (never cut in two), its small capitals sit on the baseline of
+   the value's first line */
+.sl-markdown-content .me-tbl-facts { background: var(--me-glass); }
+.sl-markdown-content .me-tbl .me-facts tbody tr { background: transparent; }
+.sl-markdown-content .me-tbl .me-facts td:first-child { width: 1%; white-space: nowrap; padding-inline-end: 1.5rem;
+  font: 600 0.7rem var(--sl-font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sl-color-accent); }
+/* a machine in Mekanism's style: copper labels, like the eyebrow of its header */
+main:has(.me-head.g) .sl-markdown-content .me-tbl .me-facts td:first-child { color: var(--me-g-ink); }
 @media (max-width: 40rem) {
-  .me-facts td:first-child { width: 6.5rem; }
-  .me-facts td { padding-inline: 0.6rem; }
+  /* phone: each label above its value, the value gets the whole width */
+  .sl-markdown-content .me-tbl .me-facts, .sl-markdown-content .me-tbl .me-facts :is(tbody, tr, td) { display: block; width: auto; }
+  .sl-markdown-content .me-tbl .me-facts tr { padding: 0.7rem 1rem 0.75rem; border-bottom: 1px solid var(--me-line); }
+  .sl-markdown-content .me-tbl .me-facts tr:last-child { border-bottom: 0; }
+  .sl-markdown-content .me-tbl .me-facts td { padding: 0; border: 0; margin: 0; }
+  .sl-markdown-content .me-tbl .me-facts td:first-child { width: auto; white-space: normal; padding: 0 0 0.15rem; }
 }
-.me-scroll :is(td, th) { min-width: 5.5rem; }
-.me-scroll :is(td, th):first-child { min-width: 7.5rem; }
-.sl-markdown-content table.me-scroll {
-  background:
-    linear-gradient(to right, var(--sl-color-black) 30%, transparent) left / 2rem 100%,
-    linear-gradient(to left, var(--sl-color-black) 30%, transparent) right / 2rem 100%,
-    radial-gradient(farthest-side at 0 50%, rgba(100, 209, 199, 0.4), transparent) left / 0.8rem 100%,
-    radial-gradient(farthest-side at 100% 50%, rgba(100, 209, 199, 0.4), transparent) right / 0.8rem 100%;
-  background-repeat: no-repeat; background-attachment: local, local, scroll, scroll;
-}
+
+/* table of sentences: a list of cards on a narrow column */
 @media (max-width: 50rem) {
+  .sl-markdown-content .me-tbl-stack { border: 0; border-radius: 0; background: none; overflow: visible; }
   .sl-markdown-content table.me-stack, .me-stack tbody, .me-stack tr, .me-stack td { display: block; width: 100%; }
   .me-stack thead { display: none; }
-  .me-stack tr { border: 1px solid var(--me-line); border-radius: 14px; margin: 0.6rem 0; padding: 0.5rem 0.8rem; background: var(--me-glass) !important; }
-  .me-stack td { border: 0; padding: 0.25rem 0; min-width: 0; }
+  .sl-markdown-content .me-tbl .me-stack tbody tr { border: 1px solid var(--me-line); border-radius: 14px; margin: 0.6rem 0; padding: 0.6rem 0.9rem; background: var(--me-tbl-bg); }
+  .sl-markdown-content .me-tbl .me-stack td { border: 0; padding: 0.25rem 0; min-width: 0; }
+  .sl-markdown-content .me-tbl .me-stack tbody tr:first-child { margin-top: 0; }
   .me-stack td::before { content: attr(data-label); display: block; font: 600 0.68rem var(--sl-font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-color-accent); }
   .me-stack td:first-child { font-weight: 650; color: var(--sl-color-white); }
 }
@@ -491,3 +518,50 @@ starlight-lang-select select { width: 8.4rem; }
   .site-title img { height: 1.9rem !important; }
 }
 @media (max-width: 23.5rem) { .site-title { font-size: 0.9rem !important; } .site-title img { height: 1.6rem !important; } }
+
+/* ---------- the big additions of a version (src/lib/features.mjs): Quantum colours, teal light on navy ---------- */
+.me-new, .sl-markdown-content .me-feature, .me-spot { --me-f-line: rgba(100, 209, 199, 0.42); --me-f-glow: rgba(100, 209, 199, 0.16); --me-f-card: rgba(6, 10, 17, 0.5); }
+:root[data-theme='light'] :is(.me-new, .sl-markdown-content .me-feature, .me-spot) { --me-f-line: rgba(15, 125, 116, 0.4); --me-f-glow: rgba(15, 125, 116, 0.12); --me-f-card: #ffffff; }
+.me-feature-num { flex: none; display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; margin-right: 0.55rem;
+  background: linear-gradient(135deg, var(--me-teal), #4a84ec); color: var(--me-ink); font: 700 0.75rem/1 var(--sl-font-mono); vertical-align: 0.1em; }
+.me-feature-cards { display: grid; gap: 0.7rem; }
+@media (min-width: 40rem) { .me-feature-cards { grid-template-columns: 1fr 1fr; } }
+.me-feature-card { border-radius: 16px; padding: 0.85rem 1rem 0.95rem; background: var(--me-f-card); border: 1px solid var(--me-t-line); }
+.me-feature-card > b { font: 650 1.08rem/1.3 var(--me-head); color: var(--sl-color-white); }
+.me-feature-card p { font-size: 0.86rem; line-height: 1.55; color: var(--me-card-text); margin: 0.45rem 0 0; }
+.me-feature-card p b { color: var(--sl-color-white); font-weight: 650; }
+
+/* banner under the page header, down to the section */
+.me-new { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 0.95rem; align-items: center; max-width: 34rem; margin-top: 1.3rem; padding: 0.9rem 1.1rem;
+  border-radius: 18px; text-decoration: none; color: inherit; border: 1px solid var(--me-f-line);
+  background: radial-gradient(120% 140% at 0% 0%, var(--me-f-glow), transparent 65%), linear-gradient(160deg, var(--me-q1), var(--me-q2));
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.me-new:hover { transform: translateY(-1px); border-color: var(--me-teal); box-shadow: 0 10px 28px -14px rgba(100, 209, 199, 0.55); color: inherit; }
+.me-new-icon { display: grid; place-items: center; width: 2.7rem; height: 2.7rem; border-radius: 13px; align-self: start;
+  background: linear-gradient(135deg, var(--me-teal), #4a84ec); color: var(--me-ink); }
+.me-new-text { display: block; min-width: 0; }
+.me-new-text b { display: block; font: 650 1.12rem/1.25 var(--me-head); color: var(--sl-color-white); margin-top: 0.2rem; }
+.me-new-lead { display: block; font-size: 0.88rem; line-height: 1.5; color: var(--sl-color-gray-2); margin-top: 0.2rem; }
+.me-new-go { grid-column: 2; justify-self: start; font: 600 0.74rem var(--sl-font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-color-accent); white-space: nowrap; }
+
+/* the section itself, drawn as a feature */
+.sl-markdown-content .me-feature { margin-top: 2.4rem; padding: 1.1rem 1.3rem 1.3rem; border-radius: 22px; border: 1px solid var(--me-f-line);
+  background: radial-gradient(90% 60% at 0% 0%, var(--me-f-glow), transparent 70%), linear-gradient(160deg, var(--me-q1), var(--me-q2));
+  box-shadow: 0 22px 60px -34px rgba(100, 209, 199, 0.5); }
+.me-feature-badge .me-pill { border: 0; color: var(--me-ink); background: linear-gradient(135deg, var(--me-teal), #4a84ec); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.me-feature-badge svg { width: 0.95rem; height: 0.95rem; }
+.sl-markdown-content .me-feature > .sl-heading-wrapper, .sl-markdown-content .me-feature > h3 { margin-top: 0.7rem; }
+.sl-markdown-content .me-feature h3 { font-size: clamp(1.3rem, 3.2vw, 1.6rem); line-height: 1.2; scroll-margin-top: 2.4rem; }
+.sl-markdown-content .me-feature .me-feature-cards { margin: 1rem 0 0.2rem; }
+@media (max-width: 40rem) { .sl-markdown-content .me-feature { padding: 1rem 1rem 1.1rem; margin-inline: -0.25rem; } }
+
+/* home: under the hero */
+.me-spot { display: grid; gap: 1.1rem 1.8rem; margin-top: 2.6rem; padding: 1.3rem; border-radius: 24px; border: 1px solid var(--me-f-line);
+  background: radial-gradient(70% 90% at 0% 0%, var(--me-f-glow), transparent 70%), linear-gradient(160deg, var(--me-q1), var(--me-q2));
+  box-shadow: 0 24px 70px -36px rgba(100, 209, 199, 0.55); }
+.me-spot-text img { float: right; width: 5rem; height: 5rem; margin: 0 0 0.4rem 0.8rem; image-rendering: pixelated; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.4)); }
+.me-home .me-spot h2 { margin: 0.45rem 0 0; font-size: clamp(1.45rem, 3.4vw, 2rem); line-height: 1.15; }
+.me-spot-text p { color: var(--sl-color-gray-2); font-size: 0.95rem; line-height: 1.55; margin: 0.6rem 0 1rem; }
+@media (min-width: 60rem) { .me-spot { grid-template-columns: 0.9fr 1.1fr; align-items: center; padding: 1.6rem 1.7rem; } .me-spot .me-feature-cards { grid-template-columns: 1fr; } }
+@media (min-width: 120rem) { .me-spot .me-feature-cards { grid-template-columns: 1fr 1fr; } }
+@media (prefers-reduced-motion: reduce) { .me-new { transition: none; } }
