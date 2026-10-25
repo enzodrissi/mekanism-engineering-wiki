@@ -1,7 +1,8 @@
 // Block animations of the 3D views: what the game shows when a machine works, drawn from its own models and textures.
 // A block with an `_active` model (the model the game switches to while it works) gets the Idle / Running switch for free;
 // a module in this folder adds the rest (what the block does around its model). Every module is loaded only for its page.
-//   export default async function setup(ctx) { ... }   ctx: { stage, host, obj, base, still, tween, easeOut, easeInOut, easeBack, icon, BASE, active }
+//   export default async function setup(ctx) { ... }   ctx: { stage, host, obj, focus, base, still, tween, easeOut, easeInOut, easeBack, icon, BASE, active }
+//   `ctx.focus` names what the view is about when the block's animation is shown on another page (data-focus of the view).
 //   `ctx.active` is the switch of the Idle / Running pair: { on, set(bool), onChange(fn) }, `ctx.state()` reads it.
 import { buildBlock, textureAnimator } from '../mcmodel.js';
 import { choice } from './ui.js';

@@ -51,7 +51,8 @@ export class Stage {
   frame(reset = true, show = true) {
     const w = this.host.clientWidth, h = this.host.clientHeight;
     if (!w || !h || !this.root.children.length) return;
-    const box = new THREE.Box3().setFromObject(this.root), ctr = box.getCenter(new THREE.Vector3());
+    // `fitBox` (when an animation sets it) gives the part of the scene the view centres on instead of all of it
+    const box = this.fitBox ? this.fitBox() : new THREE.Box3().setFromObject(this.root), ctr = box.getCenter(new THREE.Vector3());
     if (reset || !this.fitted) {
       this.cam.position.copy(ctr).addScaledVector(this.dir, 60); this.cam.zoom = 1;
       this.controls.target.copy(ctr);
@@ -187,7 +188,7 @@ export async function itemObject(id) {
 
 export async function mountBlock(host) {
   const stage = new Stage(host, { yaw: 35, pitch: 28, pad: 0.08 });
-  const id = host.dataset.item;
+  const id = host.dataset.item, focus = host.dataset.focus || null;
   const obj = await itemObject(id);
   stage.root.add(obj);
   stage.resize(); stage.frame();
@@ -199,7 +200,7 @@ export async function mountBlock(host) {
   // the block's own animation (src/lib/anim): what the game shows when the machine works
   try {
     const { animate } = await import('./anim/index.js');
-    await animate(id, { stage, host, obj, base: MC, still: still(), tween, easeOut, easeInOut, easeBack, icon, BASE });
+    await animate(id, { stage, host, obj, focus, base: MC, still: still(), tween, easeOut, easeInOut, easeBack, icon, BASE });
   } catch (e) { console.warn('animation', id, e); }
   return stage;
 }

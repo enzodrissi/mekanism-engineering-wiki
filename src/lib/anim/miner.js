@@ -12,8 +12,8 @@
 //   (charge 30 ticks by default, ServerConfig relocation.chargeTicks): a scan plane sweeps down inside a teal field, wireframe, core; at launch the
 //   field collapses and a beacon beam goes up; at the destination the beam comes down and the field "prints" the machine from the bottom up.
 //   Not reproduced: sounds, arcs (Mekanism's bolt renderer) and particles, and the field's teleporter-portal sprite (Mekanism's texture, not shipped here).
-// - The Digital Miner Companion linked to the machine and its screen (./companion.js), and the "mining finished" notification its owner gets
-//   when the zone is done (./qdm-toast.js): the sources are named there.
+// - The "mining finished" notification its owner gets when the zone is done (./qdm-toast.js), and, on the Companion's page
+//   (ctx.focus 'companion'), the Digital Miner Companion linked to the machine in front of it, its screen moving on (./companion.js).
 import * as THREE from 'three';
 import { getTexture } from '../mcmodel.js';
 import { caption } from './ui.js';
@@ -69,10 +69,11 @@ const ease = x => x * x * (3 - 2 * x);
 
 export default async function setup(ctx) {
   const { stage, base, still, active, obj, onObj, host, choice, tween, easeInOut } = ctx;
+  const withComp = ctx.focus === 'companion';
   const picture = src => new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ko(new Error('missing ' + src)); i.src = src; });
   const MODELS = ['reset', 'done', ...Array.from({ length: 10 }, (_, i) => 'running_' + i)];
   const [runTex, beamTex, comp, qdmIcon] = await Promise.all([
-    getTexture(base, NS + 'screen_run'), getTexture(base, 'minecraft:entity/beacon_beam'), buildCompanion(base, MODELS),
+    getTexture(base, NS + 'screen_run'), getTexture(base, 'minecraft:entity/beacon_beam'), withComp ? buildCompanion(base, MODELS) : null,
     picture(ctx.icon('quantum_digital_miner')), loadFont(base),
   ]);
 
@@ -127,16 +128,17 @@ export default async function setup(ctx) {
   }
   if (still) clock = SEARCH_MS + MINE_MS * 0.55;           // reduced motion: a fixed, readable "MINING · 55 %"
 
-  // the captions: what the view shows, what the Companion shows, then (when on) what the zone is
+  // the captions: on the Companion's page what it shows first, then what the machine shows, then (when on) what the zone is
+  const compNote = withComp ? caption(host, '') : null;
   const note = caption(host, '');
-  const compNote = caption(host, '');
   const zoneNote = caption(host, '');
 
-  // ---------------- the Digital Miner Companion linked to the machine (companion.js), standing on the ground in front of its screen
+  // ---------------- on the Companion's page: the Digital Miner Companion linked to the machine (companion.js), standing in front of it
   // Its state as the server computes it for the item (CompanionActions.progress, MinerProgress.of): not ready while the machine has not
   // started, working while it searches (0 %) and while it mines (held up too), done once the zone is mined; mined share in whole percent.
   let compSaid = '';
   function companionNow(ms = 0) {
+    if (!comp) return false;
     // the game's own words for the states (gui.mekanismengineering.companion.status.*)
     let model, status;
     if (!active.on) { model = companionModel('not_ready'); status = L('Not ready'); }
@@ -152,12 +154,20 @@ export default async function setup(ctx) {
     }
     return comp.set(model, ms);
   }
-  comp.obj.scale.setScalar(1.4);
-  comp.obj.position.set(1.8, 0, -2.3);
-  comp.obj.rotation.y = Math.atan2(stage.dir.x, stage.dir.z);   // its screen faces the starting angle of the view
-  stage.root.add(comp.obj);
-  {
-    // the view widens to take it in: from where the camera is to where frame() puts it
+  if (comp) {
+    // bigger than the item really is, at the front left of the machine
+    comp.obj.scale.setScalar(2.4);
+    comp.obj.position.set(2.2, 0, -2.6);
+    comp.obj.rotation.y = Math.atan2(stage.dir.x, stage.dir.z);   // its screen faces the starting angle of the view
+    stage.root.add(comp.obj);
+    // the view is on the Companion, with the near part of the machine beside it (also after a resize or a reset of the zone):
+    // the machine's box drawn 40 % of the way towards the Companion
+    stage.fitBox = () => {
+      const b = new THREE.Box3().setFromObject(comp.obj), mid = b.getCenter(new THREE.Vector3());
+      const m = new THREE.Box3().setFromObject(obj);
+      return b.union(new THREE.Box3(m.min.lerp(mid, 0.4), m.max.lerp(mid, 0.4)));
+    };
+    // from where the camera is to the new framing
     const c = stage.cam, snap = () => ({ pos: c.position.clone(), target: stage.controls.target.clone(), zoom: c.zoom, box: [c.left, c.right, c.top, c.bottom] });
     const a = snap(); stage.frame(true, false); const b = snap();
     const at = t => {
@@ -352,7 +362,7 @@ export default async function setup(ctx) {
       }
       sinceStatus += dt;
       if (sinceStatus >= STATUS_MS) { sinceStatus = 0; if (companionNow(now)) changed = true; }
-      if (comp.step(now)) changed = true;                                  // the strips of its screen and LED
+      if (comp && comp.step(now)) changed = true;                                  // the strips of its screen and LED
       toast.step(dt);                                                      // a page element: moving it needs no new picture
       return changed;
     }, { fps: 30 });
