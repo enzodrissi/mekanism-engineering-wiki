@@ -113,11 +113,6 @@ export const FR_ANIM = {
     "En marche : le minage est bloqué, l'écran devient donc ambre. Les chiffres sont des exemples.",
   'Running: the screen shows the state, the share mined and the blocks left. When the zone is done it goes back to its resting picture. The figures are examples.':
     "En marche : l'écran montre l'état, la part minée et les blocs restants. Une fois la zone terminée, il revient à son image de repos. Les chiffres sont des exemples.",
-  'The ore flowing in is an illustration of the mining, not an effect of the game.':
-    "Le minerai qui afflue illustre le minage ; ce n'est pas un effet du jeu.",
-  'Mining illustration': 'Illustration du minage',
-  'Ore flow: on': 'Flux de minerai : activé',
-  'Ore flow: off': 'Flux de minerai : désactivé',
   'Screen state': "État de l'écran",
   'Screen: mining': 'Écran : minage',
   'Screen: warning': 'Écran : alerte',
@@ -127,61 +122,6 @@ export const FR_ANIM = {
   'Small zone': 'Petite zone',
   'Relocation': 'Relocalisation',
   'Relocate': 'Relocaliser',
-
-  // refinery-run.js (job = « travail », as in the mod's French; products as in the modules' French texts)
-  'makes dirty slurry.': 'produit de la boue sale.',
-  'makes clean slurry.': 'produit de la boue propre.',
-  'makes crystals.': 'produit des cristaux.',
-  'makes shards.': 'produit des éclats.',
-  'makes clumps.': 'produit des amas.',
-  'makes dust.': 'produit de la poussière.',
-  'makes ingots.': 'produit des lingots.',
-  '{t} tick ({s} s)': '{t} tick ({s} s)',
-  '{t} ticks ({s} s)': '{t} ticks ({s} s)',
-  '{chain}. One iron ore gives {n} ingot; it takes nothing from the tanks.':
-    '{chain}. Un minerai de fer donne {n} lingot ; cela ne prend rien dans les réservoirs.',
-  '{chain}. One iron ore gives {n} ingots; it takes nothing from the tanks.':
-    '{chain}. Un minerai de fer donne {n} lingots ; cela ne prend rien dans les réservoirs.',
-  '{chain}. One iron ore gives {n} ingot; it takes {takes} from the tanks.':
-    '{chain}. Un minerai de fer donne {n} lingot ; cela prend {takes} dans les réservoirs.',
-  '{chain}. One iron ore gives {n} ingots; it takes {takes} from the tanks.':
-    '{chain}. Un minerai de fer donne {n} lingots ; cela prend {takes} dans les réservoirs.',
-  'A job takes {time} with {n} accelerator.': 'Un travail dure {time} avec {n} accélérateur.',
-  'A job takes {time} with {n} accelerators.': 'Un travail dure {time} avec {n} accélérateurs.',
-  'Shown over {s} s so each step can be seen.': 'Montré sur {s} s pour que chaque étape soit visible.',
-  'Ore comes in through an input port. One item stands for the stack (up to 64) that a job works.':
-    "Le minerai entre par un port d'entrée. Un objet représente la pile (jusqu'à 64) que traite un travail.",
-  'Ingots go to the Quantum Module, then to its Quantum or QIO frequency.':
-    'Les lingots vont au module quantique, puis à sa fréquence Quantum ou QIO.',
-  'Ingots leave by the output port.': 'Les lingots sortent par le port de sortie.',
-  'no module of its own in the structure.': 'aucun module propre dans la structure.',
-  'Step {i} of {n} · {name} ({inputs}): {what}': 'Étape {i} sur {n} · {name} ({inputs}) : {what}',
-  'Step {i} of {n} · {name}: {what}': 'Étape {i} sur {n} · {name} : {what}',
-  'Next step': 'Étape suivante',
-  'Run a job': 'Lancer un travail',
-  'Stop': 'Arrêter',
-  'Level of the refinery': 'Niveau de la raffinerie',
-  'Accelerators in use': 'Accélérateurs utilisés',
-  'Where the ingots go': 'Destination des lingots',
-  'Output port': 'Port de sortie',
-  'Quantum Module': 'Module quantique',
-  'Level': 'Niveau',
-  'Accelerators in use (of 8 places)': 'Accélérateurs utilisés (sur 8 places)',
-  'Ingots go to': 'Lingots vers',
-  // refinery-run.js, only when the French table (qor-levels.fr.json) is missing: the step names and inputs of qor-levels.json
-  'Smelting': 'Fonte',
-  'Enrichment': 'Enrichissement',
-  'Purification': 'Purification',
-  'Crusher': 'Broyeur',
-  'Injection': 'Injection',
-  'Dissolution': 'Dissolution',
-  'Washing': 'Lavage',
-  'Crystallization': 'Cristallisation',
-  'ore and oxygen': 'minerai et oxygène',
-  'ore and hydrogen chloride': "minerai et chlorure d'hydrogène",
-  'shards and oxygen': 'éclats et oxygène',
-  'ore and sulfuric acid': 'minerai et acide sulfurique',
-  'water': 'eau',
 
   // QDM: companion and notification (miner.js, companion.js, qdm-toast.js); the game's words from the mod's fr_fr.json
   // (toast.mekanismengineering.qdm.*, gui.mekanismengineering.companion.status.*)

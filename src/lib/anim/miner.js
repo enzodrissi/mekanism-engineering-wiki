@@ -313,35 +313,6 @@ export default async function setup(ctx) {
   let relocUi;
   function relocEnd() { reloc = -1; fx(END + 1); fieldM.visible = planeM.visible = wireM.visible = beamIn.visible = beamOut.visible = false; machine(true); relocUi.set(null); say(); stage.draw(); }
 
-  // ---------------- illustration (not a game effect): the mined blocks flowing from the zone into the machine's top port
-  // The game shows no such thing; the page says so. Sprites are the vanilla item pictures of what a miner finds.
-  const ORES = ['raw_iron', 'raw_gold', 'raw_copper', 'coal', 'diamond', 'redstone', 'lapis_lazuli'];
-  const oreTex = await Promise.all(ORES.map(n => getTexture(base, 'minecraft:item/' + n)));
-  const FLOW_MS = 2000, PORT = new THREE.Vector3(0.5, 2.06, 0.5), HEART = new THREE.Vector3(0.5, 0, 0.69);
-  const bits = oreTex.slice(0, 6).map((tex, i) => {
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-    sp.visible = false; sp.renderOrder = 4; stage.root.add(sp);
-    return { sp, from: new THREE.Vector3(), lap: -1, seed: i };
-  });
-  let flowOn = !still && true;
-  function flow(now) {
-    for (const b of bits) {
-      const u = (now + b.seed * FLOW_MS / bits.length) / FLOW_MS, lap = Math.floor(u), t = u - lap;
-      if (lap !== b.lap) {                                   // a new block leaves the zone: a new place on the ring, a new picture
-        b.lap = lap;
-        const a = ((lap * 7 + b.seed * 3) * 2.399963) % (2 * Math.PI), r = 2.1 + 0.25 * ((lap + b.seed) % 3);
-        b.from.set(HEART.x + Math.cos(a) * r, 0.3, HEART.z + Math.sin(a) * r);
-        b.sp.material.map = oreTex[(lap + b.seed * 2) % oreTex.length];
-      }
-      b.sp.position.lerpVectors(b.from, PORT, ease(t));
-      b.sp.position.y += 1.4 * Math.sin(Math.PI * t);
-      const size = 0.34 * Math.min(1, t * 8) * (t > 0.82 ? (1 - t) / 0.18 : 1);
-      b.sp.scale.set(size, size, 1);
-      b.sp.visible = size > 0.01;
-    }
-  }
-  function flowHide() { for (const b of bits) b.sp.visible = false; }
-
   // ---------------- one loop for all of it
   let sinceStatus = 0;
   if (!still) {
@@ -351,7 +322,6 @@ export default async function setup(ctx) {
         reloc += dt / 50;                                                   // a game tick lasts 50 ms
         if (reloc >= END) relocEnd(); else { fx(reloc); changed = true; }
       }
-      if (flowOn && active.on && !resting() && clock >= SEARCH_MS) { flow(now); changed = true; } else if (bits[0].sp.visible) { flowHide(); changed = true; }
       if (active.on) {
         const was = resting();
         if (!(held && !resting() && clock >= SEARCH_MS)) clock += dt;       // a held-up miner does not progress
@@ -378,12 +348,6 @@ export default async function setup(ctx) {
     }
     note.set(held ? L('Running: mining is held up, so the screen turns amber. The figures are examples.')
       : L('Running: the screen shows the state, the share mined and the blocks left. When the zone is done it goes back to its resting picture. The figures are examples.'));
-  }
-  if (!still) {
-    const flowNote = caption(host, '');
-    const sayFlow = () => flowNote.set(flowOn ? L('The ore flowing in is an illustration of the mining, not an effect of the game.') : '');
-    choice(L('Mining illustration'), [['on', L('Ore flow: on')], ['off', L('Ore flow: off')]], 'on', v => { flowOn = v === 'on'; sayFlow(); if (!flowOn) { flowHide(); stage.draw(); } });
-    sayFlow();
   }
   const heldUi = choice(L('Screen state'), [['ok', L('Screen: mining')], ['warn', L('Screen: warning')]], 'ok', v => setHeld(v === 'warn'));
   endUi = choice(L('End of mining'), [['end', L('Finish the zone')]], null, () => {
