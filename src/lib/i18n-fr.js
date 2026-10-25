@@ -89,7 +89,7 @@ export const FR = {
   'First refinery': 'Première raffinerie',
   'The Quantum Ore Refinery': 'La Quantum Ore Refinery',
   'The machines': 'Les machines',
-  '{n} machines and tools. Blue: Quantum. Grey: Mekanism style.': '{n} machines et outils. Bleu : Quantum. Gris : style Mekanism.',
+  '{n} machines and tools. Blue: Quantum. Copper: Mekanism style.': '{n} machines et outils. Bleu : Quantum. Cuivre : style Mekanism.',
   'Previous machines': 'Machines précédentes',
   'Next machines': 'Machines suivantes',
   'new': 'nouveau',

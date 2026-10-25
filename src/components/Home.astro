@@ -25,18 +25,14 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
 
 <div class="me-home not-content">
   <section class="me-hero">
-    <div>
+    <div class="me-hero-text">
       <div class="me-eyebrow">{t('Mekanism addon')} · <span style="text-transform:none">v{source.modVersion}</span> · <span style="white-space:nowrap">Minecraft {source.builds.map(b => b.minecraft).join(' & ')}</span></div>
       <h1 set:html={t('Engineering,<br />at quantum scale.')} />
       <p>{t('Remote mining, whole-chain ore refining, quantum networks and precise logistics. The complete wiki of Mekanism: Engineering.')}</p>
-      <div class="me-cta">
-        <a class="me-btn primary" href={`${base}/${pre}overview/`}>{t('Start here →')}</a>
-        <a class="me-btn" href={`${base}/${pre}guides/first-ore-refinery/`}>{t('First refinery')}</a>
-        <a class="me-btn" href="https://www.curseforge.com/minecraft/mc-mods/mekanism-engineering">CurseForge ↗</a>
-        {/* on a phone the home page has no menu, so no language menu either: this button is the way to the other language */}
-        {lng === 'fr' ? <a class="me-btn me-lang" href={`${base}/`} hreflang="en" lang="en">English</a>
-          : <a class="me-btn me-lang" href={`${base}/fr/`} hreflang="fr" lang="fr">Français</a>}
-      </div>
+    </div>
+    <div class="me-cta">
+      <a class="me-btn primary" href={`${base}/${pre}overview/`}>{t('Start here →')}</a>
+      <a class="me-btn" href="https://www.curseforge.com/minecraft/mc-mods/mekanism-engineering">CurseForge ↗</a>
     </div>
     <div data-me3d data-kind="refinery" data-mode="assembled" data-tags="hero">
       <div class="me-stage"><img src={`${base}/icons/mekanismengineering/_refinery.png`} alt={t('The Quantum Ore Refinery')} style="width:100%;height:100%;object-fit:contain" /></div>
@@ -44,7 +40,7 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
   </section>
 
   <h2>{t('The machines')}</h2>
-  <p class="me-sub">{t('{n} machines and tools. Blue: Quantum. Grey: Mekanism style.', { n: machines.length })}</p>
+  <p class="me-sub">{t('{n} machines and tools. Blue: Quantum. Copper: Mekanism style.', { n: machines.length })}</p>
   <div class="me-rail-wrap">
   <button type="button" class="me-rail-btn prev" aria-label={t('Previous machines')}>←</button>
   <button type="button" class="me-rail-btn next" aria-label={t('Next machines')}>→</button>
