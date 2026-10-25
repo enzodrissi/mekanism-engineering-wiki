@@ -182,4 +182,22 @@ export const FR_ANIM = {
   'shards and oxygen': 'éclats et oxygène',
   'ore and sulfuric acid': 'minerai et acide sulfurique',
   'water': 'eau',
+
+  // QDM: companion and notification (miner.js, companion.js, qdm-toast.js); the game's words from the mod's fr_fr.json
+  // (toast.mekanismengineering.qdm.*, gui.mekanismengineering.companion.status.*)
+  'Mining finished': 'Minage terminé',
+  'X {x} Y {y} Z {z}': 'X {x} Y {y} Z {z}',
+  'Overworld': 'Overworld',
+  '{n} block mined': '{n} bloc miné',
+  '{n} blocks mined': '{n} blocs minés',
+  'Not ready': 'Non prêt',
+  'Searching · Running': 'Recherche · En marche',
+  'Ready · Running': 'Prêt · En marche',
+  'Finished': 'Terminé',
+  'Digital Miner Companion linked to this miner: {status}. Its screen shows the share mined, by tenths, refreshed every second.':
+    "Digital Miner Companion relié à ce Miner : {status}. Son écran montre la part minée, par dixièmes, mise à jour chaque seconde.",
+  'Running: the zone is mined. The screen is back on its resting picture, and the owner gets this notification at the top right of the game screen for 5 seconds. The figures are examples.':
+    "En marche : la zone est minée. L'écran revient à son image de repos, et le propriétaire reçoit cette notification en haut à droite de l'écran du jeu pendant 5 secondes. Les chiffres sont des exemples.",
+  'End of mining': 'Fin du minage',
+  'Finish the zone': 'Terminer la zone',
 };

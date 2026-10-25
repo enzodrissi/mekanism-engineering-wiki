@@ -4,7 +4,7 @@
 //   Text at scale 2, rows at y 98 and 128, padding 22 / 24, as written there. The text and bar come from common/quantum/ScreenReadout.java
 //   (states SEARCHING, MINING, WARNING; RESTING = the resting picture screen.png, which is what a finished zone shows) and lang/en_us.json
 //   (gui.mekanismengineering.qdm_screen.*). The server refreshes the figures twice a second (QuantumScreen javadoc). The game's own font is
-//   drawn from its real bitmaps (vanilla textures/font/ascii.png, nonlatin_european.png for the middle dot), glyph widths measured like the game does.
+//   drawn from its real bitmaps (./mcfont.js), glyph widths measured like the game does.
 // - client/render/RenderQuantumDigitalMiner.java: zone() draws the Visuals tab box as one translucent white box, x/z from -radius to radius+1 around the
 //   block, y from minY to maxY+1 (world Y), with a brightness per face (COLORS: up/down 0.82, north/south 0.8, east/west 0.78).
 //   Defaults: TileEntityQuantumDigitalMiner.DEFAULT_RADIUS = 10, DEFAULT_HEIGHT_RANGE = 60 (zone Y 0 to 60, QuantumRegion).
@@ -12,10 +12,15 @@
 //   (charge 30 ticks by default, ServerConfig relocation.chargeTicks): a scan plane sweeps down inside a teal field, wireframe, core; at launch the
 //   field collapses and a beacon beam goes up; at the destination the beam comes down and the field "prints" the machine from the bottom up.
 //   Not reproduced: sounds, arcs (Mekanism's bolt renderer) and particles, and the field's teleporter-portal sprite (Mekanism's texture, not shipped here).
+// - The Digital Miner Companion linked to the machine and its screen (./companion.js), and the "mining finished" notification its owner gets
+//   when the zone is done (./qdm-toast.js): the sources are named there.
 import * as THREE from 'three';
 import { getTexture } from '../mcmodel.js';
 import { caption } from './ui.js';
-import { L } from '../i18n.js';
+import { L, lang } from '../i18n.js';
+import { loadFont, glyph, width, write as writeAt } from './mcfont.js';
+import { buildCompanion, companionModel } from './companion.js';
+import { qdmToast } from './qdm-toast.js';
 
 const NS = 'mekanismengineering:block/quantum_digital_miner/';
 // QuantumScreen.java
@@ -24,59 +29,12 @@ const HIGH = '#96fff0', MID = '#64d1c7', AMBER = '#ffb050';
 // demo figures: the zone size is not a game fact, only the way the screen writes it
 const FOUND = 12000;
 const REFRESH = 500;                                // ms, "the server refreshes twice a second"
-const SEARCH_MS = 2000, MINE_MS = 14000, REST_MS = 3500;
-
-// ------------------------------------------------------------------------------------------------------------ the game's font
-const CELL = 8;
-const sheetImg = [];                                // [ascii, nonlatin_european]
-const sheetPix = [];
-const tinted = new Map();                           // 'sheet|colour' -> canvas
-const glyphs = new Map();
-
-function pixels(img) {
-  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
-  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
-  return g.getImageData(0, 0, c.width, c.height);
-}
-/** Where a character is in the game's default font and how far it advances (BitmapProvider: rightmost lit column + 1, plus 1 of spacing). */
-function glyph(ch) {
-  let g = glyphs.get(ch);
-  if (g) return g;
-  const code = ch.charCodeAt(0);
-  let sheet = 0, col = code & 15, row = code >> 4;
-  if (ch === ' ') g = { adv: 4 };                                   // font/include/space.json
-  else {
-    if (ch === '·') { sheet = 1; col = 3; row = 0; }                // nonlatin_european.png, first row
-    else if (ch === '░') { col = 0; row = 11; }
-    else if (ch === '█') { col = 11; row = 13; }
-    const px = sheetPix[sheet];
-    let w = 0;
-    for (let x = CELL - 1; x >= 0 && !w; x--) for (let y = 0; y < CELL; y++) if (px.data[((row * CELL + y) * px.width + col * CELL + x) * 4 + 3] > 0) { w = x + 1; break; }
-    g = { sheet, sx: col * CELL, sy: row * CELL, adv: w + 1 };
-  }
-  glyphs.set(ch, g);
-  return g;
-}
-const width = s => { let w = 0; for (const ch of s) w += glyph(ch).adv; return w; };
-function sheetIn(sheet, colour) {
-  const k = sheet + colour;
-  let c = tinted.get(k);
-  if (!c) {
-    const img = sheetImg[sheet];
-    c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
-    const g = c.getContext('2d'); g.drawImage(img, 0, 0);
-    g.globalCompositeOperation = 'source-in'; g.fillStyle = colour; g.fillRect(0, 0, c.width, c.height);
-    tinted.set(k, c);
-  }
-  return c;
-}
-function write(g, text, x, y, colour) {
-  for (const ch of text) {
-    const gl = glyph(ch);
-    if (gl.sheet !== undefined) g.drawImage(sheetIn(gl.sheet, colour), gl.sx, gl.sy, CELL, CELL, x, y, CELL * SCALE, CELL * SCALE);
-    x += gl.adv * SCALE;
-  }
-}
+// the rest lasts long enough for the notification to come and go (0.6 s in, 5 s shown, 0.6 s out) before the next cycle
+const SEARCH_MS = 2000, MINE_MS = 14000, REST_MS = 7000;
+const write = (g, text, x, y, colour) => writeAt(g, text, x, y, colour, SCALE);
+// demo figures of the notification: where the miner stands (drawn at Y 30, see ZONES) and what the cycle mined (all it found)
+const SPOT = { x: -120, y: 30, z: 300 };
+const STATUS_MS = 1000;                             // DigitalMinerCompanionItem.STATUS_PERIOD: 20 ticks
 
 // ------------------------------------------------------------------------------------------------------------ the readout (ScreenReadout.java)
 const group = n => String(n).replace(/\B(?=(\d{3})+$)/g, ' ');       // "a space every three digits"
@@ -110,13 +68,13 @@ const clamp01 = x => (x < 0 ? 0 : x > 1 ? 1 : x);
 const ease = x => x * x * (3 - 2 * x);
 
 export default async function setup(ctx) {
-  const { stage, base, still, active, obj, onObj, host, choice } = ctx;
-  // the font sheets are plain pictures (nonlatin_european is tall, which getTexture would take for an animation strip)
-  const load = file => new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ko(new Error('missing font ' + file)); i.src = `${base}/minecraft/textures/font/${file}.png`; });
-  const [runTex, ascii, nonlatin, beamTex] = await Promise.all([
-    getTexture(base, NS + 'screen_run'), load('ascii'), load('nonlatin_european'), getTexture(base, 'minecraft:entity/beacon_beam'),
+  const { stage, base, still, active, obj, onObj, host, choice, tween, easeInOut } = ctx;
+  const picture = src => new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ko(new Error('missing ' + src)); i.src = src; });
+  const MODELS = ['reset', 'done', ...Array.from({ length: 10 }, (_, i) => 'running_' + i)];
+  const [runTex, beamTex, comp, qdmIcon] = await Promise.all([
+    getTexture(base, NS + 'screen_run'), getTexture(base, 'minecraft:entity/beacon_beam'), buildCompanion(base, MODELS),
+    picture(ctx.icon('quantum_digital_miner')), loadFont(base),
   ]);
-  sheetImg.push(ascii, nonlatin); sheetPix.push(pixels(ascii), pixels(nonlatin));
 
   // ---------------- the wide screen: one canvas on the screen's face, in front of the model's resting picture
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
@@ -133,13 +91,14 @@ export default async function setup(ctx) {
   let held = false;                                          // the WARNING state
   let clock = 0, sinceRefresh = REFRESH, painted = '';
   const resting = () => clock >= SEARCH_MS + MINE_MS;
+  /** Blocks left at this point of the cycle (one at least until the zone is done). */
+  const toMineNow = () => Math.max(1, Math.round(FOUND * (1 - clamp01((clock - SEARCH_MS) / MINE_MS))));
   /** Draws the screen for the cycle's time; returns true when the picture changed. */
   function paint() {
     let state = 'mine', toMine;
     if (clock < SEARCH_MS) state = 'search';
     else if (resting()) { screen.visible = false; const k = 'rest'; const ch = painted !== k; painted = k; return ch; }
-    const f = clamp01((clock - SEARCH_MS) / MINE_MS);
-    toMine = Math.max(1, Math.round(FOUND * (1 - f)));
+    toMine = toMineNow();
     if (held) state = 'warn';
     const r = rows(state, toMine);
     const key = state + r.line + r.count;
@@ -163,14 +122,61 @@ export default async function setup(ctx) {
     held = v;
     // a warning only exists while mining: jump there if the cycle is searching or resting
     if (v && (clock < SEARCH_MS || resting())) clock = SEARCH_MS + MINE_MS * 0.45;
-    if (still) clock = SEARCH_MS + MINE_MS * 0.55;
-    painted = ''; paint(); say();
+    if (still) { clock = SEARCH_MS + MINE_MS * 0.55; unfinish(); }
+    painted = ''; paint(); companionNow(); say();
   }
   if (still) clock = SEARCH_MS + MINE_MS * 0.55;           // reduced motion: a fixed, readable "MINING · 55 %"
 
-  // the captions: what the view shows, then (when on) what the zone is
+  // the captions: what the view shows, what the Companion shows, then (when on) what the zone is
   const note = caption(host, '');
+  const compNote = caption(host, '');
   const zoneNote = caption(host, '');
+
+  // ---------------- the Digital Miner Companion linked to the machine (companion.js), standing on the ground in front of its screen
+  // Its state as the server computes it for the item (CompanionActions.progress, MinerProgress.of): not ready while the machine has not
+  // started, working while it searches (0 %) and while it mines (held up too), done once the zone is mined; mined share in whole percent.
+  let compSaid = '';
+  function companionNow(ms = 0) {
+    // the game's own words for the states (gui.mekanismengineering.companion.status.*)
+    let model, status;
+    if (!active.on) { model = companionModel('not_ready'); status = L('Not ready'); }
+    else if (clock < SEARCH_MS) { model = companionModel('working', 0); status = L('Searching · Running'); }
+    else if (resting()) { model = companionModel('done'); status = L('Finished'); }
+    else {
+      const percent = Math.min(99, Math.floor((FOUND - toMineNow()) * 100 / FOUND));
+      model = companionModel('working', Math.floor(percent / 10)); status = L('Ready · Running');
+    }
+    if (status !== compSaid) {
+      compSaid = status;
+      compNote.set(L('Digital Miner Companion linked to this miner: {status}. Its screen shows the share mined, by tenths, refreshed every second.', { status }));
+    }
+    return comp.set(model, ms);
+  }
+  comp.obj.scale.setScalar(1.4);
+  comp.obj.position.set(1.8, 0, -2.3);
+  comp.obj.rotation.y = Math.atan2(stage.dir.x, stage.dir.z);   // its screen faces the starting angle of the view
+  stage.root.add(comp.obj);
+  {
+    // the view widens to take it in: from where the camera is to where frame() puts it
+    const c = stage.cam, snap = () => ({ pos: c.position.clone(), target: stage.controls.target.clone(), zoom: c.zoom, box: [c.left, c.right, c.top, c.bottom] });
+    const a = snap(); stage.frame(true, false); const b = snap();
+    const at = t => {
+      const k = easeInOut(t);
+      c.position.lerpVectors(a.pos, b.pos, k); stage.controls.target.lerpVectors(a.target, b.target, k);
+      c.zoom = a.zoom + (b.zoom - a.zoom) * k; [c.left, c.right, c.top, c.bottom] = a.box.map((v, i) => v + (b.box[i] - v) * k);
+      c.updateProjectionMatrix(); c.lookAt(stage.controls.target); c.updateMatrixWorld(); stage.draw();
+    };
+    if (still) at(1); else tween(500, at);
+  }
+
+  // ---------------- the notification of the end of the zone (qdm-toast.js), with the game's words in the page's language
+  const grouped = FOUND.toLocaleString(lang() === 'fr' ? 'fr-FR' : 'en-US').replace(/[\u202f\u00a0]/g, ' ');   // CompanionNumbers: plain spaces
+  const toast = qdmToast(host, { icon: qdmIcon, lines: [
+    '> ' + L('Mining finished'), L('X {x} Y {y} Z {z}', SPOT), L('Overworld'),
+    FOUND === 1 ? L('{n} block mined', { n: grouped }) : L('{n} blocks mined', { n: grouped }),
+  ] });
+  let finished = false, endUi = null;                       // reduced motion: the fixed picture of a finished zone is on
+  function unfinish() { if (finished) { finished = false; toast.fixed(false); endUi?.set(null); } }
 
   // ---------------- the mining zone box
   const boxGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -327,6 +333,7 @@ export default async function setup(ctx) {
   function flowHide() { for (const b of bits) b.sp.visible = false; }
 
   // ---------------- one loop for all of it
+  let sinceStatus = 0;
   if (!still) {
     stage.live((now, dt) => {
       let changed = false;
@@ -336,11 +343,17 @@ export default async function setup(ctx) {
       }
       if (flowOn && active.on && !resting() && clock >= SEARCH_MS) { flow(now); changed = true; } else if (bits[0].sp.visible) { flowHide(); changed = true; }
       if (active.on) {
+        const was = resting();
         if (!(held && !resting() && clock >= SEARCH_MS)) clock += dt;       // a held-up miner does not progress
         if (clock >= SEARCH_MS + MINE_MS + REST_MS) clock = 0;
+        if (resting() !== was) { if (!was) toast.show(); say(); }          // the last block is mined: the owner is told
         sinceRefresh += dt;
         if (sinceRefresh >= REFRESH) { sinceRefresh = 0; if (paint()) changed = true; }
       }
+      sinceStatus += dt;
+      if (sinceStatus >= STATUS_MS) { sinceStatus = 0; if (companionNow(now)) changed = true; }
+      if (comp.step(now)) changed = true;                                  // the strips of its screen and LED
+      toast.step(dt);                                                      // a page element: moving it needs no new picture
       return changed;
     }, { fps: 30 });
   }
@@ -349,6 +362,10 @@ export default async function setup(ctx) {
   function say() {
     if (reloc >= 0) { note.set(still ? L('Relocation: the machine charges inside a teal field with a bright core. It then flies up as a beam and is rebuilt at its new place.') : L('Relocating: it scans, charges, flies away as a beam, then is rebuilt from the bottom up.')); return; }
     if (!active.on) { note.set(L('Idle: the wide screen is dark.')); return; }
+    if (resting() && !held) {
+      note.set(L('Running: the zone is mined. The screen is back on its resting picture, and the owner gets this notification at the top right of the game screen for 5 seconds. The figures are examples.'));
+      return;
+    }
     note.set(held ? L('Running: mining is held up, so the screen turns amber. The figures are examples.')
       : L('Running: the screen shows the state, the share mined and the blocks left. When the zone is done it goes back to its resting picture. The figures are examples.'));
   }
@@ -358,7 +375,20 @@ export default async function setup(ctx) {
     choice(L('Mining illustration'), [['on', L('Ore flow: on')], ['off', L('Ore flow: off')]], 'on', v => { flowOn = v === 'on'; sayFlow(); if (!flowOn) { flowHide(); stage.draw(); } });
     sayFlow();
   }
-  choice(L('Screen state'), [['ok', L('Screen: mining')], ['warn', L('Screen: warning')]], 'ok', v => setHeld(v === 'warn'));
+  const heldUi = choice(L('Screen state'), [['ok', L('Screen: mining')], ['warn', L('Screen: warning')]], 'ok', v => setHeld(v === 'warn'));
+  endUi = choice(L('End of mining'), [['end', L('Finish the zone')]], null, () => {
+    if (held) { held = false; heldUi.set('ok'); }
+    if (still) {                                                            // one fixed picture: the zone done, the Companion done, the notification on
+      if (finished) { unfinish(); clock = SEARCH_MS + MINE_MS * 0.55; }
+      else { if (!active.on) active.set(true); finished = true; clock = SEARCH_MS + MINE_MS; toast.fixed(true); endUi.set('end'); }
+    } else {
+      if (!active.on) active.set(true);
+      clock = SEARCH_MS + MINE_MS - 300;                                    // the last blocks: the cycle then ends by itself
+      endUi.set(null);
+    }
+    painted = ''; paint(); companionNow(); say(); stage.draw();
+  });
+  endUi.set(null);
   choice(L('Show mining zone'), [['off', L('Zone off')], ['def', L('Default zone')], ['small', L('Small zone')]], 'off', showZone);
   relocUi = choice(L('Relocation'), [['go', L('Relocate')]], null, () => {
     if (still) {                                                            // one fixed picture: the machine charged, field and core shown
@@ -371,11 +401,12 @@ export default async function setup(ctx) {
   active.onChange(on => {
     if (gone) { obj.visible = false; onObj.visible = false; }
     if (on) { restart(); if (still) clock = SEARCH_MS + MINE_MS * 0.55; paint(); }
-    say(); stage.draw();
+    if (still) unfinish();
+    companionNow(); say(); stage.draw();
   });
   restart(); if (still) clock = SEARCH_MS + MINE_MS * 0.55;
   paint();
   active.set(true);
-  say();
+  companionNow(); say();
 }
 setup.active = true;
