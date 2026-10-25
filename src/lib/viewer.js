@@ -2,7 +2,7 @@
 // Transparent background, orthographic camera like an isometric drawing, drag to turn, pinch or wheel to zoom, tap a block.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildBlock, loadModel, JOINED, preloadFiles } from './mcmodel.js';
+import { buildBlock, loadModel, JOINED, preloadFiles, textureAnimator } from './mcmodel.js';
 import { buildRefinery, arrange } from './refinery.js';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -33,7 +33,11 @@ export class Stage {
     this.controls.addEventListener('change', () => this.draw());
     this.controls.addEventListener('start', () => host.classList.add('touched'));
     this.listeners = [];
+    this.tickers = []; this.visible = true;
     new ResizeObserver(() => this.resize()).observe(host);
+    new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; this._kick(); }).observe(host);
+    document.addEventListener('visibilitychange', () => this._kick());
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', () => this._kick());
     host.dispatchEvent(new CustomEvent('me-stage', { bubbles: true, detail: this })); // the drawing behind it (src/scripts/stage-bg.ts)
   }
   onDraw(fn) { this.listeners.push(fn); }
@@ -67,11 +71,34 @@ export class Stage {
   }
   draw() {
     if (this.pending) return;
-    this.pending = requestAnimationFrame(() => {
-      this.pending = 0;
-      this.renderer.render(this.scene, this.cam);
-      for (const fn of this.listeners) fn();
-    });
+    this.pending = requestAnimationFrame(() => this.drawNow());
+  }
+  drawNow() {
+    if (this.pending) { cancelAnimationFrame(this.pending); this.pending = 0; }
+    this.renderer.render(this.scene, this.cam);
+    for (const fn of this.listeners) fn();
+  }
+  /**
+   * Runs `fn(now, dt)` (ms) for as long as the view is on screen, and draws when it returns true. Nothing runs when the page
+   * is hidden, the view is scrolled away, or the reader asked for less motion: the scene then stays on its last still picture.
+   * Returns a function that stops it.
+   */
+  live(fn, { fps = 30 } = {}) {
+    const t = { fn, every: 1000 / fps, last: 0 };
+    this.tickers.push(t); this._kick();
+    return () => { this.tickers = this.tickers.filter(x => x !== t); };
+  }
+  _kick() {
+    if (this.looping || !this.tickers.length || still() || document.hidden || !this.visible) return;
+    this.looping = true;
+    const tick = now => {
+      if (!this.tickers.length || still() || document.hidden || !this.visible) { this.looping = false; return; }
+      let changed = false;
+      for (const t of this.tickers.slice()) if (now - t.last >= t.every - 3) { const dt = now - t.last; t.last = now; if (t.fn(now, Math.min(dt, 100))) changed = true; }
+      if (changed) this.drawNow();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
   /** Screen position (CSS px in the host) of a point. */
   toScreen(v) {
@@ -160,13 +187,19 @@ export async function itemObject(id) {
 
 export async function mountBlock(host) {
   const stage = new Stage(host, { yaw: 35, pitch: 28, pad: 0.08 });
-  const obj = await itemObject(host.dataset.item);
+  const id = host.dataset.item;
+  const obj = await itemObject(id);
   stage.root.add(obj);
   stage.resize(); stage.frame();
   host.querySelector(':scope > img')?.remove();
   const end = camState(stage);
   host.classList.add('me-live');
   await tween(1100, t => { const k = easeOut(t); turn(stage, end, -70 * (1 - k)); stage.cam.zoom = 0.82 + 0.18 * k; stage.cam.updateProjectionMatrix(); stage.draw(); });
+  // the block's own animation (src/lib/anim): what the game shows when the machine works
+  try {
+    const { animate } = await import('./anim/index.js');
+    await animate(id, { stage, host, obj, base: MC, still: still(), tween, easeOut, easeInOut, easeBack, icon, BASE });
+  } catch (e) { console.warn('animation', id, e); }
   return stage;
 }
 
