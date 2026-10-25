@@ -1,13 +1,16 @@
 ---
 import Default from '@astrojs/starlight/components/Footer.astro';
 import source from '../data/source.json';
+import { tr } from '../lib/i18n.js';
+const lng = Astro.locals.starlightRoute?.lang === 'fr' ? 'fr' : 'en';
+const t = (en: string, vars?: Record<string, unknown>) => tr(lng, en, vars);
 const date = new Date(source.imported).toISOString().slice(0, 10);
 ---
 
 <Default><slot /></Default>
 <p class="me-foot-note">
-  Written from the mod's own wiki and data files (<a href={`https://gitlab.com/enzodr/mekanism-engineering/-/commit/${source.commit}`}>{source.commit.slice(0, 8)}</a>, {date}).
-  Mod v{source.modVersion} for {source.builds.map(b => `Minecraft ${b.minecraft} (${b.loader}, Mekanism ${b.mekanism})`).join(' and ')}.
-  Block and item pictures are drawn from the game's models and textures; Mekanism's are under the MIT licence.
-  Not an official Minecraft product, not approved by or associated with Mojang or Microsoft.
+  {t('Written from the mod\'s own wiki and data files')} (<a href={`https://gitlab.com/enzodr/mekanism-engineering/-/commit/${source.commit}`}>{source.commit.slice(0, 8)}</a>, {date}).
+  {t('Mod v{v} for {builds}.', { v: source.modVersion, builds: source.builds.map(b => t('Minecraft {mc} ({loader}, Mekanism {mek})', { mc: b.minecraft, loader: b.loader, mek: b.mekanism })).join(t(' and ')) })}
+  {t('Block and item pictures are drawn from the game\'s models and textures; Mekanism\'s are under the MIT licence.')}
+  {t('Not an official Minecraft product, not approved by or associated with Mojang or Microsoft.')}
 </p>

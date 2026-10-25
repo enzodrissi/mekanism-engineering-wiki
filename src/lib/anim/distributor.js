@@ -12,6 +12,7 @@
 import * as THREE from 'three';
 import { getTexture } from '../mcmodel.js';
 import { caption } from './ui.js';
+import { L } from '../i18n.js';
 
 const NS = 'mekanismengineering';
 const KINDS = ['iron_ingot', 'gold_ingot', 'coal', 'redstone', 'copper_ingot'];
@@ -28,12 +29,12 @@ const OUTPUTS = [
 ];
 
 const SCENES = {
-  balanced: { label: 'Balanced', w: [1, 1], open: [true, true],
-    note: 'Balanced: each kind of item is shared evenly, so iron goes to the front, then the side, then the front again.' },
-  weighted: { label: 'Weighted 3 : 1', w: [3, 1], open: [true, true],
-    note: 'Weighted 3 : 1: the front output takes 3 items out of every 4 of each kind, the side output takes 1.' },
-  full: { label: 'Output full', w: [1, 1], open: [true, false],
-    note: 'The side output is full, so it is skipped and every item leaves by the front. It gets its share again once it has room.' },
+  balanced: { label: L('Balanced'), w: [1, 1], open: [true, true],
+    note: L('Balanced: each kind of item is shared evenly, so iron goes to the front, then the side, then the front again.') },
+  weighted: { label: L('Weighted 3 : 1'), w: [3, 1], open: [true, true],
+    note: L('Weighted 3 : 1: the front output takes 3 items out of every 4 of each kind, the side output takes 1.') },
+  full: { label: L('Output full'), w: [1, 1], open: [true, false],
+    note: L('The side output is full, so it is skipped and every item leaves by the front. It gets its share again once it has room.') },
 };
 
 // timings in ms and distances in blocks (readability only)
@@ -137,7 +138,7 @@ export default async function setup({ stage, host, obj, base, still, choice, bui
     reset();
     if (still) { for (let t = 0; t < 2000; t += 50) advance(50); stage.draw(); }
   };
-  choice('Distribution', Object.entries(SCENES).map(([id, s]) => [id, s.label]), 'balanced', pick);
+  choice(L('Distribution'), Object.entries(SCENES).map(([id, s]) => [id, s.label]), 'balanced', pick);
   pick('balanced');
 
   if (!still) stage.live((now, dt) => { advance(dt); return true; }, { fps: 30 });

@@ -11,6 +11,7 @@
 // box on a page, and thin teal edges are added so that a white box can be seen on the light theme.
 import * as THREE from 'three';
 import { bar, caption } from './ui.js';
+import { L, num } from '../i18n.js';
 
 const MIN = 1, MAX = 64, DEFAULT = 8;
 const FACE_ALPHA = { x: 0.78, y: 0.82, z: 0.8 };  // COLORS in RenderQuantumDigitalMiner
@@ -68,14 +69,14 @@ export default async function setup(ctx) {
   // ---- controls: a real toggle button and a slider, under the view ----
   const tog = document.createElement('div');
   tog.className = 'me-seg me-anim-seg';
-  tog.innerHTML = '<button type="button" aria-pressed="false">Show work cube</button>';
+  tog.innerHTML = `<button type="button" aria-pressed="false">${L('Show work cube')}</button>`;
   const btn = tog.firstChild;
   bar(host).append(tog);
   btn.addEventListener('click', () => show(!shown));
 
   const rng = document.createElement('label');
   rng.className = 'me-anim-range';
-  rng.innerHTML = `<span class="me-anim-range-name">Radius</span><input type="range" min="${MIN}" max="${MAX}" step="1" value="${DEFAULT}" aria-label="Work cube radius in blocks (the game's server setting allows 1 to ${MAX})"><output aria-hidden="true"></output>`;
+  rng.innerHTML = `<span class="me-anim-range-name">${L('Radius')}</span><input type="range" min="${MIN}" max="${MAX}" step="1" value="${DEFAULT}" aria-label="${L("Work cube radius in blocks (the game's server setting allows 1 to {max})", { max: MAX })}"><output aria-hidden="true"></output>`;
   const input = rng.querySelector('input'), out = rng.querySelector('output');
   bar(host).append(rng);
   const note = caption(host, '');
@@ -83,11 +84,12 @@ export default async function setup(ctx) {
   function sync() {
     btn.setAttribute('aria-pressed', String(shown));
     const s = side(radius);
-    out.textContent = `${radius}${radius === DEFAULT ? ' (default)' : ''}`;
-    input.setAttribute('aria-valuetext', `${radius} blocks, a cube of ${s} by ${s} by ${s}`);
+    const v = { r: num(radius), s: num(s), max: MAX, def: DEFAULT };
+    out.textContent = radius === DEFAULT ? L('{r} (default)', v) : v.r;
+    input.setAttribute('aria-valuetext', L('{r} blocks, a cube of {s} by {s} by {s}', v));
     note.set(shown
-      ? `Work cube: ${s} × ${s} × ${s} blocks, centred on the Controller. In the game it is shown by the Visuals tab, and the radius is a server setting (1 to ${MAX}, ${DEFAULT} by default).`
-      : `The Controller fits upgrades into every machine inside a cube around it. Press Show work cube to see it.${active.on ? ' Running: the front panel is lit.' : ''}`);
+      ? L('Work cube: {s} × {s} × {s} blocks, centred on the Controller. In the game it is shown by the Visuals tab, and the radius is a server setting (1 to {max}, {def} by default).', v)
+      : L('The Controller fits upgrades into every machine inside a cube around it. Press Show work cube to see it.') + (active.on ? ' ' + L('Running: the front panel is lit.') : ''));
   }
   input.addEventListener('input', () => {
     radius = +input.value;

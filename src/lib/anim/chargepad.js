@@ -10,6 +10,7 @@
 import * as THREE from 'three';
 import { getTexture } from '../mcmodel.js';
 import { caption } from './ui.js';
+import { L } from '../i18n.js';
 
 const COUNT = 28;            // particles at most
 const RATE = 6;              // sparks a second; the game's own rate is not in the mod's code (it is Mekanism's), this one is a look
@@ -114,8 +115,8 @@ export default async function setup(ctx) {
     ctx.obj.visible = false;               // the page's own model is the lit one
     idle.visible = !on;
     note.set(on
-      ? 'Running: a player with items that can charge is standing on the pad. It glows and gives off teal sparks.'
-      : 'Idle: nobody is charging. The core and the strips on the pad are dark.');
+      ? L('Running: a player with items that can charge is standing on the pad. It glows and gives off teal sparks.')
+      : L('Idle: nobody is charging. The core and the strips on the pad are dark.'));
     if (ctx.still) {                       // reduced motion: a still picture of the sparks, or none
       for (let i = 0; i < COUNT; i++) { alive[i] = 0; size[i] = 0; }
       if (on) for (let i = 0; i < 7; i++) spawn(i, 0.05 + Math.random() * 0.6);

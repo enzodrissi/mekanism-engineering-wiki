@@ -5,6 +5,7 @@
 //   `ctx.active` is the switch of the Idle / Running pair: { on, set(bool), onChange(fn) }, `ctx.state()` reads it.
 import { buildBlock, textureAnimator } from '../mcmodel.js';
 import { choice } from './ui.js';
+import { L } from '../i18n.js';
 
 const MODULES = {
   // block id (the item's name) -> () => import('./<module>.js'), one line per block
@@ -36,7 +37,7 @@ export async function animate(id, ctx) {
   if (hasActive) {
     onObj = await buildBlock(base, `${NS}:block/${id}_active`, { id: `${NS}:block/${id}`, tints: mod.tints ? mod.tints() : {} });
     onObj.visible = false; stage.root.add(onObj);
-    const ui = choice(ctx.host, 'Machine state', [['off', 'Idle'], ['on', 'Running']], ctx.still ? 'on' : 'off', v => active.set(v === 'on'));
+    const ui = choice(ctx.host, L('Machine state'), [['off', L('Idle')], ['on', L('Running')]], ctx.still ? 'on' : 'off', v => active.set(v === 'on'));
     active.set = on => {
       active.on = on; ctx.obj.visible = !on; onObj.visible = on; ui.set(on ? 'on' : 'off');
       for (const fn of listeners) fn(on);

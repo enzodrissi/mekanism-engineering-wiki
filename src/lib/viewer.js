@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { buildBlock, loadModel, JOINED, preloadFiles, textureAnimator } from './mcmodel.js';
 import { buildRefinery, arrange } from './refinery.js';
+import { L, pageUrl, dataUrl } from './i18n.js';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 export const MC = `${BASE}/mc`;
@@ -16,7 +17,7 @@ export class Stage {
   constructor(host, { yaw = 35, pitch = 30, pad = 0.06, zoom = true } = {}) {
     this.host = host; this.pad = pad;
     this.canvas = document.createElement('canvas');
-    this.canvas.setAttribute('aria-label', 'Drag to turn the 3D view');
+    this.canvas.setAttribute('aria-label', L('Drag to turn the 3D view'));
     host.prepend(this.canvas);
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -221,13 +222,13 @@ const MARKS = [
  */
 export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded', markers = true, tags = null } = {}) {
   host.classList.add('me-ref');
-  host.innerHTML = `<div class="me-stage"><span class="me-pill me-hint">⟲ Drag to turn · tap a block</span><div class="me-loading">Loading the 3D view…</div></div>`
+  host.innerHTML = `<div class="me-stage"><span class="me-pill me-hint">${L('⟲ Drag to turn · tap a block')}</span><div class="me-loading">${L('Loading the 3D view…')}</div></div>`
     + '<div class="me-info" hidden></div>'
     + (markers ? '<ul class="me-legend"></ul>' : '')
-    + `<div class="me-ref-bar"><div class="me-seg" role="group" aria-label="View">
-        <button type="button" data-mode="assembled">Assembled</button><button type="button" data-mode="exploded">Exploded</button>
-        <button type="button" data-mode="layers">Layer by layer</button></div>
-       <button type="button" class="me-pill me-reset" style="cursor:pointer">⟳ Reset view</button></div>
+    + `<div class="me-ref-bar"><div class="me-seg" role="group" aria-label="${L('View')}">
+        <button type="button" data-mode="assembled">${L('Assembled')}</button><button type="button" data-mode="exploded">${L('Exploded')}</button>
+        <button type="button" data-mode="layers">${L('Layer by layer')}</button></div>
+       <button type="button" class="me-pill me-reset" style="cursor:pointer">${L('⟳ Reset view')}</button></div>
        <div class="me-layers" hidden></div>`;
   if (tags) host.querySelector('.me-ref-bar').style.display = 'none'; // the home page shows the structure only
   const stageEl = host.querySelector('.me-stage');
@@ -243,7 +244,7 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   const marks = markers ? MARKS.map(([f, label], i) => {
     const b = blocks.find(x => f(x.userData)); const el = document.createElement('span');
     el.className = 'me-mk'; el.textContent = i + 1; stageEl.appendChild(el);
-    return { b, el, label };
+    return { b, el, label: L(label) };
   }) : [];
   if (markers) host.querySelector('.me-legend').innerHTML = marks.map((m, i) => `<li><i>${i + 1}</i>${m.label}</li>`).join('');
   if (markers) host.append(billOfMaterials(blocks, names));
@@ -268,7 +269,7 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   const meshes = [];
   root.traverse(m => { if (m.material) meshes.push(m); });
   const layersEl = host.querySelector('.me-layers');
-  layersEl.innerHTML = [1, 2, 3, 4].map(n => `<button type="button" data-layer="${n}" aria-pressed="false"><img src="${icon('_layer' + n)}" alt="" loading="lazy">Layer ${n}</button>`).join('');
+  layersEl.innerHTML = [1, 2, 3, 4].map(n => `<button type="button" data-layer="${n}" aria-pressed="false"><img src="${icon('_layer' + n)}" alt="" loading="lazy">${L('Layer {n}', { n })}</button>`).join('');
   let gliding = 0;
   function apply(reframe, glide = false) {
     const gap = state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6;
@@ -323,12 +324,12 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     if (!b) { stage.draw(); return; }
     b.traverse(m => m.material && m.material.color.setRGB(0.75, 1.15, 1.1));
     const id = b.userData.id, n = names[id] || {};
-    const many = counts[id] > 1 ? `${counts[id]} in the structure` : 'One in the structure';
-    const where = b.userData.dy === 3 ? 'top layer' : `layer ${b.userData.dy + 1}`;
-    info.innerHTML = `<img src="${icon(id)}" alt=""><div><em>Selected · ${many} · ${where}</em><b>${n.name || b.userData.name}</b>`
+    const many = counts[id] > 1 ? L('{n} in the structure', { n: counts[id] }) : L('One in the structure');
+    const where = b.userData.dy === 3 ? L('top layer') : L('layer {n}', { n: b.userData.dy + 1 });
+    info.innerHTML = `<img src="${icon(id)}" alt=""><div><em>${L('Selected · {many} · {where}', { many, where })}</em><b>${n.name || b.userData.name}</b>`
       + (n.text ? `<p>${n.text.replace(/</g, '&lt;')}</p>` : '')
-      + '<span class="me-info-links">' + (markers ? '<button type="button" class="me-info-craft">See its craft</button>' : '')
-      + (n.page ? `<a href="${BASE}/${n.page}/">Open its page →</a>` : '') + '</span></div>';
+      + '<span class="me-info-links">' + (markers ? `<button type="button" class="me-info-craft">${L('See its craft')}</button>` : '')
+      + (n.page ? `<a href="${pageUrl(n.page)}">${L('Open its page →')}</a>` : '') + '</span></div>';
     const craftBtn = info.querySelector('.me-info-craft');
     if (craftBtn) craftBtn.onclick = () => openCraft(id, { ids: bomOrder(Object.keys(counts)), count: counts, names });
     info.hidden = false; stage.draw();
@@ -373,20 +374,21 @@ function billOfMaterials(blocks, names) {
   const optional = id => /module_quantum|output_port/.test(id);
   // the ports go where the player wants on the back of the two lower floors: a port left out is a casing
   const RULE = { input_port: 'at least 5', energy_port: 'at least 1', output_port: 'optional', module_quantum: 'optional' };
-  const rule = id => RULE[Object.keys(RULE).find(k => id.endsWith(k))];
+  const rule = id => { const r = RULE[Object.keys(RULE).find(k => id.endsWith(k))]; return r && L(r); };
   const required = Object.entries(count).reduce((n, [id, c]) => n + (optional(id) ? 0 : c), 0);
   const ids = bomOrder(Object.keys(count));
   const el = document.createElement('section');
   el.className = 'me-bom';
-  const short = id => ((names[id] || {}).name || id).replace(/^(Quantum )?Ore Refinery /, '');
-  el.innerHTML = `<h3>Bill of materials</h3><p><b>${required}</b> blocks to place, plus the optional output port and Quantum Module. Tap a block to see its craft.</p><ul>`
-    + ids.map(id => `<li${optional(id) ? ' class="opt"' : ''}><button type="button" data-id="${id}" aria-label="${(names[id] || {}).name || id}: see its craft"><img src="${icon(id)}" alt="" loading="lazy">`
+  // "Ore Refinery Input Port" and "Port d'entrée de raffinerie de minerai" both show as the port alone
+  const short = id => ((names[id] || {}).name || id).replace(/^(Quantum )?Ore Refinery /, '').replace(/ de (la )?(raffinerie de minerai|Quantum Ore Refinery)$/, '');
+  el.innerHTML = `<h3>${L('Bill of materials')}</h3><p>${L('<b>{n}</b> blocks to place, plus the optional output port and Quantum Module. Tap a block to see its craft.', { n: required })}</p><ul>`
+    + ids.map(id => `<li${optional(id) ? ' class="opt"' : ''}><button type="button" data-id="${id}" aria-label="${L('{name}: see its craft', { name: (names[id] || {}).name || id })}"><img src="${icon(id)}" alt="" loading="lazy">`
       + `<b>×${count[id]}</b><span>${short(id)}${rule(id) ? `<em>${rule(id)}</em>` : ''}</span>`
       + '<i class="me-bom-go" aria-hidden="true"></i></button></li>').join('')
     + '</ul><ul class="me-bom-notes">'
-    + '<li>Ports go anywhere on the back of the two lower floors: at least 5 input ports and 1 energy port. A port you leave out is a casing.</li>'
-    + '<li>With the Quantum Module on, the output port is a backup buffer. Without one, ore processing stops when the network can\'t take the result.</li>'
-    + '<li>Each accelerator place can hold a casing instead.</li></ul>';
+    + `<li>${L('Ports go anywhere on the back of the two lower floors: at least 5 input ports and 1 energy port. A port you leave out is a casing.')}</li>`
+    + `<li>${L('With the Quantum Module on, the output port is a backup buffer. Without one, ore processing stops when the network can\'t take the result.')}</li>`
+    + `<li>${L('Each accelerator place can hold a casing instead.')}</li></ul>`;
   el.addEventListener('click', e => {
     const id = e.target.closest('button[data-id]')?.dataset.id;
     if (id) openCraft(id, { ids, count, names });
@@ -401,7 +403,7 @@ const bomOrder = ids => {
 
 // ---------- the crafting card: one dialog for the page, opened from the bill of materials or the 3D view ----------
 let recipesP = null;
-const loadRecipes = () => (recipesP ??= fetch(`${BASE}/data/recipes.json`).then(r => r.json()).catch(() => ({})));
+const loadRecipes = () => (recipesP ??= fetch(dataUrl('recipes.json')).then(r => r.json()).catch(() => ({})));
 const itemIcon = id => { const [ns, p] = id.split(':'); return `${BASE}/icons/${ns}/${p}.png`; };
 const escH = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 let craftDlg = null;
@@ -456,7 +458,7 @@ async function openCraft(id, ctx, dir = 0) {
   const { ids, count, names } = ctx;
   const i = ids.indexOf(id), name = (names[id] || {}).name || (r && r.name) || id, page = (names[id] || {}).page;
   const placed = count[id] || 1, need = totalNeed(id, ctx, recipes), used = need - placed;
-  let body = '<p class="me-craft-none">No crafting table recipe for this block.</p>';
+  let body = `<p class="me-craft-none">${L('No crafting table recipe for this block.')}</p>`;
   if (r) {
     const rows = r.pattern.length === 1 && r.pattern[0].length === 1 ? ['   ', ` ${r.pattern[0]} `, '   '] : r.pattern.map(p => p.padEnd(3));
     while (rows.length < 3) rows.push('   ');
@@ -464,7 +466,7 @@ async function openCraft(id, ctx, dir = 0) {
     const local = ing => ing && ing.item && ing.item.startsWith('mekanismengineering:') && ids.includes(ing.item.split(':')[1]) ? ing.item.split(':')[1] : null;
     const pic = ing => `<img src="${itemIcon(ing.show || ing.item || '')}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:${escH(JSON.stringify(ing.name.replace(/^any /, '').slice(0, 2)))}}))">`;
     const slot = (ing, n) => !ing ? `<span class="me-slot" style="--i:${n}"></span>`
-      : local(ing) ? `<button type="button" class="me-slot me-slot-go" style="--i:${n}" data-name="${escH(ing.name)}" data-go="${local(ing)}" aria-label="${escH(ing.name)}: see its craft">${pic(ing)}</button>`
+      : local(ing) ? `<button type="button" class="me-slot me-slot-go" style="--i:${n}" data-name="${escH(ing.name)}" data-go="${local(ing)}" aria-label="${escH(L('{name}: see its craft', { name: ing.name }))}">${pic(ing)}</button>`
       : `<span class="me-slot" tabindex="0" style="--i:${n}" data-name="${escH(ing.name)}">${pic(ing)}</span>`;
     const crafts = Math.ceil(need / r.count);
     const per = {};
@@ -472,18 +474,18 @@ async function openCraft(id, ctx, dir = 0) {
     const made = crafts * r.count;
     body = `<div class="me-craft-recipe"><div class="me-grid">${cells.map(slot).join('')}</div><span class="me-arrow">→</span>`
       + `<span class="me-slot me-out" data-name="${escH(r.name)}">${pic({ show: r.result, name: r.name })}${r.count > 1 ? `<i>${r.count}</i>` : ''}</span></div>`
-      + `<p class="me-craft-need">${used > 0 ? `The structure places ${placed}, and the crafts of its other blocks use ${used} more: <b>${need}</b> in all.` : `The structure needs <b>${need}</b>.`} ${r.count > 1 ? `One craft makes ${r.count}, so craft it <b>${crafts}</b> times${made > need ? ` (${made - need} left over)` : ''}.` : need > 1 ? `Craft it <b>${crafts}</b> times.` : 'Craft it once.'}</p>`
-      + `<h4>${crafts > 1 ? `For ${crafts} crafts` : 'For one craft'}</h4><ul class="me-craft-list">`
+      + `<p class="me-craft-need">${used > 0 ? L('The structure places {placed}, and the crafts of its other blocks use {used} more: <b>{need}</b> in all.', { placed, used, need }) : L('The structure needs <b>{need}</b>.', { need })} ${r.count > 1 ? (made > need ? L('One craft makes {count}, so craft it <b>{crafts}</b> times ({left} left over).', { count: r.count, crafts, left: made - need }) : L('One craft makes {count}, so craft it <b>{crafts}</b> times.', { count: r.count, crafts })) : need > 1 ? L('Craft it <b>{crafts}</b> times.', { crafts }) : L('Craft it once.')}</p>`
+      + `<h4>${crafts > 1 ? L('For {n} crafts', { n: crafts }) : L('For one craft')}</h4><ul class="me-craft-list">`
       + Object.values(per).map(({ ing, n }) => `<li${local(ing) ? ` data-go="${local(ing)}" tabindex="0" role="button"` : ''}>${pic(ing)}<b>${n * crafts}</b><span>${escH(ing.name)}</span></li>`).join('')
       + '</ul>';
   }
   d.innerHTML = `<div class="me-craft-card${dir ? (dir > 0 ? ' me-from-right' : ' me-from-left') : ''}">`
-    + `<header><img src="${icon(id)}" alt=""><div><em>Craft${i >= 0 ? ` · ${i + 1} of ${ids.length}` : ''}</em><h3 id="me-craft-title">${escH(name)}</h3></div>`
-    + '<button type="button" class="me-craft-x" aria-label="Close">×</button></header>'
+    + `<header><img src="${icon(id)}" alt=""><div><em>${i >= 0 ? L('Craft · {i} of {n}', { i: i + 1, n: ids.length }) : L('Craft')}</em><h3 id="me-craft-title">${escH(name)}</h3></div>`
+    + `<button type="button" class="me-craft-x" aria-label="${L('Close')}">×</button></header>`
     + body
-    + `<footer><button type="button" class="me-craft-prev" data-go="${ids[i - 1] || ''}" data-dir="-1" ${i > 0 ? '' : 'disabled'}>← Previous</button>`
-    + (page && location.pathname !== `${BASE}/${page}/` ? `<a href="${BASE}/${page}/">Open its page</a>` : '<span></span>')
-    + `<button type="button" class="me-craft-next" data-go="${ids[i + 1] || ''}" ${i >= 0 && i < ids.length - 1 ? '' : 'disabled'}>Next →</button></footer></div>`;
+    + `<footer><button type="button" class="me-craft-prev" data-go="${ids[i - 1] || ''}" data-dir="-1" ${i > 0 ? '' : 'disabled'}>${L('← Previous')}</button>`
+    + (page && location.pathname !== pageUrl(page) ? `<a href="${pageUrl(page)}">${L('Open its page')}</a>` : '<span></span>')
+    + `<button type="button" class="me-craft-next" data-go="${ids[i + 1] || ''}" ${i >= 0 && i < ids.length - 1 ? '' : 'disabled'}>${L('Next →')}</button></footer></div>`;
   d.ctx = ctx;
   if (!d.open) { d.showModal(); document.documentElement.classList.add('me-craft-open'); }
   (d.querySelector(dir > 0 ? '.me-craft-next:not([disabled])' : dir < 0 ? '.me-craft-prev:not([disabled])' : '.me-craft-x') || d.querySelector('.me-craft-x')).focus({ preventScroll: true });

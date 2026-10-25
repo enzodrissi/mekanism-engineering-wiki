@@ -11,7 +11,12 @@
 // The tanks are not animated: their models show no fluid level (models/block/ore_refinery/tank_*), only the controller holds the stock.
 import * as THREE from 'three';
 import { getTexture } from '../mcmodel.js';
-import levels from '../../data/qor-levels.json';
+import levelsEn from '../../data/qor-levels.json';
+import levelsFr from '../../data/qor-levels.fr.json';
+import { L, lang, num } from '../i18n.js';
+
+// the table in the page's language (the French one is made by the import from the French page, same format)
+const levels = lang() === 'fr' && levelsFr.length === 5 ? levelsFr : levelsEn;
 
 const R = 'ore_refinery_';
 const MIN_STEP = 0.45;   // s: the shortest a step is shown (a real x1 job is 1 tick = 0.05 s, invisible)
@@ -21,25 +26,38 @@ const DIM = 0.3, LIT = 1.25; // colour factor of a LED glow: waiting / working (
 const SIZE = 0.6;
 const BELT = 0.45;       // height of the belt surface of a conveyor, in blocks (models/block/ore_refinery/conveyor.json: its plate is 7/16 high)       // sprite size, in blocks
 const MADE = { dissolution: 'dirty slurry', washing: 'clean slurry', crystallization: 'crystals', injection: 'shards', purification: 'clumps', enrichment: 'dust', smelting: 'ingots' };
+/** What a module makes, as the caption of its step says it. */
+const makes = key => ({
+  dissolution: L('makes dirty slurry.'), washing: L('makes clean slurry.'), crystallization: L('makes crystals.'), injection: L('makes shards.'),
+  purification: L('makes clumps.'), enrichment: L('makes dust.'), smelting: L('makes ingots.'),
+})[key];
 
 // same formula as the calculator of the page (src/scripts/site.ts) and RefinerySpeed.ticks
 const ticksOf = (level, n) => level <= 1 ? 1 : Math.max(1, Math.round(200 * Math.pow(50, -n / 8) * (level - 1) / 4));
-const secs = t => `${t} tick${t === 1 ? '' : 's'} (${+(t / 20).toFixed(2)} s)`;
+const secs = t => { const v = { t: num(t), s: num(+(t / 20).toFixed(2)) }; return t === 1 ? L('{t} tick ({s} s)', v) : L('{t} ticks ({s} s)', v); };
 const clamp01 = x => (x < 0 ? 0 : x > 1 ? 1 : x);
 const smooth = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
 
-/** "Purification (ore and oxygen), Crusher, Enrichment, smelting" -> steps. */
-function stepsOf(chain) {
-  return chain.replace(/ only$/, '').split(/,\s*(?![^()]*\))/).map(s => {
-    const m = s.trim().replace(/^then\s+/i, '').match(/^([A-Za-z]+)\s*(?:\((.*)\))?$/);
-    const key = m[1].toLowerCase();
-    return { key, name: m[1][0].toUpperCase() + m[1].slice(1).toLowerCase(), inputs: m[2] || '', module: key !== 'crusher' };
+/** "Purification (ore and oxygen), Crusher, Enrichment, smelting" -> [name, inputs] of each step. */
+const pieces = chain => chain.replace(/\s+(only|seule|seulement|uniquement)$/i, '').split(/,\s*(?![^()]*\))/)
+  .map(s => s.trim().replace(/^(then|puis)\s+/i, '').match(/^(.+?)\s*(?:\((.*)\))?$/));
+const cap = s => s[0].toUpperCase() + s.slice(1);
+
+/** The steps of a level: which module each is from the English table, its name and inputs as the page's language writes them. */
+function stepsOf(level) {
+  const en = pieces(levelsEn.find(x => x.level === level).chain);
+  const own = levels === levelsEn ? null : pieces(levels.find(x => x.level === level).chain);
+  return en.map((m, i) => {
+    const key = m[1].toLowerCase(), o = own && own.length === en.length ? own[i] : null;
+    const name = o ? cap(o[1]) : L(cap(m[1].toLowerCase()));
+    return { key, name, inputs: o ? o[2] || '' : m[2] ? L(m[2]) : '', module: key !== 'crusher' };
   });
 }
 
 function seg(label, items, value, pick) {
   const g = document.createElement('div');
-  g.className = 'me-ref-run-seg'; // not .me-seg: the view buttons of the viewer reset every .me-seg button g.setAttribute('role', 'group'); g.setAttribute('aria-label', label);
+  g.className = 'me-ref-run-seg'; // not .me-seg: the view buttons of the viewer reset every .me-seg button
+  g.setAttribute('role', 'group'); g.setAttribute('aria-label', label);
   g.innerHTML = items.map(([v, text]) => `<button type="button" data-v="${v}" aria-pressed="false">${text}</button>`).join('');
   const set = v => { for (const b of g.children) b.setAttribute('aria-pressed', String(b.dataset.v === String(v))); };
   g.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { set(b.dataset.v); pick(b.dataset.v); } });
@@ -85,7 +103,7 @@ export async function attachRun({ stage, blocks, host, hero = false, base }) {
   let cfg = null, lastKey = '';
 
   function build() {
-    const L = levels.find(x => x.level === S.level), steps = stepsOf(L.chain), n = steps.length;
+    const lv = levels.find(x => x.level === S.level), steps = stepsOf(S.level), n = steps.length;
     const real = ticksOf(S.level, S.acc), shown = Math.max(real / 20, MIN_STEP * n, MIN_JOB), d = shown / n;
     // a step without a module (the Crusher) waits on the belt between its neighbours
     steps.forEach((s, i) => {
@@ -95,11 +113,14 @@ export async function attachRun({ stage, blocks, host, hero = false, base }) {
       while (z < n && !steps[z].module) z++;
       s.between = [steps[a] || steps[z], steps[z] || steps[a]];
     });
-    cfg = { L, steps, n, real, shown, d, cycle: IN + shown + OUT + GAP, floored: shown > real / 20 + 1e-6 };
-    const takes = L.takes === 'nothing' ? 'nothing from the tanks' : `${L.takes} from the tanks`;
-    sum.textContent = `${L.chain}. One iron ore gives ${L.ingots} ingot${L.ingots === 1 ? '' : 's'}; it takes ${takes}.`;
-    time.textContent = `A job takes ${secs(real)} with ${S.acc} accelerator${S.acc === 1 ? '' : 's'}.`
-      + (cfg.floored ? ` Shown over ${+shown.toFixed(1)} s so each step can be seen.` : '');
+    cfg = { L: lv, steps, n, real, shown, d, cycle: IN + shown + OUT + GAP, floored: shown > real / 20 + 1e-6 };
+    const v = { chain: lv.chain, n: lv.ingots, takes: lv.takes }, one = lv.ingots === 1;
+    sum.textContent = /^(nothing|rien)$/.test(lv.takes)
+      ? (one ? L('{chain}. One iron ore gives {n} ingot; it takes nothing from the tanks.', v) : L('{chain}. One iron ore gives {n} ingots; it takes nothing from the tanks.', v))
+      : (one ? L('{chain}. One iron ore gives {n} ingot; it takes {takes} from the tanks.', v) : L('{chain}. One iron ore gives {n} ingots; it takes {takes} from the tanks.', v));
+    const tv = { time: secs(real), n: S.acc };
+    time.textContent = (S.acc === 1 ? L('A job takes {time} with {n} accelerator.', tv) : L('A job takes {time} with {n} accelerators.', tv))
+      + (cfg.floored ? ' ' + L('Shown over {s} s so each step can be seen.', { s: num(+shown.toFixed(1)) }) : '');
   }
 
   // positions, from the blocks as they are drawn now (the layers glide apart in the exploded and layer views)
@@ -162,11 +183,12 @@ export async function attachRun({ stage, blocks, host, hero = false, base }) {
     for (const b of ledBlocks) led2(b, DIM + (LIT - DIM) * (b === litBlock ? litV : 0));
     if (key === lastKey) return null;
     lastKey = key;
-    if (key === 'in') return 'Ore comes in through an input port. One item stands for the stack (up to 64) that a job works.';
-    if (key === 'out') return destBlock() === quantum ? 'Ingots go to the Quantum Module, then to its Quantum or QIO frequency.' : 'Ingots leave by the output port.';
+    if (key === 'in') return L('Ore comes in through an input port. One item stands for the stack (up to 64) that a job works.');
+    if (key === 'out') return destBlock() === quantum ? L('Ingots go to the Quantum Module, then to its Quantum or QIO frequency.') : L('Ingots leave by the output port.');
     if (i < 0) return null;
     const s = steps[i];
-    return `Step ${i + 1} of ${n} · ${s.name}${s.inputs ? ` (${s.inputs})` : ''}: ` + (s.module ? `makes ${MADE[s.key]}.` : 'no module of its own in the structure.');
+    const v = { i: i + 1, n, name: s.name, inputs: s.inputs, what: s.module ? makes(s.key) : L('no module of its own in the structure.') };
+    return s.inputs ? L('Step {i} of {n} · {name} ({inputs}): {what}', v) : L('Step {i} of {n} · {name}: {what}', v);
   }
 
   function show() { // the picture of the moment and its text
@@ -186,17 +208,17 @@ export async function attachRun({ stage, blocks, host, hero = false, base }) {
   if (!hero) {
     const top = document.createElement('div'); top.className = 'me-ref-run-top';
     if (still) {
-      next = document.createElement('button'); next.type = 'button'; next.className = 'me-ref-run-go'; next.textContent = 'Next step';
+      next = document.createElement('button'); next.type = 'button'; next.className = 'me-ref-run-go'; next.textContent = L('Next step');
       top.append(next);
     } else {
-      go = document.createElement('button'); go.type = 'button'; go.className = 'me-ref-run-go'; go.textContent = 'Run a job'; top.append(go);
+      go = document.createElement('button'); go.type = 'button'; go.className = 'me-ref-run-go'; go.textContent = L('Run a job'); top.append(go);
     }
     const opts = document.createElement('div'); opts.className = 'me-ref-run-opts';
     const grp = (label, s) => { const g = document.createElement('div'); g.className = 'me-ref-run-grp'; g.innerHTML = `<span>${label}</span>`; g.append(s.el); opts.append(g); };
-    const lvl = seg('Level of the refinery', [1, 2, 3, 4, 5].map(n => [n, 'x' + n]), S.level, v => { S.level = +v; restart(); });
-    const acc = seg('Accelerators in use', [0, 2, 4, 6, 8].map(n => [n, n]), S.acc, v => { S.acc = +v; restart(); });
-    const out = seg('Where the ingots go', [['port', 'Output port'], ['quantum', 'Quantum Module']], S.dest, v => { S.dest = v; restore(); watch(); if (S.running || still) { show(); stage.draw(); } else stage.draw(); });
-    grp('Level', lvl); grp('Accelerators in use (of 8 places)', acc); grp('Ingots go to', out);
+    const lvl = seg(L('Level of the refinery'), [1, 2, 3, 4, 5].map(n => [n, 'x' + n]), S.level, v => { S.level = +v; restart(); });
+    const acc = seg(L('Accelerators in use'), [0, 2, 4, 6, 8].map(n => [n, n]), S.acc, v => { S.acc = +v; restart(); });
+    const out = seg(L('Where the ingots go'), [['port', L('Output port')], ['quantum', L('Quantum Module')]], S.dest, v => { S.dest = v; restore(); watch(); if (S.running || still) { show(); stage.draw(); } else stage.draw(); });
+    grp(L('Level'), lvl); grp(L('Accelerators in use (of 8 places)'), acc); grp(L('Ingots go to'), out);
     ui.append(top, step, opts, sum, time);
     host.querySelector('.me-stage').after(ui); // right under the view, so the controls and the animation fit on a phone screen together
   }
@@ -214,7 +236,7 @@ export async function attachRun({ stage, blocks, host, hero = false, base }) {
     stage.draw();
   }
   function start() {
-    S.running = true; S.t = 0; if (go) go.textContent = 'Stop';
+    S.running = true; S.t = 0; if (go) go.textContent = L('Stop');
     stopLive = stage.live((now, dt) => {
       S.t += dt / 1000; if (S.t >= cfg.cycle) S.t -= cfg.cycle;
       S.dimK = Math.min(1, S.dimK + dt / 500);
@@ -223,7 +245,7 @@ export async function attachRun({ stage, blocks, host, hero = false, base }) {
     }, { fps: hero ? 20 : 30 });
   }
   function stop() {
-    S.running = false; S.dimK = 0; if (stopLive) stopLive(); stopLive = null; if (go) go.textContent = 'Run a job';
+    S.running = false; S.dimK = 0; if (stopLive) stopLive(); stopLive = null; if (go) go.textContent = L('Run a job');
     restore(); step.textContent = ''; stage.draw();
   }
   build(); watch();

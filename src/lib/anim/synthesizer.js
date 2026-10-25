@@ -9,22 +9,23 @@
 // (cube_all: the one texture; cube_column: its `end` texture, the block standing upright).
 import { buildBlock } from '../mcmodel.js';
 import { caption } from './ui.js';
+import { L, num } from '../i18n.js';
 
 // [id, name, top texture, water mB, lava mB], in the recipes' own `order`
 const PRODUCTS = [
-  ['cobblestone', 'Cobblestone', 'cobblestone', 250, 250],
-  ['stone', 'Stone', 'stone', 250, 250],
-  ['smooth_stone', 'Smooth Stone', 'smooth_stone', 250, 500],
-  ['obsidian', 'Obsidian', 'obsidian', 1000, 1000],
-  ['basalt', 'Basalt', 'basalt_top', 500, 500],
-  ['granite', 'Granite', 'granite', 250, 500],
-  ['diorite', 'Diorite', 'diorite', 250, 500],
-  ['andesite', 'Andesite', 'andesite', 250, 500],
-  ['cobbled_deepslate', 'Cobbled Deepslate', 'cobbled_deepslate', 250, 375],
-  ['deepslate', 'Deepslate', 'deepslate_top', 250, 500],
-  ['tuff', 'Tuff', 'tuff', 500, 500],
-  ['blackstone', 'Blackstone', 'blackstone_top', 250, 500],
-  ['smooth_basalt', 'Smooth Basalt', 'smooth_basalt', 500, 750],
+  ['cobblestone', L('Cobblestone'), 'cobblestone', 250, 250],
+  ['stone', L('Stone'), 'stone', 250, 250],
+  ['smooth_stone', L('Smooth Stone'), 'smooth_stone', 250, 500],
+  ['obsidian', L('Obsidian'), 'obsidian', 1000, 1000],
+  ['basalt', L('Basalt'), 'basalt_top', 500, 500],
+  ['granite', L('Granite'), 'granite', 250, 500],
+  ['diorite', L('Diorite'), 'diorite', 250, 500],
+  ['andesite', L('Andesite'), 'andesite', 250, 500],
+  ['cobbled_deepslate', L('Cobbled Deepslate'), 'cobbled_deepslate', 250, 375],
+  ['deepslate', L('Deepslate'), 'deepslate_top', 250, 500],
+  ['tuff', L('Tuff'), 'tuff', 500, 500],
+  ['blackstone', L('Blackstone'), 'blackstone_top', 250, 500],
+  ['smooth_basalt', L('Smooth Basalt'), 'smooth_basalt', 500, 750],
 ];
 
 // the roof square of RenderPetrogenicSynthesizer (pixels of the model facing north, which is how the page shows it)
@@ -45,9 +46,9 @@ export default async function setup({ stage, base, host, active, choice }) {
 
   const text = () => {
     const p = PRODUCTS.find(x => x[0] === current);
-    const state = active.on ? 'Running: the LEDs, the core field and the ports are lit.' : 'Idle: the LEDs, the core field and the ports are dark.';
-    return p ? `${state} ${p[1]} shows on the roof (${p[3].toLocaleString('en-US')} mB of water and ${p[4].toLocaleString('en-US')} mB of lava a block).`
-      : `${state} No product chosen: the roof square stays teal.`;
+    const state = active.on ? L('Running: the LEDs, the core field and the ports are lit.') : L('Idle: the LEDs, the core field and the ports are dark.');
+    return state + ' ' + (p ? L('{product} shows on the roof ({water} mB of water and {lava} mB of lava a block).', { product: p[1], water: num(p[3]), lava: num(p[4]) })
+      : L('No product chosen: the roof square stays teal.'));
   };
 
   async function show(id) {
@@ -66,7 +67,7 @@ export default async function setup({ stage, base, host, active, choice }) {
     stage.draw();
   }
 
-  choice('Product on the roof', [['none', 'None'], ...PRODUCTS.map(p => [p[0], p[1]])], current, v => show(v));
+  choice(L('Product on the roof'), [['none', L('None')], ...PRODUCTS.map(p => [p[0], p[1]])], current, v => show(v));
   active.onChange(() => note.set(text()));
   await show(current);
   // pressing "Running" is the first thing a reader tries: start it

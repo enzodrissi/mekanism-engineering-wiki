@@ -10,6 +10,7 @@
 // The game has no entrance animation for a module (it just appears when inserted); the small drop here is only the page's way to show it.
 import { buildBlock, textureAnimator } from '../mcmodel.js';
 import { caption } from './ui.js';
+import { L } from '../i18n.js';
 
 const NS = 'mekanismengineering:block/';
 const PART = NS + 'petrogenic_synthesis_plant/';
@@ -54,9 +55,13 @@ export default async function setup({ stage, base, host, obj, still, tween, ease
   let running = false, fill = 'both';
   const note = caption(host);
   const text = () => {
-    const mods = k => (counts[k] ? `${counts[k]} ${TOWERS[k].name}${counts[k] > 1 ? 's' : ''}` : 'no module');
-    const tanks = { empty: 'Both towers are empty.', water: 'The water tower holds water.', lava: 'The lava tower holds lava.', both: 'The towers hold water and lava.' }[fill];
-    return `${running ? 'Running: the ports are lit.' : 'Idle: the ports are dark.'} ${tanks} Water tower: ${mods('water')}. Lava tower: ${mods('lava')}.`;
+    const many = {
+      water: [L('{n} Hydro Condenser Upgrade', { n: counts.water }), L('{n} Hydro Condenser Upgrades', { n: counts.water })],
+      lava: [L('{n} Magma Synthesizer Upgrade', { n: counts.lava }), L('{n} Magma Synthesizer Upgrades', { n: counts.lava })],
+    };
+    const mods = k => (counts[k] ? many[k][counts[k] > 1 ? 1 : 0] : L('no module'));
+    const tanks = { empty: L('Both towers are empty.'), water: L('The water tower holds water.'), lava: L('The lava tower holds lava.'), both: L('The towers hold water and lava.') }[fill];
+    return `${running ? L('Running: the ports are lit.') : L('Idle: the ports are dark.')} ${tanks} ` + L('Water tower: {water}. Lava tower: {lava}.', { water: mods('water'), lava: mods('lava') });
   };
   const refresh = () => { note.set(text()); stage.draw(); };
 
@@ -81,10 +86,10 @@ export default async function setup({ stage, base, host, obj, still, tween, ease
     refresh();
   };
 
-  choice('Machine state', [['off', 'Idle'], ['on', 'Running']], 'on', v => setRunning(v === 'on'));
-  choice('Fluids in the towers', [['empty', 'Empty'], ['water', 'Water'], ['lava', 'Lava'], ['both', 'Both']], fill, setFill);
-  choice('Water tower modules', COUNTS, 0, n => setModules('water', Number(n)));
-  choice('Lava tower modules', COUNTS, 0, n => setModules('lava', Number(n)));
+  choice(L('Machine state'), [['off', L('Idle')], ['on', L('Running')]], 'on', v => setRunning(v === 'on'));
+  choice(L('Fluids in the towers'), [['empty', L('Empty')], ['water', L('Water')], ['lava', L('Lava')], ['both', L('Both')]], fill, setFill);
+  choice(L('Water tower modules'), COUNTS, 0, n => setModules('water', Number(n)));
+  choice(L('Lava tower modules'), COUNTS, 0, n => setModules('lava', Number(n)));
   setFill('both');
   setRunning(true);
 }

@@ -464,3 +464,6 @@ body:has(.me-home) .content-panel { border-top: 0; }
 .me-ref-run-sum, .me-ref-run-step { margin: 0; max-width: 46rem; text-align: center; font: 500 0.78rem var(--sl-font); color: var(--sl-color-gray-3); }
 .me-ref-run-step { min-height: 1.2em; font-weight: 650; color: var(--sl-color-gray-1); }
 @media (max-width: 30rem) { .me-ref-run-seg button { padding-inline: 0.5rem; font-size: 0.76rem; } }
+
+/* the language menu shows its whole label ("Français" was cut short) */
+starlight-lang-select select { width: 8.4rem; }

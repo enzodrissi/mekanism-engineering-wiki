@@ -15,6 +15,7 @@
 import * as THREE from 'three';
 import { getTexture } from '../mcmodel.js';
 import { caption } from './ui.js';
+import { L } from '../i18n.js';
 
 const NS = 'mekanismengineering:block/quantum_digital_miner/';
 // QuantumScreen.java
@@ -83,16 +84,20 @@ const group = n => String(n).replace(/\B(?=(\d{3})+$)/g, ' ');       // "a space
 const percentOf = (toMine, found) => (found <= 0 || toMine >= found ? 0 : Math.min(99, Math.round(100 * (found - toMine) / found)));
 /** The rows of the screen for a state: 'search' | 'mine' | 'warn'. */
 function rows(state, toMine) {
-  if (state === 'search') return { line: 'SEARCHING', count: 'scanning the zone...', percent: 0 };
-  const percent = percentOf(toMine, FOUND);
-  return { line: `${state === 'warn' ? 'WARNING' : 'MINING'} · ${percent} %`, count: `${group(toMine)} ${toMine === 1 ? 'block' : 'blocks'} left`, percent };
+  // the game's own words (gui.mekanismengineering.qdm_screen.*), in the page's language; the font draws them, so plain ASCII only
+  if (state === 'search') return { line: L('SEARCHING'), count: L('scanning the zone...'), percent: 0 };
+  const percent = percentOf(toMine, FOUND), n = group(toMine);
+  return {
+    line: state === 'warn' ? L('WARNING · {p} %', { p: percent }) : L('MINING · {p} %', { p: percent }),
+    count: toMine === 1 ? L('{n} block left', { n }) : L('{n} blocks left', { n }), percent,
+  };
 }
 
 // ------------------------------------------------------------------------------------------------------------ the zone (RenderQuantumDigitalMiner.java)
 // the miner is drawn at world Y 30 so that the default zone (Y 0 to 60) surrounds it
 const ZONES = {
-  def: { tall: true, radius: 10, minY: 0, maxY: 60, posY: 30, text: 'Default zone: radius 10 (21 × 21 blocks), height Y 0 to 60. This is the mod\'s starting setting; the miner is drawn at Y 30. The box is taller than the view: pinch or scroll to zoom out.' },
-  small: { radius: 3, minY: 24, maxY: 36, posY: 30, text: 'Small zone, an example setting: radius 3 (7 × 7 blocks), height Y 24 to 36. You can set any radius up to 128.' },
+  def: { tall: true, radius: 10, minY: 0, maxY: 60, posY: 30, text: L("Default zone: radius 10 (21 × 21 blocks), height Y 0 to 60. This is the mod's starting setting; the miner is drawn at Y 30. The box is taller than the view: pinch or scroll to zoom out.") },
+  small: { radius: 3, minY: 24, maxY: 36, posY: 30, text: L('Small zone, an example setting: radius 3 (7 × 7 blocks), height Y 24 to 36. You can set any radius up to 128.') },
 };
 const ZONE_SHADE = { x: 0.78, y: 0.82, z: 0.8 };      // COLORS per face pair: east/west, up/down, north/south
 const ZONE_ALPHA = 0.12;                              // the game gives 0.78 to 0.82 per face; kept low here so the machine stays visible
@@ -342,20 +347,20 @@ export default async function setup(ctx) {
 
   // ---------------- controls and caption
   function say() {
-    if (reloc >= 0) { note.set(still ? 'Relocation: the machine charges inside a teal field with a bright core. It then flies up as a beam and is rebuilt at its new place.' : 'Relocating: it scans, charges, flies away as a beam, then is rebuilt from the bottom up.'); return; }
-    if (!active.on) { note.set('Idle: the wide screen is dark.'); return; }
-    note.set(held ? 'Running: mining is held up, so the screen turns amber. The figures are examples.'
-      : 'Running: the screen shows the state, the share mined and the blocks left. When the zone is done it goes back to its resting picture. The figures are examples.');
+    if (reloc >= 0) { note.set(still ? L('Relocation: the machine charges inside a teal field with a bright core. It then flies up as a beam and is rebuilt at its new place.') : L('Relocating: it scans, charges, flies away as a beam, then is rebuilt from the bottom up.')); return; }
+    if (!active.on) { note.set(L('Idle: the wide screen is dark.')); return; }
+    note.set(held ? L('Running: mining is held up, so the screen turns amber. The figures are examples.')
+      : L('Running: the screen shows the state, the share mined and the blocks left. When the zone is done it goes back to its resting picture. The figures are examples.'));
   }
   if (!still) {
     const flowNote = caption(host, '');
-    const sayFlow = () => flowNote.set(flowOn ? 'The ore flowing in is an illustration of the mining, not an effect of the game.' : '');
-    choice('Mining illustration', [['on', 'Ore flow: on'], ['off', 'Ore flow: off']], 'on', v => { flowOn = v === 'on'; sayFlow(); if (!flowOn) { flowHide(); stage.draw(); } });
+    const sayFlow = () => flowNote.set(flowOn ? L('The ore flowing in is an illustration of the mining, not an effect of the game.') : '');
+    choice(L('Mining illustration'), [['on', L('Ore flow: on')], ['off', L('Ore flow: off')]], 'on', v => { flowOn = v === 'on'; sayFlow(); if (!flowOn) { flowHide(); stage.draw(); } });
     sayFlow();
   }
-  choice('Screen state', [['ok', 'Screen: mining'], ['warn', 'Screen: warning']], 'ok', v => setHeld(v === 'warn'));
-  choice('Show mining zone', [['off', 'Zone off'], ['def', 'Default zone'], ['small', 'Small zone']], 'off', showZone);
-  relocUi = choice('Relocation', [['go', 'Relocate']], null, () => {
+  choice(L('Screen state'), [['ok', L('Screen: mining')], ['warn', L('Screen: warning')]], 'ok', v => setHeld(v === 'warn'));
+  choice(L('Show mining zone'), [['off', L('Zone off')], ['def', L('Default zone')], ['small', L('Small zone')]], 'off', showZone);
+  relocUi = choice(L('Relocation'), [['go', L('Relocate')]], null, () => {
     if (still) {                                                            // one fixed picture: the machine charged, field and core shown
       if (reloc < 0) { reloc = CHARGE - 1; fx(reloc); relocUi.set('go'); } else relocEnd();
       say(); stage.draw(); return;

@@ -1,6 +1,8 @@
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
-const { entry, id } = Astro.locals.starlightRoute;
+import { tr } from '../lib/i18n.js';
+const { entry, id, lang } = Astro.locals.starlightRoute;
+const t = (en: string) => tr(lang === 'fr' ? 'fr' : 'en', en);
 const m = entry.data.machine;
 const family = m?.family ?? '';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -10,10 +12,10 @@ const item = m?.model ?? m?.id;
 ---
 
 {
-  id === '' || id === 'index' ? null : m ? (
+  ['', 'index', 'fr', 'fr/index'].includes(id) ? null : m ? (
     <div class:list={['me-head', m.quantum ? 'q' : 'g', { wide: kind === 'refinery' }]}>
       <div>
-        <div class="me-eyebrow">{family}{m.isNew ? ' · New' : ''}{m.quantum ? ' · Quantum' : ''}</div>
+        <div class="me-eyebrow">{family}{m.isNew ? ` · ${t('New')}` : ''}{m.quantum ? ' · Quantum' : ''}</div>
         <h1 id="_top">{entry.data.title}</h1>
         {entry.data.description && <p class="me-lead">{entry.data.description}</p>}
       </div>
@@ -22,7 +24,7 @@ const item = m?.model ?? m?.id;
         <div class="me-head-visual not-content">
           <div class="me-stage" data-me3d data-kind="block" data-item={item}>
             <img src={`${base}/icons/mekanismengineering/${item}.png`} alt="" style="width:min(12rem,60%);margin:auto;display:block;image-rendering:pixelated" />
-            <span class="me-pill me-hint">⟲ Drag to turn</span>
+            <span class="me-pill me-hint">{t('⟲ Drag to turn')}</span>
           </div>
         </div>
       )}

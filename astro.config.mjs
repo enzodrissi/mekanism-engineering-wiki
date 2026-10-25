@@ -19,6 +19,10 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Mekanism: Engineering',
+      // English at the root, French under /fr/ (pages from scripts/import-wiki.mjs and src/content/docs/fr); a menu in the
+      // header switches between them, and a page missing in French shows the English one with a notice
+      defaultLocale: 'root',
+      locales: { root: { label: 'English', lang: 'en' }, fr: { label: 'Français', lang: 'fr' } },
       description: 'The complete wiki of Mekanism: Engineering, an addon for Mekanism: remote mining, whole-chain ore refining, quantum networks and precise logistics.',
       logo: { src: './src/assets/logo.png', alt: 'Mekanism: Engineering' },
       favicon: '/favicon.png',
@@ -47,18 +51,18 @@ export default defineConfig({
       pagination: true,
       sidebar: [
         {
-          label: 'Start here',
+          label: 'Start here', translations: { fr: 'Commencer ici' },
           items: [
             'overview',
             'getting-started',
-            { label: 'Guides', items: [{ autogenerate: { directory: 'guides' } }] },
+            { label: 'Guides', translations: { fr: 'Tutos' }, items: [{ autogenerate: { directory: 'guides' } }] },
             'faq',
           ],
         },
         // one group per machine family, written by scripts/import-wiki.mjs
-        { label: 'Machines', items: machines },
-        { label: 'Reference', items: ['crafting', 'in-game-texts', 'configuration', 'jei-jade-wthit'] },
-        { label: 'Changelog', collapsed: true, items: [{ autogenerate: { directory: 'changelog' } }] },
+        { label: 'Machines', translations: { fr: 'Machines' }, items: machines },
+        { label: 'Reference', translations: { fr: 'Référence' }, items: ['crafting', 'in-game-texts', 'configuration', 'jei-jade-wthit'] },
+        { label: 'Changelog', translations: { fr: 'Notes de version' }, collapsed: true, items: [{ autogenerate: { directory: 'changelog' } }] },
       ],
     }),
   ],

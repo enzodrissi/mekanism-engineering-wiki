@@ -6,12 +6,13 @@
 //    receiver_<tier>_trim.png. Their rates are in the wiki page (Quantum-Energy-Receiver.md), as Mekanism's Energy Cube tiers.
 // The only thing offered is the tier choice, which builds each tier's own model.
 import { caption } from './ui.js';
+import { L, num } from '../i18n.js';
 
 const TIERS = [
-  ['basic', 'Basic', '4,000'],
-  ['advanced', 'Advanced', '16,000'],
-  ['elite', 'Elite', '64,000'],
-  ['ultimate', 'Ultimate', '256,000'],
+  ['basic', L('Basic'), 4000],
+  ['advanced', L('Advanced'), 16000],
+  ['elite', L('Elite'), 64000],
+  ['ultimate', L('Ultimate'), 256000],
 ];
 
 export default async function setup(ctx) {
@@ -21,9 +22,9 @@ export default async function setup(ctx) {
   let note;
   const say = id => {
     const [, name, rate] = TIERS.find(t => t[0] === id);
-    note.set(`${name} Receiver: up to ${rate} J per tick. Only the colour of the trim changes between tiers. The game shows no change while it receives energy.`);
+    note.set(L('{name} Receiver: up to {rate} J per tick. Only the colour of the trim changes between tiers. The game shows no change while it receives energy.', { name, rate: num(rate) }));
   };
-  const ui = ctx.choice('Receiver tier', TIERS.map(([id, name]) => [id, name]), current, async id => {
+  const ui = ctx.choice(L('Receiver tier'), TIERS.map(([id, name]) => [id, name]), current, async id => {
     want = id;
     if (id === current) return;
     if (!built[id]) {
