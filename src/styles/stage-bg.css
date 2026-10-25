@@ -87,7 +87,7 @@
   .me-bp-on .me-bp-spin2 { animation: me-bp-turn 70s linear infinite reverse; }
   .me-bp-scan { display: block; will-change: transform, opacity;
     background: linear-gradient(90deg, transparent, rgba(var(--bp-ink), calc(0.5 * var(--bp-k))) 25%, rgba(var(--bp-ink), calc(0.5 * var(--bp-k))) 75%, transparent) bottom / 100% 1px no-repeat,
-      linear-gradient(transparent 30%, rgba(var(--bp-ink), calc(0.06 * var(--bp-k)))); }
+      linear-gradient(transparent, rgba(var(--bp-ink), calc(0.035 * var(--bp-k)))); }
   .me-bp-ready.me-bp-on .me-bp-scan { animation: me-bp-scan 9s cubic-bezier(0.45, 0, 0.4, 1) 1.6s infinite; }
   .me-bp-pause, .me-bp-pause * { animation-play-state: paused !important; }
 }
