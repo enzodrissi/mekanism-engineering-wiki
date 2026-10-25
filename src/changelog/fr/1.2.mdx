@@ -122,9 +122,11 @@ Chacune des huit places d'accélérateur de la structure qui contient un **Accé
 
 Accueil montre le statut, les cinq niveaux (prêt, en attente d'une ressource, en marche), la barre d'énergie, les neuf emplacements de minerai et les boutons Toujours actif. **Réservoirs** montre quatre grandes jauges et le niveau que chacune débloque. **Statistiques** montre le travail en cours, niveau par niveau la ressource qui manque, et un graphique des cinq dernières minutes. Le tout dans le même bleu que les machines Quantum.
 
-<Shots items={[
-  { src: 'wiki-images/quantum_ore_refinery-gui.png', alt: 'L’écran Accueil du contrôleur de la Quantum Ore Refinery', caption: 'Accueil : les niveaux x5 à x1, ce qui manque pour x5, Toujours actif et les neuf emplacements de minerai.' },
-  { src: 'gallery/03_refinery_screens.png', alt: 'La raffinerie et ses écrans', caption: 'Accueil, Réservoirs, Statistiques et l’écran du module.' },
+<Shots cols={2} items={[
+  { src: 'screens/qor-tabs-fr-1.png', alt: 'L’onglet Accueil du contrôleur de la raffinerie en jeu', caption: 'Accueil : le statut, ce qui manque pour x5, les niveaux x5 à x1, Toujours actif et les neuf emplacements de minerai.' },
+  { src: 'screens/qor-tabs-fr-2.png', alt: 'L’onglet Réservoirs en jeu', caption: 'Réservoirs : les quatre réservoirs, pleins, et le niveau que chacun débloque.' },
+  { src: 'screens/qor-tabs-fr-3.png', alt: 'L’onglet Statistiques en jeu', caption: 'Statistiques : production, énergie, accélérateurs et, niveau par niveau, ce qui est en attente.' },
+  { src: 'screens/qor-tabs-fr-4.png', alt: 'L’onglet du module de sortie en jeu', caption: 'Module de sortie : Quantum ou QIO, la fréquence et le tampon de 64 piles.' },
 ]} />
 
 ### Module Quantum / QIO
@@ -221,6 +223,13 @@ Les minerais de fer, d'or, de charbon et de redstone sont toujours listés. Les 
   <div class="me-feature-card"><span class="me-feature-num">1</span><b>Remplacer</b><p>Réduit la liste du mineur à ce seul filtre.</p></div>
   <div class="me-feature-card"><span class="me-feature-num">2</span><b>Ajouter</b><p>L'ajoute seulement si le même filtre de tag n'y est pas déjà.</p></div>
 </div>
+
+<Shots cols={2} items={[
+  { src: 'screens/quick-filters-fr-1.png', alt: 'La fenêtre Nouveau filtre en jeu', caption: 'La fenêtre Nouveau filtre commence par Filtres rapides et Configurations.' },
+  { src: 'screens/quick-filters-fr-2.png', alt: 'La fenêtre Filtres rapides, Charbon choisi', caption: 'Charbon choisi : son tag c:ores/coal, puis Remplacer ou Ajouter.' },
+  { src: 'screens/quick-filters-fr-3.png', alt: 'Charbon ajouté à la liste', caption: 'Ajouter : « Charbon ajouté (1 filtre) », le filtre est dans la liste.' },
+  { src: 'screens/quick-filters-fr-4.png', alt: 'La fenêtre Configurations avec une liste enregistrée', caption: 'Configurations : la liste enregistrée sous « Charbon », prête à charger sur n’importe quel mineur.' },
+]} />
 
 **Les minerais des autres mods compris.** Chaque filtre rapide est un filtre de tag Mekanism ordinaire sur le tag de minerai commun, donc les minerais que d'autres mods mettent dans ce tag sont minés aussi. Rien n'est scanné et aucun chunk n'est chargé pour le construire.
 

@@ -125,6 +125,8 @@
 
 /* screenshots */
 .cl-shots { display: grid; gap: 0.8rem; margin: 1.1rem 0 0.3rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+/* --cols (Shots cols={n}): at most n side by side, so that four pictures make two rows of two */
+@media (min-width: 36rem) { .cl-shots[style*="--cols"] { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
 .cl-shots figure, .cl-card-v figure { margin: 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--me-line); background: #0a111d; }
 .cl-shots img, .cl-card-v figure img { display: block; width: 100%; height: auto; margin: 0; border-radius: 0; }
 .cl-shots figure.px img, .cl-card-v figure.px img { image-rendering: pixelated; }

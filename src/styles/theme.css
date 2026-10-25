@@ -553,6 +553,13 @@ starlight-lang-select select { width: 8.4rem; }
 .sl-markdown-content .me-feature > .sl-heading-wrapper, .sl-markdown-content .me-feature > h3 { margin-top: 0.7rem; }
 .sl-markdown-content .me-feature h3 { font-size: clamp(1.3rem, 3.2vw, 1.6rem); line-height: 1.2; scroll-margin-top: 2.4rem; }
 .sl-markdown-content .me-feature .me-feature-cards { margin: 1rem 0 0.2rem; }
+/* the real screens of the game under the cards: two by two, one by one on a phone, pixels kept sharp */
+.me-feature-shots { display: grid; gap: 0.8rem; margin: 1rem 0 0.4rem; }
+@media (min-width: 40rem) { .me-feature-shots { grid-template-columns: 1fr 1fr; } }
+.me-feature-shots figure { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.6rem; border-radius: 16px; background: var(--me-f-card); border: 1px solid var(--me-t-line); }
+.me-feature-shots img { width: 100%; height: auto; image-rendering: pixelated; border-radius: 8px; }
+.me-feature-shots figcaption { display: flex; align-items: flex-start; gap: 0.1rem; font-size: 0.82rem; line-height: 1.45; color: var(--me-card-text); }
+.me-feature-shots figcaption .me-feature-num { flex: none; transform: scale(0.85); }
 @media (max-width: 40rem) { .sl-markdown-content .me-feature { padding: 1rem 1rem 1.1rem; margin-inline: -0.25rem; } }
 
 /* home, under the hero: what's new in the version (NEWS in src/lib/features.mjs). Two equal cards, the new multiblock first:
@@ -566,18 +573,12 @@ starlight-lang-select select { width: 8.4rem; }
 .me-news-card { container-type: inline-size; display: flex; flex-direction: column; min-width: 0; border-radius: 20px; overflow: hidden; background: var(--me-f-card); border: 1px solid var(--me-t-line); }
 .me-news-visual { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: 1px solid var(--me-t-line);
   background: radial-gradient(70% 80% at 30% 40%, rgba(100, 209, 199, 0.22), transparent 70%), linear-gradient(160deg, #13274a, #060a11); }
-/* the controller's screen, cut out of the 1920 × 1080 gallery picture: x 1148 to 1720, y 390 to 712 */
-.me-news-shot img { position: absolute; max-width: none; width: 335.66%; height: auto; left: -200.7%; top: -121.21%; transition: transform 0.3s; transform-origin: 60% 60%; }
-.me-news-card:hover .me-news-shot img { transform: scale(1.03); }
-.me-news-ores { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: center; align-items: center; gap: 0.5rem 1.1rem; padding: 1rem 1.2rem; text-decoration: none; }
-/* sized on the card's width (a container query), so that the picture fills its band from phone to 4K */
-.me-news-ores img { width: clamp(5rem, 25cqi, 11rem); height: clamp(5rem, 25cqi, 11rem); object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55)); grid-row: span 2; align-self: center; }
-.me-news-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; align-self: end; }
-.me-news-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.55rem; border-radius: 99px; font: 600 clamp(0.62rem, 2.15cqi, 0.95rem)/1.2 var(--sl-font-mono);
-  color: #041018; background: linear-gradient(135deg, var(--me-teal), #4a84ec); }
-.me-news-chip svg { width: 0.75rem; height: 0.75rem; }
-.me-news-chip.opt { color: #c9fbf5; background: rgba(100, 209, 199, 0.1); border: 1px dashed rgba(100, 209, 199, 0.55); padding: calc(0.25rem - 1px) calc(0.55rem - 1px); }
-.me-news-note { align-self: start; font: 500 clamp(0.6rem, 1.8cqi, 0.8rem)/1.35 var(--sl-font-mono); color: #8fb3c9; letter-spacing: 0.02em; }
+/* real screens of the game, animated (Home.astro): the pixels kept sharp, the whole window shown on the card's glow */
+.me-news-anim { display: grid; place-items: center; padding: clamp(0.6rem, 3cqi, 1.2rem); aspect-ratio: 4 / 3; }
+.me-news-anim picture { display: contents; }
+.me-news-anim img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; border-radius: 6px;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55)); transition: transform 0.3s; }
+.me-news-card:hover .me-news-anim img { transform: scale(1.02); }
 .me-news-body { display: flex; flex-direction: column; flex: 1; padding: 1rem 1.1rem 1.15rem; }
 .me-news-body .me-eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.55rem; font-size: 0.66rem; letter-spacing: 0.12em; }
 .me-news-badge { padding: 0.15rem 0.5rem; border-radius: 99px; color: var(--me-ink); background: linear-gradient(135deg, var(--me-teal), #4a84ec); font-weight: 700; }
@@ -594,7 +595,5 @@ starlight-lang-select select { width: 8.4rem; }
   font: 600 0.78rem var(--sl-font-mono); letter-spacing: 0.04em; color: var(--sl-color-accent); text-decoration: none; background: var(--me-glass); transition: border-color 0.15s, transform 0.15s; }
 .me-news-all:hover { border-color: var(--me-teal); transform: translateY(-1px); color: var(--sl-color-accent); }
 @media (max-width: 40rem) { .me-news { padding: 1rem 0.8rem; margin-inline: -0.25rem; } .me-news-body { padding: 0.9rem 0.95rem 1rem; } }
-@container (max-width: 25rem) { .me-news-ores { gap: 0.35rem 0.75rem; padding: 0.7rem 0.85rem; } .me-news-chips { gap: 0.25rem; } .me-news-chip { padding: 0.15rem 0.4rem; }
-  .me-news-chip.opt { padding: calc(0.15rem - 1px) calc(0.4rem - 1px); } .me-news-chip svg { display: none; } }
 @media (min-width: 120rem) { .me-news { padding: 1.7rem 1.8rem; } }
-@media (prefers-reduced-motion: reduce) { .me-new, .me-news-all, .me-news-shot img { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .me-new, .me-news-all, .me-news-anim img { transition: none; } }

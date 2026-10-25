@@ -122,9 +122,11 @@ Each of the structure's eight accelerator places that holds an **Ore Refinery Ac
 
 Home shows the status, the five levels (ready, waiting for a resource, working), the energy bar, the nine ore slots and the Always run buttons. **Buffers** shows four large gauges and the level each one unlocks. **Stats** shows the work in progress, level by level which resource is short, and a graph of the last five minutes. All of it in the same blue as the Quantum machines.
 
-<Shots items={[
-  { src: 'wiki-images/quantum_ore_refinery-gui.png', alt: 'The Home screen of the Quantum Ore Refinery Controller', caption: 'Home: the levels x5 to x1, what x5 is missing, Always run and the nine ore slots.' },
-  { src: 'gallery/03_refinery_screens.png', alt: 'The refinery and its screens', caption: 'Home, Buffers, Stats and the module screen.' },
+<Shots cols={2} items={[
+  { src: 'screens/qor-tabs-en-1.png', alt: 'The Home tab of the refinery controller in game', caption: 'Home: “Running at x2”, what x5 is missing, the levels x5 to x1, Always run and the nine ore slots.' },
+  { src: 'screens/qor-tabs-en-2.png', alt: 'The Buffers tab in game', caption: 'Buffers: the four tanks, full, and the level each one unlocks.' },
+  { src: 'screens/qor-tabs-en-3.png', alt: 'The Stats tab in game', caption: 'Stats: production, energy, accelerators, and level by level what is waiting.' },
+  { src: 'screens/qor-tabs-en-4.png', alt: 'The Output module tab in game', caption: 'Output module: Quantum or QIO, the frequency, and the buffer of 64 stacks.' },
 ]} />
 
 ### Quantum / QIO module
@@ -221,6 +223,13 @@ Iron, gold, coal and redstone ores are always listed. Copper, lapis, diamond, em
   <div class="me-feature-card"><span class="me-feature-num">1</span><b>Replace</b><p>Makes the miner's list that one filter.</p></div>
   <div class="me-feature-card"><span class="me-feature-num">2</span><b>Add</b><p>Adds it only if the same tag filter is not already there.</p></div>
 </div>
+
+<Shots cols={2} items={[
+  { src: 'screens/quick-filters-en-1.png', alt: 'The New filter window in game', caption: 'The New filter window starts with Quick filters and Configurations.' },
+  { src: 'screens/quick-filters-en-2.png', alt: 'The Quick filters window with Coal chosen', caption: 'Coal chosen: its tag c:ores/coal, then Replace or Add.' },
+  { src: 'screens/quick-filters-en-3.png', alt: 'Coal added to the list', caption: 'Add: “Coal added (1 filter)”, the filter is in the list.' },
+  { src: 'screens/quick-filters-en-4.png', alt: 'The Configurations window with a saved list', caption: 'Configurations: the list saved as “Charbon”, ready to load on any miner.' },
+]} />
 
 **Other mods' ores included.** Each quick filter is an ordinary Mekanism tag filter on the common ore tag, so the ores that other mods put in that tag are mined too. Nothing is scanned and no chunk is loaded to build it.
 

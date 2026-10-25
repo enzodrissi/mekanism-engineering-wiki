@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import source from '../data/source.json';
 import families from '../data/sidebar.json';
 import { tr } from '../lib/i18n.js';
-import { FEATURES, NEWS, hasSection, FILTER_ICON } from '../lib/features.mjs';
+import { FEATURES, NEWS, hasSection } from '../lib/features.mjs';
 const lng = Astro.locals.starlightRoute?.lang === 'fr' ? 'fr' : 'en';
 const t = (en: string, vars?: Record<string, unknown>) => tr(lng, en, vars);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -54,8 +54,9 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
       <div class="me-news-grid">
         {mb.doc && (
           <article class="me-news-card">
-            <a class="me-news-visual me-news-shot" href={`${base}/${mb.doc.id}/`} tabindex="-1" aria-hidden="true">
-              <img src={`${base}/${mb.shot}`} alt="" loading="lazy" width="1920" height="1080" />
+            <a class="me-news-visual me-news-anim" href={`${base}/${mb.doc.id}/`} tabindex="-1">
+              <picture><source media="(prefers-reduced-motion: reduce)" srcset={`${base}/${mb.screens}-${lng}-1.png`} />
+                <img src={`${base}/${mb.screens}-${lng}.gif`} alt={mb.alt} loading="lazy" width="480" height="462" /></picture>
             </a>
             <div class="me-news-body">
               <div class="me-eyebrow"><span class="me-news-badge">{mb.badge}</span> {mb.family}</div>
@@ -72,13 +73,9 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
         )}
         {spots.map(f => (
           <article class="me-news-card">
-            <a class="me-news-visual me-news-ores" href={`${base}/${f.doc.id}/#${f.anchor}`} tabindex="-1" aria-hidden="true">
-              <img src={`${base}/icons/mekanismengineering/${f.icon}.png`} alt="" loading="lazy" />
-              <span class="me-news-chips">
-                {f.ores[0].map(o => <span class="me-news-chip"><Fragment set:html={FILTER_ICON} />{o}</span>)}
-                {f.ores[1].map(o => <span class="me-news-chip opt">{o}</span>)}
-              </span>
-              <span class="me-news-note">{f.oresNote}</span>
+            <a class="me-news-visual me-news-anim" href={`${base}/${f.doc.id}/#${f.anchor}`} tabindex="-1">
+              <picture><source media="(prefers-reduced-motion: reduce)" srcset={`${base}/${f.screens}-${lng}-1.png`} />
+                <img src={`${base}/${f.screens}-${lng}.gif`} alt={f.alt} loading="lazy" width="552" height="508" /></picture>
             </a>
             <div class="me-news-body">
               <div class="me-eyebrow"><span class="me-news-badge">{news.filters}</span> {f.machine}</div>
