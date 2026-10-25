@@ -61,12 +61,54 @@ function resolveTex(textures, ref) {
 
 export async function getTexture(base, id) {
   const url = fileUrl(base, 'textures', id, '.png');
-  if (!texCache.has(id)) texCache.set(id, fromBundle(url).then(b => new Promise((ok, ko) => loader.load(b || url, t => {
+  if (!texCache.has(id)) texCache.set(id, fromBundle(url).then(b => new Promise((ok, ko) => loader.load(b || url, async t => {
     t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false;
     t.colorSpace = THREE.SRGBColorSpace;
-    t.userData.frames = Math.max(1, Math.round(t.image.height / t.image.width)); ok(t);
+    const frames = t.userData.frames = Math.max(1, Math.round(t.image.height / t.image.width));
+    // a tall texture is an animation strip, as in the game: its .mcmeta says how long each frame lasts (none = one tick each)
+    if (frames > 1) t.userData.anim = parseAnimation(await getJson(url + '.mcmeta', true).catch(() => null), frames);
+    ok(t);
   }, undefined, () => ko(new Error('missing texture ' + id))))));
   return texCache.get(id);
+}
+
+/** The frames of a texture strip in play order, each with its length in game ticks (a tick lasts 50 ms). */
+function parseAnimation(meta, frames) {
+  const a = (meta && meta.animation) || {}, base = a.frametime || 1;
+  const seq = (a.frames || Array.from({ length: frames }, (_, i) => i)).map(f => (typeof f === 'number' ? { i: f, t: base } : { i: f.index, t: f.time || base }));
+  return { seq, total: seq.reduce((n, f) => n + f.t, 0) || 1 };
+}
+
+/** Index of the strip's frame shown `ms` milliseconds after the start. */
+export function frameAt(anim, ms) {
+  let t = (ms / 50) % anim.total;
+  for (const f of anim.seq) { if (t < f.t) return f.i; t -= f.t; }
+  return 0;
+}
+
+/**
+ * The animation of every animated texture drawn in `root` (a .mcmeta strip, like the pump's fan and glow). Call the result
+ * with the clock in ms: it moves each strip to its frame and says whether any frame changed. Nothing moves until it is called.
+ */
+export function textureAnimator(root) {
+  const texs = new Set();
+  root.traverse(o => { const t = o.material && o.material.map; if (t && t.userData.anim) texs.add(t); });
+  const shown = new Map();
+  const step = ms => {
+    let changed = false;
+    for (const t of texs) {
+      const f = frameAt(t.userData.anim, ms);
+      if (shown.get(t) !== f) { shown.set(t, f); t.offset.y = -f / t.userData.frames; changed = true; }
+    }
+    return changed;
+  };
+  step.count = texs.size;
+  return step;
+}
+
+/** Colours the faces that carry a model's tint index (the game tints them per block: the pump's glow takes its fluid's colour). */
+export function setTint(root, index, hex) {
+  root.traverse(o => { if (o.material && o.material.userData.tint === index) o.material.color.setHex(hex); });
 }
 
 const FACE = {
@@ -117,9 +159,9 @@ async function partsOf(base, model) {
   return model.elements ? [{ elements: model.elements, textures: model.textures, render_type: model.render_type }] : [];
 }
 
-function bucket(buckets, texId, glow, translucent) {
-  const key = texId + (glow ? '|glow' : '') + (translucent ? '|t' : '');
-  if (!buckets.has(key)) buckets.set(key, { texId, glow, translucent, pos: [], uv: [], col: [] });
+function bucket(buckets, texId, glow, translucent, tint) {
+  const key = texId + (glow ? '|glow' : '') + (translucent ? '|t' : '') + (tint === undefined ? '' : '|tint' + tint);
+  if (!buckets.has(key)) buckets.set(key, { texId, glow, translucent, tint, pos: [], uv: [], col: [] });
   return buckets.get(key);
 }
 
@@ -171,12 +213,12 @@ export const JOINED = {
  * Builds an Object3D for a model (in blocks, origin at the block corner), turned like a blockstate (x, y in degrees).
  * Glowing faces (block_light) keep full brightness and are drawn over the face they cover.
  */
-export async function buildBlock(base, modelId, { x = 0, y = 0, id = null } = {}) {
+export async function buildBlock(base, modelId, { x = 0, y = 0, id = null, tints = {} } = {}) {
   const model = typeof modelId === 'string' ? await loadModel(base, modelId) : modelId;
   const group = new THREE.Group();
   const key = id || (typeof modelId === 'string' ? modelId : null);
   for (const j of (key && JOINED[key]) || []) {
-    const part = await buildBlock(base, j.model, { x, y });
+    const part = await buildBlock(base, j.model, { x, y, tints });
     const o = new THREE.Vector3(...j.offset);
     if (x) o.applyAxisAngle(new THREE.Vector3(1, 0, 0), -x * Math.PI / 180);
     if (y) o.applyAxisAngle(new THREE.Vector3(0, 1, 0), -y * Math.PI / 180);
@@ -190,7 +232,7 @@ export async function buildBlock(base, modelId, { x = 0, y = 0, id = null } = {}
       const glow = !!(el.neoforge_data && el.neoforge_data.block_light);
       for (const [dir, face] of Object.entries(el.faces || {})) {
         const texId = resolveTex(part.textures, face.texture); if (!texId) continue;
-        const bk = bucket(buckets, texId, glow, translucent);
+        const bk = bucket(buckets, texId, glow, translucent, face.tintindex);
         let pts = FACE[dir](el.from, el.to);
         if (el.rotation) pts = pts.map(p => rotPoint(p, el.rotation.axis, el.rotation.angle, el.rotation.origin, el.rotation.rescale));
         if (x) pts = pts.map(p => rotPoint(p, 'x', -x, [8, 8, 8]));
@@ -219,6 +261,7 @@ export async function buildBlock(base, modelId, { x = 0, y = 0, id = null } = {}
     g.computeBoundingBox();
     const mat = new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, side: THREE.DoubleSide,
       transparent: bk.translucent, alphaTest: bk.translucent ? 0.01 : 0.5, depthWrite: !bk.translucent });
+    if (bk.tint !== undefined) { mat.userData.tint = bk.tint; if (tints[bk.tint] !== undefined) mat.color.setHex(tints[bk.tint]); }
     if (bk.glow) { mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -2; }
     const mesh = new THREE.Mesh(g, mat);
     mesh.renderOrder = bk.translucent ? 2 : bk.glow ? 1 : 0;
