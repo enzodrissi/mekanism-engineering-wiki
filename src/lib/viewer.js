@@ -34,6 +34,7 @@ export class Stage {
     this.controls.addEventListener('start', () => host.classList.add('touched'));
     this.listeners = [];
     new ResizeObserver(() => this.resize()).observe(host);
+    host.dispatchEvent(new CustomEvent('me-stage', { bubbles: true, detail: this })); // the drawing behind it (src/scripts/stage-bg.ts)
   }
   onDraw(fn) { this.listeners.push(fn); }
   resize() {

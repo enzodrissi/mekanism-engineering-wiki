@@ -1,0 +1,93 @@
+/* The technical drawing behind the 3D views (src/scripts/stage-bg.ts): a turntable and a block grid lying on the model's
+   floor, corner brackets, a dimension line, a slow scan line, monospace labels. Thin teal lines, behind the canvas, never
+   in the way of a tap. Only transform and opacity move after the lines have drawn themselves; with reduced motion the
+   drawing is simply there, still. */
+:root { --bp-ink: 100, 209, 199; --bp-k: 1; }
+:root[data-theme='light'] { --bp-ink: 15, 125, 116; --bp-k: 1.15; }
+
+.me-bp-host { isolation: isolate; }
+.me-bp { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; contain: strict; user-select: none; }
+.me-bp svg { display: block; overflow: visible; }
+.me-stage .me-bp svg :is(circle, path) { fill: none; } /* theme.css fills the markers' circles */
+
+/* ---------- the floor: a 640 px disc that stage-bg.ts lays on the model's floor plane ---------- */
+.me-bp-floor { position: absolute; left: 0; top: 0; width: 640px; height: 640px; transform-origin: 0 0; opacity: 0; --lw: 1px; }
+.me-bp-ready .me-bp-floor, .me-bp-ready .me-bp-dim { opacity: 1; }
+.me-bp-floor > svg, .me-bp-spin, .me-bp-spin2 { position: absolute; inset: 0; width: 100%; height: 100%; }
+.me-bp-spin > svg, .me-bp-spin2 > svg { width: 100%; height: 100%; }
+.me-bp-floor :is(path, circle) { stroke: rgba(var(--bp-ink), calc(0.42 * var(--bp-k))); stroke-width: var(--lw); }
+.me-bp-ring { stroke-dasharray: 1; }
+.me-bp-floor .me-bp-ticks { stroke: rgba(var(--bp-ink), calc(0.5 * var(--bp-k))); stroke-dasharray: 1; }
+.me-stage .me-bp-floor .me-bp-index { fill: rgba(var(--bp-ink), calc(0.75 * var(--bp-k))); stroke: none; }
+.me-bp-floor .me-bp-dash { stroke: rgba(var(--bp-ink), calc(0.26 * var(--bp-k))); stroke-dasharray: 3 9; }
+.me-bp-floor .me-bp-arc { stroke: rgba(var(--bp-ink), calc(0.8 * var(--bp-k))); stroke-width: calc(var(--lw) * 1.8); stroke-dasharray: 1; stroke-linecap: round; }
+.me-bp-floor .me-bp-cross { stroke: rgba(var(--bp-ink), calc(0.4 * var(--bp-k))); }
+/* one line per block edge (and, for a single block, a faint one per model pixel), fading out toward the ring */
+.me-bp-grid { position: absolute; inset: 0; --s: 64px; --gx: 0px; --gz: 0px; --gl: rgba(var(--bp-ink), calc(0.14 * var(--bp-k)));
+  background-image: linear-gradient(90deg, var(--gl) var(--lw), transparent var(--lw)), linear-gradient(var(--gl) var(--lw), transparent var(--lw));
+  background-size: var(--s) var(--s); background-position: var(--gx) var(--gz);
+  -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent 96%); mask-image: radial-gradient(closest-side, #000 40%, transparent 96%); }
+.me-bp-block .me-bp-grid { --gf: rgba(var(--bp-ink), calc(0.05 * var(--bp-k)));
+  background-image: linear-gradient(90deg, var(--gl) var(--lw), transparent var(--lw)), linear-gradient(var(--gl) var(--lw), transparent var(--lw)),
+    linear-gradient(90deg, var(--gf) var(--lw), transparent var(--lw)), linear-gradient(var(--gf) var(--lw), transparent var(--lw));
+  background-size: var(--s) var(--s), var(--s) var(--s), calc(var(--s) / 16) calc(var(--s) / 16), calc(var(--s) / 16) calc(var(--s) / 16);
+  background-position: var(--gx) var(--gz); }
+
+/* ---------- frame: corner brackets and labels ---------- */
+.me-bp-corner { position: absolute; width: 14px; height: 14px; }
+.me-bp-corner path { stroke: rgba(var(--bp-ink), calc(0.6 * var(--bp-k))); stroke-width: 1.2; stroke-dasharray: 1; }
+.me-bp-corner.tl { left: 8px; top: 8px; }
+.me-bp-corner.tr { right: 8px; top: 8px; transform: scaleX(-1); }
+.me-bp-corner.bl { left: 8px; bottom: 8px; transform: scaleY(-1); }
+.me-bp-corner.br { right: 8px; bottom: 8px; transform: scale(-1); }
+.me-bp-label { position: absolute; top: 10px; font: 500 9px/1.45 var(--sl-font-mono); letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(var(--bp-ink), calc(0.72 * var(--bp-k))); white-space: pre; }
+.me-bp-name { left: 28px; max-width: calc(50% - 28px); overflow: hidden; text-overflow: ellipsis; }
+.me-bp-ang { right: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- dimension line under the model (positions set by stage-bg.ts) ---------- */
+.me-bp-dim { position: absolute; inset: 0; opacity: 0; }
+.me-bp-dim > * { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.me-bp-line, .me-bp-ext { width: 1px; height: 1px; }
+.me-bp-line { background: rgba(var(--bp-ink), calc(0.5 * var(--bp-k))); }
+.me-bp-ext { background: rgba(var(--bp-ink), calc(0.2 * var(--bp-k))); }
+.me-bp-end::before { content: ''; position: absolute; left: -0.5px; top: -5px; width: 1px; height: 10px; background: rgba(var(--bp-ink), calc(0.75 * var(--bp-k))); transform: rotate(45deg); }
+.me-bp-size { translate: -50% calc(-100% - 3px); font: 500 9px/1 var(--sl-font-mono); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+  color: rgba(var(--bp-ink), calc(0.85 * var(--bp-k))); }
+
+.me-bp-scan { position: absolute; left: 0; right: 0; top: 0; height: 38%; opacity: 0; display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* the lines draw themselves once the view is on screen, then only the turntable and the scan line move, slowly */
+  @keyframes me-bp-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes me-bp-fade { from { opacity: 0; } }
+  @keyframes me-bp-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes me-bp-open { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes me-bp-turn { to { transform: rotate(360deg); } }
+  @keyframes me-bp-scan {
+    0% { transform: translateY(-100%); opacity: 0; }
+    6% { opacity: 1; }
+    52% { opacity: 1; }
+    60%, 100% { transform: translateY(163%); opacity: 0; }
+  }
+  .me-bp :is(.me-bp-ring, .me-bp-ticks, .me-bp-arc, .me-bp-corner path) { stroke-dashoffset: 1; }
+  .me-bp-ready.me-bp-on .me-bp-corner path { animation: me-bp-draw 700ms var(--me-ease, ease-out) both; stroke-dashoffset: 0; }
+  .me-bp-ready.me-bp-on .me-bp-corner.tr path { animation-delay: 90ms; }
+  .me-bp-ready.me-bp-on .me-bp-corner.br path { animation-delay: 180ms; }
+  .me-bp-ready.me-bp-on .me-bp-corner.bl path { animation-delay: 270ms; }
+  .me-bp-ready.me-bp-on .me-bp-ring { animation: me-bp-draw 1500ms var(--me-ease, ease-out) 150ms both; stroke-dashoffset: 0; }
+  .me-bp-ready.me-bp-on .me-bp-ticks { animation: me-bp-draw 1800ms cubic-bezier(0.5, 0, 0.2, 1) 300ms both; stroke-dashoffset: 0; }
+  .me-bp-ready.me-bp-on .me-bp-arc { animation: me-bp-draw 900ms var(--me-ease, ease-out) 1100ms both; stroke-dashoffset: 0; }
+  .me-bp-ready.me-bp-on :is(.me-bp-dash, .me-bp-cross, .me-bp-index) { animation: me-bp-fade 700ms ease-out 900ms both; }
+  .me-bp-ready.me-bp-on .me-bp-grid { animation: me-bp-fade 1400ms ease-out 400ms both; }
+  .me-bp-ready.me-bp-on .me-bp-dim { animation: me-bp-open 900ms var(--me-ease, ease-out) 700ms both; }
+  .me-bp-ready.me-bp-on .me-bp-label { animation: me-bp-type 700ms steps(14, end) 500ms both; }
+  .me-bp-ready.me-bp-on .me-bp-ang { animation-delay: 800ms; }
+  .me-bp-on .me-bp-spin { animation: me-bp-turn 140s linear infinite; }
+  .me-bp-on .me-bp-spin2 { animation: me-bp-turn 70s linear infinite reverse; }
+  .me-bp-scan { display: block; will-change: transform, opacity;
+    background: linear-gradient(90deg, transparent, rgba(var(--bp-ink), calc(0.5 * var(--bp-k))) 25%, rgba(var(--bp-ink), calc(0.5 * var(--bp-k))) 75%, transparent) bottom / 100% 1px no-repeat,
+      linear-gradient(transparent 30%, rgba(var(--bp-ink), calc(0.06 * var(--bp-k)))); }
+  .me-bp-ready.me-bp-on .me-bp-scan { animation: me-bp-scan 9s cubic-bezier(0.45, 0, 0.4, 1) 1.6s infinite; }
+  .me-bp-pause, .me-bp-pause * { animation-play-state: paused !important; }
+}
