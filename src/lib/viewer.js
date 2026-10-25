@@ -42,8 +42,8 @@ export class Stage {
     this.renderer.setSize(w, h, false);
     this.frame(false);
   }
-  /** Fits the camera on the content; `reset` also turns it back to the starting angle. */
-  frame(reset = true) {
+  /** Fits the camera on the content; `reset` also turns it back to the starting angle; `show` draws the result. */
+  frame(reset = true, show = true) {
     const w = this.host.clientWidth, h = this.host.clientHeight;
     if (!w || !h || !this.root.children.length) return;
     const box = new THREE.Box3().setFromObject(this.root), ctr = box.getCenter(new THREE.Vector3());
@@ -62,7 +62,7 @@ export class Stage {
     Object.assign(this.cam, { left: -w * s / 2, right: w * s / 2, top: h * s / 2, bottom: -h * s / 2 });
     this.cam.updateProjectionMatrix();
     this.fitted = true;
-    this.draw();
+    if (show) this.draw();
   }
   draw() {
     if (this.pending) return;
@@ -231,26 +231,40 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   });
 
   const state = { mode, only: mode === 'layers' ? 1 : 0 };
+  const meshes = [];
+  root.traverse(m => { if (m.material) meshes.push(m); });
   const layersEl = host.querySelector('.me-layers');
   layersEl.innerHTML = [1, 2, 3, 4].map(n => `<button type="button" data-layer="${n}" aria-pressed="false"><img src="${icon('_layer' + n)}" alt="" loading="lazy">Layer ${n}</button>`).join('');
   let gliding = 0;
   function apply(reframe, glide = false) {
     const gap = state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6;
     const was = glide ? blocks.map(b => b.position.y) : null, cam = glide && reframe ? camState(stage) : null;
-    arrange(blocks, { gap, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 });
+    const fade = glide ? meshes.map(m => m.material.opacity) : null;
+    const opts = { gap, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 };
+    arrange(blocks, opts);
     root.updateMatrixWorld(true);
     for (const b of host.querySelectorAll('.me-seg button')) b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
     layersEl.hidden = state.mode !== 'layers';
     for (const b of layersEl.querySelectorAll('button')) b.setAttribute('aria-pressed', String(+b.dataset.layer === state.only));
-    if (reframe) stage.frame(); else stage.draw();
-    if (!glide) return;
-    // the layers glide to their new place and the camera follows
+    if (!glide) { if (reframe) stage.frame(); else stage.draw(); return; }
+    // the layers glide to their new place, the hidden ones fade, and the camera follows; the end state is only measured
+    // here, never drawn, so the view goes straight from where it was to where it goes
+    if (reframe) stage.frame(true, false);
     const to = blocks.map(b => b.position.y), end = cam && camState(stage), run = ++gliding;
+    const target = meshes.map(m => m.material.opacity);
+    const moving = meshes.map((m, i) => fade[i] !== target[i]);
+    // while a block fades, it is see-through and keeps every pixel (the cut-out threshold would hide it below half opacity)
+    meshes.forEach((m, i) => { if (moving[i]) Object.assign(m.material, { transparent: true, depthWrite: false, alphaTest: 0.02, opacity: fade[i], needsUpdate: true }); });
+    blocks.forEach((b, i) => { b.position.y = was[i]; });
+    if (cam) setCam(stage, cam, end, 0);
+    stage.draw();
     tween(650, t => {
       if (run !== gliding) return;
       const k = easeInOut(t);
       blocks.forEach((b, i) => { b.position.y = was[i] + (to[i] - was[i]) * k; });
+      meshes.forEach((m, i) => { if (moving[i]) m.material.opacity = fade[i] + (target[i] - fade[i]) * k; });
       if (cam) setCam(stage, cam, end, t);
+      if (t === 1) arrange(blocks, opts);
       stage.draw();
     });
   }
@@ -259,7 +273,7 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     unselect();
     state.mode = m; if (m === 'layers' && !state.only) state.only = 1; apply(true, true);
   });
-  layersEl.addEventListener('click', e => { const n = +e.target.closest('button')?.dataset.layer; if (n) { unselect(); state.only = n; apply(false); } });
+  layersEl.addEventListener('click', e => { const n = +e.target.closest('button')?.dataset.layer; if (n) { unselect(); state.only = n; apply(false, true); } });
   host.querySelector('.me-reset').addEventListener('click', () => stage.frame());
 
   // tap a block: its card
@@ -302,6 +316,13 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   blocks.forEach((b, i) => { b.position.y = rest[i]; b.visible = true; });
   stageEl.classList.remove('me-intro'); stage.draw();
   if (tags) sway(stage, stageEl);
+  // the see-through blocks of the layer view need their own shaders: compiled now, while nothing moves, so the first
+  // change of view does not stall
+  else (window.requestIdleCallback || setTimeout)(() => {
+    arrange(blocks, { gap: 0, only: 1, ghost: 0.1 }); stage.renderer.compile(stage.scene, stage.cam);
+    arrange(blocks, { gap: state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 });
+    root.updateMatrixWorld(true); stage.draw();
+  });
   return stage;
 }
 
