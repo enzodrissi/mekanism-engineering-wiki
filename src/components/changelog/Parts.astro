@@ -1,0 +1,23 @@
+---
+// The blocks of a structure as a row of icons, each named as the game names it (public/data/blocks.json, made by the import).
+// Hover or tap one to read its name; a click leads to its page.
+import '../../styles/changelog.css';
+import { icon, hasIcon, data, langOf, BASE } from './lib';
+interface Props { ids: string[]; label?: string }
+const { ids, label } = Astro.props;
+const lng = langOf(Astro);
+const names = data('blocks.json', lng);
+const parts = ids.filter(id => hasIcon(id)).map(id => ({ id, name: names[id]?.name ?? id, page: names[id]?.page ?? null }));
+const href = (page: string) => `${BASE}${lng === 'fr' ? '/fr' : ''}/${page}/`;
+---
+
+<div class="cl-parts not-content">
+  {label && <span class="me-eyebrow">{label}</span>}
+  <ul>
+    {parts.map(p => (
+      <li>{p.page
+        ? <a class="me-slot" href={href(p.page)} data-name={p.name} aria-label={p.name}><img src={icon(p.id)} alt="" loading="lazy" /></a>
+        : <span class="me-slot" tabindex="0" data-name={p.name}><img src={icon(p.id)} alt={p.name} loading="lazy" /></span>}</li>
+    ))}
+  </ul>
+</div>

@@ -1,0 +1,25 @@
+---
+// The five levels of the Quantum Ore Refinery as a staircase: each one with the processing modules it adds (their icons) and as
+// many iron ingots as one iron ore gives at that level.
+import '../../styles/changelog.css';
+import { icon } from './lib';
+interface Level { x: number; mods: string[]; text: string }
+interface Props { items: Level[]; ingot: string; note?: string }
+const { items, ingot, note } = Astro.props;
+---
+
+<div class="cl-cq not-content">
+  <ol class="cl-levels">
+    {items.map(l => (
+      <li class="cl-lv" style={`--n:${l.x}`}>
+        <span class="cl-lv-x">x{l.x}</span>
+        <span class="cl-lv-mods">{l.mods.map(m => <img src={icon(m)} alt="" loading="lazy" />)}</span>
+        <span class="cl-lv-text">{l.text}</span>
+        <span class="cl-lv-ingots" role="img" aria-label={`${l.x} × ${ingot}`}>
+          {Array.from({ length: l.x }, () => <img src={icon('minecraft:iron_ingot')} alt="" loading="lazy" />)}
+        </span>
+      </li>
+    ))}
+  </ol>
+  {note && <p class="cl-note">{note}</p>}
+</div>

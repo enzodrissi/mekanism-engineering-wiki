@@ -1,0 +1,12 @@
+---
+// One headliner of a release note: its heading and text (Markdown, in the slot) on a lit panel with a badge above.
+// tone q: Quantum (blue light), t: teal.
+import '../../styles/changelog.css';
+interface Props { tone?: 'q' | 't'; kicker: string }
+const { tone = 'q', kicker } = Astro.props;
+---
+
+<section class:list={['cl-band', tone]}>
+  <div class="cl-kicker not-content"><span class="me-pill">{kicker}</span></div>
+  <slot />
+</section>

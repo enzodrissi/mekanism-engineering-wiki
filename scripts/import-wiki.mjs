@@ -303,8 +303,17 @@ const changelogs = fs.readdirSync(path.join(SRC, 'docs/publication')).filter(f =
 const ver = f => f.match(/_(\d[\d.]*)\.md$/)[1];
 const cmp = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
 const isDraft = v => /BROUILLON|NON PUBLIÉ|\bTBD\b/.test(rd(`docs/publication/CURSEFORGE_CHANGELOG_${v}.md`));
-const drafts = changelogs.map(ver).filter(v => cmp(v, '1.0.0') >= 0 && isDraft(v) && process.env.INCLUDE_DRAFT_CHANGELOG !== '1');
+// A version may also have a visual page, written by hand in this repository: src/changelog/<version>.mdx, and its French twin
+// src/changelog/fr/<version>.mdx (1.2: the multiblock and the quick filters first, with the site's 3D views and pictures). It is
+// that version's one page, /changelog/<version>/: it is copied in place of the CurseForge text, which is then not written
+// at all (the two would have the same address), and it is listed from the start, before and after the release alike.
+const VISUAL = path.join(ROOT, 'src/changelog');
+const visualOf = (v, lng) => { const f = path.join(VISUAL, lng === 'fr' ? 'fr' : '', v + '.mdx'); return fs.existsSync(f) ? f : null; };
+const visual = fs.existsSync(VISUAL) ? fs.readdirSync(VISUAL).filter(f => /^\d[\d.]*\.mdx$/.test(f)).map(f => f.slice(0, -4)) : [];
+const drafts = changelogs.map(ver).filter(v => cmp(v, '1.0.0') >= 0 && isDraft(v) && !visual.includes(v) && process.env.INCLUDE_DRAFT_CHANGELOG !== '1');
 const published = changelogs.map(ver).filter(v => cmp(v, '1.0.0') >= 0 && (!isDraft(v) || process.env.INCLUDE_DRAFT_CHANGELOG === '1')).sort(cmp).reverse();
+// every version that has a page: the published notes and the visual pages, newest first
+const shown = [...new Set([...published, ...visual])].sort(cmp).reverse();
 
 function rewrite(md, from, pageIds = null) {
   // links between pages, to anchors and to files of the GitLab repository
@@ -316,7 +325,7 @@ function rewrite(md, from, pageIds = null) {
     if (link[name]) { const a = anchorIn(pageOfFile(name), anchor); return `](${link[name]}${a ? '#' + a : ''})`; }
     if (file.startsWith('images/')) return `](${BASE}/wiki-images/${file.slice(7)})`;
     const rel = file.match(/releases\/(\d[\d.]*)\.md$/);
-    if (rel) { const v = published.find(x => x === rel[1] || x === rel[1] + '.0'); return `](${BASE}${pre()}/changelog/${v ? v.replace(/\./g, '-') + '/' : ''})`; }
+    if (rel) { const v = shown.find(x => x === rel[1] || x === rel[1] + '.0'); return `](${BASE}${pre()}/changelog/${v ? v.replace(/\./g, '-') + '/' : ''})`; }
     return `](${GITLAB}/-/blob/${EDIT_REF}/docs/wiki/${href})`;
   });
   // a recipe image followed by its pattern block becomes a crafting grid made from the mod's recipe file
@@ -377,11 +386,13 @@ for (const [from, p0] of Object.entries(PAGES)) {
 // ---------- 6. changelog: only versions whose public notes are final ----------
 let order = 2;
 const notes = v => {
-  if (!fr) return rd(`docs/publication/CURSEFORGE_CHANGELOG_${v}.md`);
+  if (!fr) return published.includes(v) ? rd(`docs/publication/CURSEFORGE_CHANGELOG_${v}.md`) : null;
   const f = path.join(FR_SRC, 'changelog', v + '.md');
-  return fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null;
+  return published.includes(v) && fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null;
 };
-const listed = published.filter(v => notes(v) !== null);
+const listed = shown.filter(v => visualOf(v, LNG) || notes(v) !== null);
+// a visual page is listed under its own title ("v1.2: New multiblock and Quick filters"), a text page as "v1.1.1"
+const label = v => { const f = visualOf(v, LNG); const t = f && (fs.readFileSync(f, 'utf8').match(/^title: *"?(.+?)"? *$/m) || [])[1]; return t || 'v' + v; };
 write(path.join(OUT, 'changelog/index.md'), fr ? `---
 title: "Notes de version"
 description: "Ce qui a changé dans chaque version de Mekanism: Engineering."
@@ -390,9 +401,9 @@ sidebar:
   label: Toutes les versions
 ---
 
-Les notes de chaque version publiée, de la plus récente à la plus ancienne, telles que publiées sur CurseForge.
+Les notes de chaque version, de la plus récente à la plus ancienne.
 ${drafts.length ? `\nLes notes de ${drafts.map(v => 'v' + v).join(', ')} sont en cours d'écriture et apparaîtront ici à sa sortie.\n` : ''}
-${listed.map(v => `- [v${v}](${BASE}/fr/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
+${listed.map(v => `- [${label(v)}](${BASE}/fr/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
 ` : `---
 title: "Release notes"
 description: "What changed in each version of Mekanism: Engineering."
@@ -401,11 +412,14 @@ sidebar:
   label: All versions
 ---
 
-The notes of every published version, newest first, as posted on CurseForge.
+The notes of every version, newest first.
 ${drafts.length ? `\nThe notes of ${drafts.map(v => 'v' + v).join(', ')} are being written and appear here when it is released.\n` : ''}
-${listed.map(v => `- [v${v}](${BASE}/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
+${listed.map(v => `- [${label(v)}](${BASE}/changelog/${v.replace(/\./g, '-')}/)`).join('\n')}
 `);
 for (const v of listed) {
+  const page = visualOf(v, LNG);
+  // the visual page as written, at its place in the sidebar (the CurseForge text of that version is left out)
+  if (page) { write(path.join(OUT, `changelog/${v.replace(/\./g, '-')}.mdx`), fs.readFileSync(page, 'utf8').replace(/^(---\n[\s\S]*?\n {2}order:) *\d+/, `$1 ${order++}`)); continue; }
   const md = notes(v).replace(/<!--[\s\S]*?-->\n?/g, '').replace(/^# .+\n+/m, '');
   write(path.join(OUT, `changelog/${v.replace(/\./g, '-')}.md`),
     `---\ntitle: ${JSON.stringify('v' + v)}\nsidebar:\n  order: ${order++}\n---\n${rewrite(md, 'changelog').trim()}\n`);

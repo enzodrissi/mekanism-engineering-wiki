@@ -1,0 +1,44 @@
+---
+// One change of a release note: its heading and text (Markdown, in the slot) beside what it looks like, and a link to its
+// wiki page. The picture is screenshots (`shots`: { src, alt, caption, crop } as in Shots) and/or a row of item icons
+// (`icons`, joined by `join`, with `caption` under them), or nothing. tone q: Quantum (blue), g: Mekanism style (copper), t: teal (reference), s: plain glass.
+import '../../styles/changelog.css';
+import { icon, asset } from './lib';
+interface Props {
+  tone?: 'q' | 'g' | 't' | 's'; shots?: { src: string; alt: string; caption?: string; crop?: number[] }[]; caption?: string;
+  icons?: string[]; join?: string; href?: string; more?: string; wide?: boolean;
+}
+const { tone = 'q', shots = [], caption, icons, join, href, more, wide } = Astro.props;
+const pct = (a: number, b: number) => `${((a / b) * 100).toFixed(3)}%`;
+const visual = !!(shots.length || icons?.length);
+---
+
+<article class:list={['cl-card', tone]}>
+  <div class:list={['cl-card-in', { 'has-v': visual, wide }]}>
+    <div class="cl-card-text">
+      <slot />
+      {href && more && <p class="cl-more-p"><a class="cl-more" href={href}>{more} →</a></p>}
+    </div>
+    {visual && (
+      <div class="cl-card-v not-content">
+        {shots.map(({ src, alt, caption: cap, crop }) => (
+          <figure class="px">
+            {crop ? (
+              <div class="cl-crop" style={`aspect-ratio:${crop[2]} / ${crop[3]}`}>
+                <img src={asset(src)} alt={alt} loading="lazy" decoding="async"
+                  style={`width:${pct(crop[4], crop[2])};left:-${pct(crop[0], crop[2])};top:-${pct(crop[1], crop[3])}`} />
+              </div>
+            ) : <img src={asset(src)} alt={alt} loading="lazy" decoding="async" />}
+            {cap && <figcaption>{cap}</figcaption>}
+          </figure>
+        ))}
+        {icons && (
+          <div class="cl-icons">
+            {icons.map((id, i) => <>{i > 0 && join && <span class="cl-join" aria-hidden="true">{join}</span>}<img src={icon(id)} alt="" loading="lazy" /></>)}
+          </div>
+        )}
+        {icons && caption && <p class="cl-note">{caption}</p>}
+      </div>
+    )}
+  </div>
+</article>

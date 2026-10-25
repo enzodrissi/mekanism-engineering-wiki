@@ -1,0 +1,474 @@
+---
+title: "v1.2 : Nouveau multibloc et Quick filters"
+description: "Mekanism: Engineering 1.2, la grosse mise à jour : le multibloc Quantum Ore Refinery, les Quick filters du Quantum Digital Miner, et tout ce qui a changé d'autre."
+sidebar:
+  order: 2
+  label: "v1.2"
+tableOfContents:
+  maxHeadingLevel: 2
+editUrl: "https://github.com/mekanism-engineering/mekanism-engineering.github.io/edit/main/src/changelog/fr/1.2.mdx"
+---
+{/* Les notes de version de la 1.2 en une page qui se voit. Écrite ici et copiée par scripts/import-wiki.mjs vers
+    src/content/docs/fr/changelog/1-2.mdx (le dossier que l'import refait à chaque build), à la place du texte CurseForge de la
+    1.2 : les chemins ci-dessous sont ceux de cette copie. Traduit des notes figées CHANGELOG_1.2_EN.md (src/changelog/1.2.mdx). */}
+import Hero from '../../../../components/changelog/Hero.astro';
+import Band from '../../../../components/changelog/Band.astro';
+import Card from '../../../../components/changelog/Card.astro';
+import Levels from '../../../../components/changelog/Levels.astro';
+import Tanks from '../../../../components/changelog/Tanks.astro';
+import Shots from '../../../../components/changelog/Shots.astro';
+import Stats from '../../../../components/changelog/Stats.astro';
+import Chips from '../../../../components/changelog/Chips.astro';
+import Parts from '../../../../components/changelog/Parts.astro';
+import Recipe from '../../../../components/changelog/Recipe.astro';
+import Viewer from '../../../../components/changelog/Viewer.astro';
+
+<Hero
+  eyebrow="Mekanism: Engineering 1.2 · La grosse mise à jour"
+  tagline={'Le minerai entre.\nJusqu’à cinq lingots sortent.'}
+  safe="Les mondes de la 1.1.1 s'ouvrent sans changement : les nouvelles données s'ajoutent à côté des anciennes, jamais à leur place."
+  heads={[
+    { tone: 'q', img: '_refinery', eyebrow: 'Nouveau multibloc', title: 'Quantum Ore Refinery',
+      text: "Toute la chaîne de traitement du minerai de Mekanism, de la fonte à la dissolution et à la cristallisation, dans une seule structure qu'on construit, qu'on voit s'allumer et qu'on règle depuis un seul écran.",
+      facts: ['x1 → x5', 'jusqu’à 5 lingots par minerai', '8 accélérateurs'], href: '#la-grosse-nouveauté-quantum-ore-refinery', go: 'Voir le multibloc' },
+    { tone: 't', img: 'quantum_digital_miner', eyebrow: 'Quick filters · Quantum Digital Miner', title: 'Quick filters et listes de filtres enregistrées',
+      text: 'Un clic pour miner le fer, l’or, le diamant et plus encore.',
+      facts: ['12 filtres de minerai', 'Remplacer ou Ajouter', '32 listes enregistrées'], href: '#aussi-en-vedette-les-quick-filters-du-quantum-digital-miner', go: 'Voir les Quick filters' },
+  ]}
+  jumpLabel="Aussi dans la 1.2"
+  jumps={[
+    { label: 'Tablette de réseau', href: '#tablette-de-réseau-quantique', icon: 'quantum_network_tablet' },
+    { label: 'Contrôleur de réseau', href: '#contrôleur-de-réseau-quantique-une-image-plus-claire-de-chaque-fréquence', icon: 'quantum_network_controller' },
+    { label: 'Chargepad', href: '#quantum-chargepad-modes-local-et-quantique', icon: 'quantum_chargepad' },
+    { label: 'Notifications du mineur', href: '#quantum-digital-miner-notifications', icon: 'quantum_digital_miner' },
+    { label: 'Portable Teleporter', href: '#quantum-portable-teleporter-le-dernier-saut-et-réglages-serveur', icon: 'quantum_portable_teleporter' },
+    { label: 'Commandes serveur', href: '#commandes-serveur' },
+    { label: 'Entangloporter', href: '#quantum-entangloporter-radioactif', icon: 'radioactive_quantum_entangloporter' },
+    { label: 'Écrans et textures', href: '#un-seul-style-les-mêmes-commandes', icon: 'precision_logistical_distributor', tone: 'g' },
+    { label: 'Corrections', href: '#corrigé' },
+    { label: 'Bon à savoir', href: '#bon-à-savoir' },
+    { label: 'Compatibilité', href: '#compatibilité' },
+  ]}
+>
+Le premier multibloc d'Engineering est arrivé. La **Quantum Ore Refinery** exécute toute la chaîne de traitement du minerai de Mekanism, de la fonte à la dissolution et à la cristallisation, dans une seule structure qu'on construit, qu'on voit s'allumer et qu'on règle depuis un seul écran. À côté, le Quantum Digital Miner reçoit les **Quick filters et les listes de filtres enregistrées** : un clic pour miner le fer, l'or, le diamant et plus encore. Autour d'eux, la 1.2 apporte une **Tablette de réseau** de poche, un **Chargepad qui puise dans le réseau quantique**, des **notifications du mineur impossibles à manquer**, des **commandes serveur**, un **Quantum Entangloporter radioactif** remanié, des écrans Quantum bleus et de nouvelles textures dans tout le mod, et une longue liste de corrections.
+</Hero>
+
+<Band tone="q" kicker="Nouveau multibloc">
+
+## La grosse nouveauté : Quantum Ore Refinery
+
+<p class="cl-lead">Un multibloc qui transforme le minerai en lingots, avec un écran pour le piloter et un module Quantum/QIO optionnel qui envoie ce qu'il produit directement sur son réseau.</p>
+
+<Viewer kind="refinery" mode="exploded" />
+
+<Stats items={[
+  { v: 'x1 → x5', l: 'cinq niveaux, une seule machine' },
+  { v: '64', l: 'minerais par travail, une pile entière' },
+  { v: '8', l: 'places d’accélérateur', icon: 'ore_refinery_accelerator' },
+  { v: '4', l: 'réservoirs, un par ressource', icon: 'ore_refinery_tank_water' },
+  { v: '10 × 4 × 3', l: 'blocs, la structure', icon: 'ore_refinery_controller' },
+]} />
+
+### Cinq niveaux, une seule machine
+
+Le niveau dit combien d'objets donne un minerai, exactement comme les chaînes de Mekanism : **x1** le fond, **x2** l'enrichit d'abord, **x3** ajoute la purification avec de l'oxygène, **x4** ajoute l'injection avec du chlorure d'hydrogène, **x5** le dissout, le lave et le cristallise avec de l'acide sulfurique et de l'eau. Un minerai de fer donne 1, 2, 3, 4 ou 5 lingots ; les autres minerais suivent leurs propres rapports Mekanism.
+
+<Levels
+  ingot="lingot de fer"
+  note="Lingots de fer obtenus d'un minerai de fer à chaque niveau, sous le module de traitement que chaque niveau ajoute."
+  items={[
+    { x: 1, mods: ['ore_refinery_module_smelting'], text: 'Le fond' },
+    { x: 2, mods: ['ore_refinery_module_enrichment'], text: 'L’enrichit d’abord' },
+    { x: 3, mods: ['ore_refinery_module_purification'], text: 'Ajoute la purification avec de l’oxygène' },
+    { x: 4, mods: ['ore_refinery_module_injection'], text: 'Ajoute l’injection avec du chlorure d’hydrogène' },
+    { x: 5, mods: ['ore_refinery_module_dissolution', 'ore_refinery_module_washing', 'ore_refinery_module_crystallization'], text: 'Le dissout, le lave et le cristallise avec de l’acide sulfurique et de l’eau' },
+  ]}
+/>
+
+**Elle utilise les recettes de Mekanism, pas les siennes.** Chaque étape lit la recette de l'objet qui se présente, donc ce qu'un modpack change dans Mekanism change la raffinerie avec. Les minerais, les métaux bruts et les blocs de métal brut entrent, tout comme les minerais d'autres mods que Mekanism sait traiter. Le tag `mekanismengineering:refinery_ores` liste ce qui entre, et un datapack peut le modifier.
+
+**Des piles entières à la fois.** Un travail traite une pile de jusqu'à 64 minerais. Le **x1 raffine une pile entière en un seul tick** ; les niveaux supérieurs prennent plus de temps, parce qu'ils donnent plus.
+
+### Huit accélérateurs
+
+Chacune des huit places d'accélérateur de la structure qui contient un **Accélérateur de raffinerie de minerai** raccourcit le travail. Avec les huit, le x2 prend 1 tick, le x3 2, le x4 3 et le x5 4 :
+
+| Accélérateurs | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|---|
+| x2 (ticks par travail) | 50 | 31 | 19 | 12 | 7 | 4 | 3 | 2 | 1 |
+| x3 | 100 | 61 | 38 | 23 | 14 | 9 | 5 | 3 | 2 |
+| x4 | 150 | 92 | 56 | 35 | 21 | 13 | 8 | 5 | 3 |
+| x5 | 200 | 123 | 75 | 46 | 28 | 17 | 11 | 7 | 4 |
+
+**La même énergie à chaque niveau.** Un minerai coûte ce qu'il coûte dans une Chambre d'enrichissement, quels que soient le niveau et la vitesse : on paie le minerai, pas la vitesse.
+
+### Quatre réservoirs qui suivent un Quantum Digital Miner
+
+3 000 000 mB d'eau, 600 000 mB de chlorure d'hydrogène, 600 000 mB d'oxygène et 120 000 mB d'acide sulfurique. Un travail prend ce que ses étapes utilisent dans Mekanism (un minerai de fer à x5 prend 200 mB d'acide sulfurique, 5 000 mB d'eau, 1 000 mB de chlorure d'hydrogène et 1 000 mB d'oxygène), tout en une fois avec les produits, ou rien du tout.
+
+<Tanks
+  note="Ce qu'un minerai de fer à x5 prend dans chaque réservoir."
+  items={[
+    { icon: 'ore_refinery_tank_water', cap: '3 000 000 mB', name: 'eau', use: 'fer à x5 : 5 000 mB' },
+    { icon: 'ore_refinery_tank_hydrogen_chloride', cap: '600 000 mB', name: 'chlorure d’hydrogène', use: 'fer à x5 : 1 000 mB' },
+    { icon: 'ore_refinery_tank_oxygen', cap: '600 000 mB', name: 'oxygène', use: 'fer à x5 : 1 000 mB' },
+    { icon: 'ore_refinery_tank_sulfuric_acid', cap: '120 000 mB', name: 'acide sulfurique', use: 'fer à x5 : 200 mB' },
+  ]}
+/>
+
+**On choisit jusqu'où elle va.** Cliquer sur un niveau de l'écran Accueil pour fixer le niveau le plus haut que la raffinerie utilisera. Avec **Toujours actif** sur OFF, elle attend ce niveau ; sur ON, elle travaille au meilleur niveau que couvrent les réservoirs, et jamais sous x2, sauf si on a choisi x1. Quand les réservoirs ne couvrent qu'une partie d'une pile, un travail prend autant de minerais qu'ils en couvrent et le reste de la pile attend le travail suivant, au lieu de bloquer ou de descendre d'un niveau pour toute la pile.
+
+### Un écran pour chaque question
+
+Accueil montre le statut, les cinq niveaux (prêt, en attente d'une ressource, en marche), la barre d'énergie, les neuf emplacements de minerai et les boutons Toujours actif. **Réservoirs** montre quatre grandes jauges et le niveau que chacune débloque. **Statistiques** montre le travail en cours, niveau par niveau la ressource qui manque, et un graphique des cinq dernières minutes. Le tout dans le même bleu que les machines Quantum.
+
+<Shots items={[
+  { src: 'wiki-images/quantum_ore_refinery-gui.png', alt: 'L’écran Accueil du contrôleur de la Quantum Ore Refinery', caption: 'Accueil : les niveaux x5 à x1, ce qui manque pour x5, Toujours actif et les neuf emplacements de minerai.' },
+  { src: 'gallery/03_refinery_screens.png', alt: 'La raffinerie et ses écrans', caption: 'Accueil, Réservoirs, Statistiques et l’écran du module.' },
+]} />
+
+### Module Quantum / QIO
+
+<div class="cl-split">
+<div>
+
+Un bloc optionnel de la structure. Avec lui, les produits vont dans un **tampon de 64 piles** et sont envoyés toutes les demi-secondes vers une **fréquence Quantum** ou vers un **QIO** choisi sur son écran (fréquences publiques, de confiance ou privées). L'onglet **Module de sortie** se trouve juste sous Accueil sur l'écran du contrôleur, et la fréquence s'y choisit. Une destination pleine ou absente garde les produits dans le tampon : rien n'est perdu. Sans le module, ou sans fréquence, les produits sortent par le port de sortie. Quand la structure a aussi un port de sortie, c'est le **tampon de secours** : ce que le tampon du module ne peut pas contenir sort par le port. Sans port de sortie, un tampon plein fait attendre la raffinerie, et rien n'est perdu.
+
+**Rien n'est refusé.** Tout ce que la raffinerie ne sait pas traiter passe intact jusqu'à la sortie, si bien qu'un tapis d'objets mélangés peut l'alimenter sans filtre (une structure sans port de sortie le refuse).
+
+</div>
+
+<Shots items={[
+  { src: 'wiki-images/quantum_ore_refinery-module-gui.png', alt: 'L’onglet Module de sortie de la raffinerie', caption: 'L’onglet Module de sortie : Quantum ou QIO, la fréquence, le tampon.' },
+]} />
+
+</div>
+
+### Elle se construit comme un multibloc de Mekanism
+
+La structure (10 × 4 × 3) comprend un contrôleur, des carcasses, des piliers, des poutres, des tapis, des vitres, des ports, des accélérateurs, quatre réservoirs et sept modules de traitement (dissolution, lavage, cristallisation, injection, purification, enrichissement, fonte).
+
+<Parts
+  label="Les 22 pièces de la structure"
+  ids={['ore_refinery_controller', 'ore_refinery_casing', 'ore_refinery_pillar', 'ore_refinery_girder', 'ore_refinery_conveyor', 'ore_refinery_glass',
+    'ore_refinery_input_port', 'ore_refinery_output_port', 'ore_refinery_energy_port', 'ore_refinery_accelerator',
+    'ore_refinery_tank_water', 'ore_refinery_tank_hydrogen_chloride', 'ore_refinery_tank_oxygen', 'ore_refinery_tank_sulfuric_acid',
+    'ore_refinery_module_dissolution', 'ore_refinery_module_washing', 'ore_refinery_module_crystallization', 'ore_refinery_module_injection',
+    'ore_refinery_module_purification', 'ore_refinery_module_enrichment', 'ore_refinery_module_smelting', 'ore_refinery_module_quantum']}
+/>
+
+La structure a 18 places où un port peut aller : huit sur chacun des deux étages inférieurs du mur arrière, entre les deux piliers, et une au pied de chaque extrémité. Le plan montre sept ports (cinq d'entrée, un de sortie, un d'énergie), mais la structure n'a besoin que d'**au moins cinq ports d'entrée et au moins un port d'énergie**, et le **port de sortie est optionnel : aucun ou un**. Le port d'énergie va sur le mur arrière ; les deux extrémités de la structure ne prennent que l'entrée d'objets ou la sortie, et le module Quantum/QIO se place côté sortie. Elle se forme d'elle-même moins d'une seconde après la pose du dernier bloc, dit quel bloc ne va pas quand elle ne se forme pas, et ne charge jamais de chunk pour vérifier. Comme les multiblocs de Mekanism, de la poudre rouge court le long de ses arêtes quand on la termine.
+
+<Stats items={[
+  { v: '18', l: 'places où un port peut aller' },
+  { v: '≥ 5', l: 'ports d’entrée', icon: 'ore_refinery_input_port' },
+  { v: '≥ 1', l: 'port d’énergie', icon: 'ore_refinery_energy_port' },
+  { v: '0 ou 1', l: 'port de sortie, optionnel', icon: 'ore_refinery_output_port' },
+]} />
+
+**Ports.** Le port d'entrée prend le minerai en objets, l'eau en fluide et les trois gaz ; **cliquer accroupi dessus avec un Configurateur** pour le faire passer entre objets, fluides et gaz, un simple clic affiche son mode. Le port de sortie donne les produits à un tuyau, un entonnoir ou un coffre. Le port d'énergie prend les Joules et la Forge Energy. Un port ne sert qu'une seule raffinerie. **Sans port de sortie ni module Quantum/QIO relié**, la raffinerie se forme quand même mais ne traite aucun minerai et affiche « Pas de sortie » ; elle ne prend ni ne perd rien, et reprend dès qu'on ajoute un port de sortie ou qu'on relie le module.
+
+**La démonter avec une clé**, comme les blocs de Mekanism. Casser le contrôleur garde ce qu'il contient dans son objet.
+
+**Des tapis qui portent du vrai minerai.** Des morceaux de minerai de lapis, de diamant, de redstone, de charbon, de glowstone et d'émeraude défilent sur les tapis, au lieu d'une simple couleur de sable.
+
+**Recettes.** C'est une construction de fin de partie : les blocs de la structure se font avec du Boîtier en acier, des alliages atomiques et des circuits ultimes, le contrôleur demande un Noyau de téléportation, un Cube d'énergie ultime et une Chambre d'enrichissement, chaque module de traitement est construit autour de sa machine Mekanism, et les réservoirs utilisent des Réservoirs de fluide et chimiques ultimes avec du verre structurel. Elles sont visibles dans JEI.
+
+<Recipe id="ore_refinery_controller" />
+
+### JEI, Jade et WTHIT
+
+**Page JEI.** Une page pour la structure avec une **vue 3D qu'on peut tourner**, les quatre couches et une grille de ses 22 pièces : cliquer sur une pièce pour l'éclairer dans la vue, avec les modes Rayons X et « Seul ». Chaque bloc de la structure a aussi sa propre fiche d'aide qui mène à la page.
+
+**Jade et WTHIT.** N'importe quel bloc de la structure montre l'état et le niveau de la raffinerie, les quatre stocks en jauges (dessinées avec les vraies textures des fluides et des produits chimiques) et, pour un port, son mode et ce qu'il sert. Dans Jade, le module Quantum/QIO a sa propre carte avec son tampon et un avertissement quand la destination est pleine.
+
+<Shots items={[
+  { src: 'gallery/10_jei.png', alt: 'La page JEI de la Quantum Ore Refinery', caption: 'JEI : la structure en 3D, ses couches et ses pièces.' },
+  { src: 'gallery/11_jade.png', alt: 'La carte Jade du contrôleur de la raffinerie', caption: 'Jade : le niveau, les quatre stocks et ce qui manque.' },
+]} />
+
+<p class="cl-more-p"><a class="cl-more" href="../../quantum-ore-refinery/">La page de la Quantum Ore Refinery →</a> <a class="cl-more" href="../../quantum-ore-refinery/structure/">Structure et pièces →</a> <a class="cl-more" href="../../guides/first-ore-refinery/">Tuto : sa première raffinerie →</a></p>
+
+</Band>
+
+<Band tone="t" kicker="Quick filters">
+
+## Aussi en vedette : les Quick filters du Quantum Digital Miner
+
+<div class="cl-split">
+<div>
+
+<p class="cl-lead"><strong>Régler un mineur en un clic.</strong> La fenêtre « Nouveau filtre » commence maintenant par des filtres de minerai tout prêts, les <strong>Filtres rapides</strong> : plus besoin de taper un nom de tag pour miner du fer.</p>
+
+### Douze filtres de minerai
+
+Les minerais de fer, d'or, de charbon et de redstone sont toujours listés. Les minerais de cuivre, de lapis, de diamant, d'émeraude, d'étain, de plomb, d'osmium et d'uranium sont listés dès que leur tag de minerai existe dans le jeu.
+
+<Chips groups={[
+  { label: 'Toujours listés', items: ['Fer', 'Or', 'Charbon', 'Redstone'] },
+  { label: 'Listés quand leur tag de minerai existe', items: ['Cuivre', 'Lapis', 'Diamant', 'Émeraude', 'Étain', 'Plomb', 'Osmium', 'Uranium'], dim: true },
+]} />
+
+</div>
+
+<Viewer kind="block" item="quantum_digital_miner" />
+
+</div>
+
+### Remplacer ou Ajouter
+
+<div class="me-feature-cards not-content cl-ra">
+  <div class="me-feature-card"><span class="me-feature-num">1</span><b>Remplacer</b><p>Réduit la liste du mineur à ce seul filtre.</p></div>
+  <div class="me-feature-card"><span class="me-feature-num">2</span><b>Ajouter</b><p>L'ajoute seulement si le même filtre de tag n'y est pas déjà.</p></div>
+</div>
+
+**Les minerais des autres mods compris.** Chaque filtre rapide est un filtre de tag Mekanism ordinaire sur le tag de minerai commun, donc les minerais que d'autres mods mettent dans ce tag sont minés aussi. Rien n'est scanné et aucun chunk n'est chargé pour le construire.
+
+### Configurations enregistrées
+
+Enregistrer la liste de filtres du mineur sous un nom, puis la charger sur n'importe quel mineur avec Remplacer ou Ajouter. Chaque joueur a sa propre bibliothèque dans le monde ou sur le serveur : jusqu'à 32 listes de 128 filtres, avec des noms de 24 caractères au plus.
+
+<Stats items={[
+  { v: '32', l: 'listes enregistrées par joueur' },
+  { v: '128', l: 'filtres par liste' },
+  { v: '24', l: 'caractères par nom' },
+]} />
+
+**Seuls les filtres changent.** Le rayon, la hauteur, le Toucher de soie et tous les autres réglages restent tels quels.
+
+<p class="cl-more-p"><a class="cl-more" href="../../quantum-digital-miner/#filtres-rapides-et-listes-de-filtres-enregistrées">Le fonctionnement des filtres rapides →</a> <a class="cl-more" href="../../quantum-digital-miner/">La page du Quantum Digital Miner →</a></p>
+
+</Band>
+
+## Autres nouveautés
+
+<Card icons={['quantum_network_controller', 'quantum_network_tablet']} join="⇄" caption="Le Contrôleur et la Tablette : l'un devient l'autre dans la grille de fabrication." href="../../quantum-network-tablet/" more="Tablette de réseau quantique">
+
+### Tablette de réseau quantique
+
+Le Contrôleur de réseau quantique tient désormais dans la main. La tablette ouvre le même écran, avec les mêmes droits, où qu'on soit ; elle ne charge aucun chunk pour cela.
+
+- Un Contrôleur seul dans la grille de fabrication devient une tablette, et une tablette redevient un Contrôleur. Son propriétaire, son mode de sécurité et son nom sont gardés dans les deux sens.
+
+</Card>
+
+<Card wide shots={[{ src: 'wiki-images/quantum_network_tablet.png', alt: 'L’écran de fréquence de la Tablette de réseau quantique', caption: 'Une fréquence : l’entrée, le tampon et la sortie, puis les sorties par famille avec leur part.' }]} href="../../quantum-network-controller/" more="Contrôleur de réseau quantique">
+
+### Contrôleur de réseau quantique : une image plus claire de chaque fréquence
+
+L'écran montre maintenant chaque fréquence comme ce qui entre, ce qu'elle contient et ce qui sort.
+
+- Les appareils sont regroupés par famille (Entangloporters, Récepteurs d'énergie quantique, Quantum Digital Miners, Quantum Chargepads), chacune avec son débit et sa part du côté entier.
+- Un chiffre qui ne pouvait qu'être déduit est marqué « ≈ », un chiffre impossible à connaître « ? », et un total est marqué « ≥ » quand un appareil n'a pas pu être lu (son chunk n'est pas chargé, ou l'accès n'est pas permis).
+- Une ligne de tendance dit si le stock de la fréquence se remplit ou se vide. Les produits chimiques radioactifs ont leur propre onglet « Radiation ».
+- **Des chiffres plus tôt.** Un appareil encore en cours de mesure ne vide plus toute la fréquence : seule sa famille attend, les autres gardent leurs chiffres. L'écran montre les derniers chiffres qu'il a pour la même fréquence et la même ressource pendant que les nouveaux sont mesurés (30 secondes par défaut, un réglage du serveur ; 0 le coupe).
+- Un long nom de fréquence s'affiche en entier au survol.
+
+</Card>
+
+<Card shots={[{ src: 'wiki-images/quantum_chargepad-gui.png', alt: 'L’écran du Quantum Chargepad en mode quantique', caption: 'Le nouvel écran du pad : Local ou Quantum, et la fréquence où il puise.' }]} href="../../quantum-chargepad/" more="Quantum Chargepad">
+
+### Quantum Chargepad : modes local et quantique
+
+Le Quantum Chargepad a maintenant un écran et deux modes.
+
+- **Local** (par défaut) fait ce que le pad a toujours fait : l'énergie arrive par câble. Les pads existants se chargent en mode local et ne perdent rien.
+- **Quantique** prend l'énergie d'une fréquence quantique choisie sur l'écran du pad (fréquences publiques, ses propres fréquences privées, et celles de confiance). Dans ce mode, le pad ne prend aucune énergie par câble.
+- La recharge ne change pas : tous les objets des joueurs debout dessus, l'armure d'abord. Changer de mode ne convertit ni ne perd jamais d'énergie.
+- Un pad en mode quantique apparaît dans le Contrôleur de réseau quantique comme une famille à part.
+- Le pad a maintenant l'onglet de sécurité de Mekanism. Son propriétaire, sa sécurité et son mode sont gardés quand on le ramasse ; sa fréquence ne l'est pas, donc un pad posé démarre toujours sans lien.
+
+</Card>
+
+<Card href="../../quantum-digital-miner/#notifications" more="Notifications">
+
+### Quantum Digital Miner : notifications
+
+Le Quantum Digital Miner prévient maintenant, par une notification et le son de notification de Minecraft, quand :
+
+- le minage est terminé (ou terminé dans les chunks chargés seulement), avec le nombre de blocs minés dans le cycle ;
+- le minage est en pause, avec la raison : pas assez d'énergie, stockage plein, objets en trop à vider, bloc de remplacement manquant, placement refusé ou zone non chargée ;
+- une relocalisation est terminée.
+
+La notification montre l'icône de la machine, un titre, une ligne de détail et le lieu : dimension et X, Y, Z. Quand seuls les chunks chargés de la zone ont été minés, une barre à moitié pleine le dit. Seul le propriétaire est prévenu, et seulement s'il est connecté ; un mineur sans propriétaire ne prévient personne. Au-delà de huit à la fois, les suivantes sont comptées dans une seule notification « +N autres ». Un réglage du client les coupe.
+
+</Card>
+
+<Card href="../../quantum-digital-miner/" more="Quantum Digital Miner">
+
+### Quantum Digital Miner : il garde ce qu'on a réglé
+
+- **Cassé par son propriétaire**, un mineur garde tous ses réglages et ses fréquences (énergie, QIO, liens d'import et d'export) dans son objet. Reposé, il est comme avant.
+- **Cassé par un autre joueur, ou par rien** (une explosion, une machine), il perd les fréquences et les liens et garde tout le reste : région, modes, filtres, mode redstone, sources et zones. Un mineur sans propriétaire garde tout.
+- La **Carte de configuration** copie les réglages ainsi que les fréquences et les liens que son utilisateur a le droit de transporter, jamais l'identité, l'énergie, le contenu ni l'historique des zones, et elle ne recrée jamais une fréquence qui n'existe plus.
+
+</Card>
+
+<Card shots={[{ src: 'wiki-images/quantum_portable_teleporter-gui.png', alt: 'L’écran du Quantum Portable Teleporter', caption: 'La dernière destination et Reprendre, à côté de l’écran.' }]} href="../../quantum-portable-teleporter/" more="Quantum Portable Teleporter">
+
+### Quantum Portable Teleporter : le dernier saut, et réglages serveur
+
+- Il retient le dernier choix : la fréquence de Teleporter vers laquelle on a sauté, ou les coordonnées tapées, jamais les deux. Un saut aléatoire ne retient ni l'un ni l'autre. **Reprendre** remet le dernier choix et ne téléporte jamais tout seul : appuyer sur Téléporter quand on est prêt.
+- **Pour les propriétaires de serveur :** interdire l'onglet des coordonnées précises (`allowCoordinates`) ou l'onglet aléatoire (`allowRandom`), et lister les dimensions où ces deux onglets sont bloqués tant que le joueur s'y trouve (`coordinateAndRandomBlockedDimensions`). La téléportation par fréquence n'est pas concernée. Par défaut rien ne change : les deux onglets sont permis et la liste est vide.
+
+</Card>
+
+<Card tone="t" href="../../quantum-ore-refinery/structure/" more="Structure et pièces">
+
+### Commandes serveur
+
+Une nouvelle commande `/mekeng`, pour les opérateurs, sans rien de destructif sans `confirm` et sans jamais charger de chunk :
+
+<div class="cl-cmds">
+
+- `/mekeng build quantum_ore_refinery` construit une raffinerie entière là où on vise (choisir son niveau, ses accélérateurs et son module, ou la construire vide), et `/mekeng remove quantum_ore_refinery` en démonte une. `/mek build quantum_ore_refinery` marche aussi, par la commande de construction de Mekanism.
+- `/mekeng refinery check | info | fill | clear | level | alwaysrun | accelerators` inspecte et pilote une raffinerie : quelle case ne va pas, ce qu'elle contient, remplir ses réservoirs et son énergie pour un essai, vider un groupe d'emplacements.
+- `/mekeng miner info | find | list` lit les Quantum Digital Miners du serveur.
+- `/mekeng about` affiche les versions et les réglages qui comptent.
+
+</div>
+
+</Card>
+
+<Card tone="s" href="../../overview/" more="Prérequis">
+
+### Compatible avec Mekanism Overclocked
+
+La plage de Mekanism acceptée va maintenant jusqu'à 10.7.23, si bien que l'édition non officielle Mekanism Overclocked (10.7.20 à 10.7.23.3, même identifiant de mod) se charge avec l'addon. Les cinq builds officiels de 10.7.15 à 10.7.19 restent ceux qui sont pris en charge.
+
+</Card>
+
+## Remanié
+
+<Card wide shots={[
+  { src: 'wiki-images/radioactive_quantum_entangloporter-gui.png', alt: 'Le nouvel écran du Quantum Entangloporter radioactif', caption: 'Le nouvel écran : le cadran se remplit avec le tampon, ici du Spent Nuclear Waste.', crop: [732, 300, 456, 480, 1920, 1080] },
+]} href="../../radioactive-quantum-entangloporter/" more="Quantum Entangloporter radioactif">
+
+### Quantum Entangloporter radioactif
+
+Le bloc transporte maintenant **uniquement des produits chimiques radioactifs** (le Spent Nuclear Waste et tout autre produit chimique que Mekanism marque comme radioactif), sur des **fréquences radioactives qui lui sont propres**. Les objets, les fluides, les gaz ordinaires, l'énergie et la chaleur sont le travail de l'Entangloporteur quantique de Mekanism.
+
+<Stats items={[
+  { v: '64 000 mB', l: 'de tampon local dans chaque bloc' },
+  { v: '10 mB/t', l: 'de réception, par récepteur' },
+  { v: '1 000 000 J', l: 'de réserve d’énergie propre' },
+  { v: '100 → 10 J', l: 'par mB, avec les Mises à niveau énergétiques' },
+]} />
+
+- Les **fréquences radioactives** sont séparées des fréquences d'inventaire : aucun autre Entangloporter, Récepteur ou Contrôleur ne les voit. Elles marchent comme les fréquences de Mekanism (Publique, De confiance, Privée) et se choisissent, se créent et se suppriment dans une fenêtre copiée de celle de Mekanism.
+- **Un tampon local de 64 000 mB** dans chaque bloc, et une réception lente : **10 mB par tick pour chaque récepteur**. Ce qu'un bloc fait de son gaz suit sa **configuration des faces pour les produits chimiques**, comme sur un Entangloporteur quantique : une face d'entrée remplit le tampon, une face de sortie le vide, et une face réglée sur les deux fait les deux.
+- **Sa propre réserve d'énergie** de 1 000 000 J paie les transferts, 100 J par mB à chaque bout. La réserve ne sort jamais par une face ; sans énergie, le bloc s'arrête et garde ce qu'il contient.
+- **Mises à niveau énergétiques.** Le bloc accepte la Mise à niveau énergétique standard de Mekanism, dans l'onglet des améliorations habituel. Chaque amélioration augmente la réserve (jusqu'à 10 MJ avec 8 améliorations) et baisse le prix d'un transfert (jusqu'à 10 J par mB).
+- **Un nouvel écran** : une console de sécurité sombre avec un cadran qui se remplit avec le tampon, le produit chimique qu'il contient et son énergie.
+- **Le démontage est refusé** tant que le tampon contient quelque chose, avec un message qui dit pourquoi.
+- **Nouvelle recette** : un Entangloporteur quantique au centre, 4 pastilles de plutonium, 2 pastilles de polonium et 2 feuilles de PE-HD.
+- Les sauvegardes de la 1.1.1 se chargent sans changement. Le stock radioactif que les versions précédentes gardaient sur une fréquence d'inventaire reste où il est et ne peut être que vidé par ce bloc, jamais rempli.
+
+<Recipe id="radioactive_quantum_entangloporter" />
+
+</Card>
+
+<Card icons={['quantum_chargepad', 'ultimate_quantum_energy_receiver', 'radioactive_quantum_entangloporter', 'quantum_network_controller', 'quantum_network_tablet', 'quantum_digital_miner', 'ore_refinery_controller']} caption="Les machines Quantum : leurs écrans sont maintenant du même bleu." href="../../quantum-energy-receiver/" more="Récepteurs d'énergie quantique">
+
+### Un seul style, les mêmes commandes
+
+- **Tous les écrans Quantum sont du même bleu** : le Chargepad, les quatre Récepteurs d'énergie quantique, le Quantum Entangloporter radioactif, le Contrôleur et la Tablette de réseau, la configuration du Digital Miner et la raffinerie. L'Industrial Fluid Pump garde son gris, puisque ce n'est pas une machine Quantum.
+- **Les onglets là où Mekanism les met.** Les Récepteurs d'énergie quantique, le Chargepad et le Precision Logistical Distributor utilisent l'onglet de configuration des faces de Mekanism et se souviennent des fenêtres ouvertes.
+- **La même fenêtre de fréquence partout.** Les Récepteurs d'énergie quantique et le Chargepad ouvrent le sélecteur de fréquence de Mekanism, la même fenêtre que le Quantum Digital Miner. Une fréquence dont le stock radioactif contient encore quelque chose ne peut être supprimée depuis aucun bloc d'Engineering.
+
+</Card>
+
+<Card tone="g" wide shots={[
+  { src: 'gallery/09_logistics.png', alt: 'Le Precision Logistical Distributor et le Contrôleur d’améliorations de précision', caption: 'Le Precision Logistical Distributor et le Contrôleur d’améliorations de précision.' },
+  { src: 'gallery/07_fluids.png', alt: 'L’Industrial Fluid Pump et son écran', caption: 'L’Industrial Fluid Pump, anciennement Quantum Fluid Pump.' },
+]}>
+
+- **Nouvelles textures** pour le Precision Logistical Distributor et le Contrôleur d'améliorations de précision ; la fenêtre de routage du Distributor est maintenant du gris de Mekanism, avec un œil pour cacher les blocs voisins, et ses boutons de mode ressemblent à ceux de Mekanism.
+- **Des ports plus nets, de nouveaux tapis.** Les ports de la raffinerie ont un cadre fin, et ses tapis portent du minerai.
+- **Des mots plus clairs.** Un Récepteur sans fréquence dit où la régler ; la raffinerie affiche « Attend le niveau » au lieu de « Inactif » ; le Configurateur est nommé dans la description du port d'entrée ; le Contrôleur d'améliorations explique ses libellés « exclue » et « Transferts » ; « Toucher de soie » s'écrit de la même façon partout ; la traduction française utilise l'infinitif pour les instructions et ne mélange plus de mots anglais (les noms propres sont gardés).
+- **Un texte plus grand** sur le Quantum Portable Teleporter et le Digital Miner Companion.
+- **Les machines tenues en main.** Les Récepteurs d'énergie quantique sont au centre de la main, la Petrogenic Synthesis Plant s'affiche correctement en première personne, et le Quantum Digital Miner, l'Industrial Fluid Pump et la Plant se portent à deux mains.
+- La **Quantum Fluid Pump** s'appelle maintenant **Industrial Fluid Pump**. Seul le nom change : les pompes existantes, les recettes et les sauvegardes sont intactes.
+- **Des tuyaux de toutes provenances.** L'admission de l'Industrial Fluid Pump accepte un tuyau de n'importe quel mod (Mekanism Extras compris), et ses ports d'énergie prêtent de l'énergie à n'importe quel fournisseur.
+
+<p class="cl-more-p"><a class="cl-more" href="../../precision-logistical-distributor/">Precision Logistical Distributor →</a> <a class="cl-more" href="../../industrial-fluid-pump/">Industrial Fluid Pump →</a> <a class="cl-more" href="../../precision-upgrade-controller/">Contrôleur d'améliorations de précision →</a></p>
+
+</Card>
+
+## Corrigé
+
+<div class="cl-grid">
+
+<Card icons={['quantum_digital_miner']} href="../../quantum-digital-miner/#sécurité-de-la-relocalisation" more="Sécurité de la relocalisation">
+
+### Quantum Digital Miner
+
+- Un bloc devenu incassable ou changé en liquide après la recherche est maintenant laissé en place.
+- Sur un serveur chargé, les recherches continuent d'avancer au lieu de compter des chunks chargés comme non chargés.
+- L'écran de façade n'affiche plus d'alerte d'énergie pendant un minage normal ; l'alerte n'apparaît maintenant que si le mineur a vraiment manqué d'énergie.
+- Une entrée abîmée dans l'historique des zones minées ne fait plus perdre les autres.
+- La relocalisation est plus sûre. Un déplacement dont la nouvelle plateforme ne peut pas être posée en entier échoue et est annulé, et le monde reste tel qu'il était. Une annulation qui ne peut pas remettre un bloc garde son journal et demande une récupération au lieu de le perdre en silence. Un retrait refusé ne laisse plus un second mineur derrière lui. Un journal d'annulation abîmé est refusé avant toute écriture.
+
+</Card>
+
+<Card tone="g" icons={['petrogenic_synthesis_plant', 'precision_logistical_distributor', 'precision_upgrade_controller', 'radioactive_quantum_entangloporter', 'ultimate_quantum_energy_receiver', 'digital_miner_surveyor']}>
+
+### Autres machines
+
+- **Petrogenic Synthesis Plant.** Plus aucun objet perdu quand une sortie est retirée pendant que la Plant y insère.
+- **Precision Logistical Distributor.** Deux objets différents dont les données semblaient identiques ne partagent plus leur place dans la rotation équitable.
+- **Contrôleur d'améliorations de précision.** Les types d'amélioration qu'il ne connaît pas (par exemple ceux d'un addon retiré) sont gardés dans son coffre au lieu d'être supprimés, et reviennent si l'addon revient.
+- **Quantum Entangloporter radioactif.** Un produit chimique stocké dont le mod a été retiré est gardé au lieu d'être perdu, et redevient utilisable au retour du mod.
+- **Récepteurs d'énergie quantique.** Ils ne peuvent plus choisir qu'une fréquence existante, par les paquets de fréquence de Mekanism : un client modifié ne peut plus en créer ni en supprimer par eux.
+- **Digital Miner Companion.** Deux jeux de réglages ou de filtres différents ne peuvent plus être pris pour le même, donc aucun changement n'est sauté.
+- **Configurateur.** Son affichage sur les blocs ne montre plus une texture périmée après un rechargement des ressources.
+
+</Card>
+
+<Card icons={['quantum_portable_teleporter']} href="../../quantum-portable-teleporter/" more="Quantum Portable Teleporter">
+
+### Quantum Portable Teleporter
+
+- Un saut refusé par un autre mod ne coûte aucune énergie, et la raison s'affiche.
+- Les dimensions interdites sont revérifiées juste avant le saut.
+- Arriver à côté d'un chunk non chargé est refusé au lieu de sauter les contrôles de sécurité ; un chunk voisin chargé est contrôlé comme d'habitude (de la lave au bord, par exemple).
+- Avec **Surface** activé, son libellé ne chevauche plus le nombre Y : le champ Y est caché tant que Surface est activé, et revient avec **Ici**.
+
+</Card>
+
+<Card tone="s">
+
+### Serveurs
+
+- Les écrans d'Engineering ignorent les données de suivi répétées ou inventées envoyées par un client modifié.
+
+</Card>
+
+</div>
+
+## Bon à savoir
+
+:::caution[Relocalisation du Quantum Digital Miner : un arrêt volontaire du serveur]
+Une relocalisation qui échoue est annulée et le monde reste tel qu'il était. Dans le rare cas où l'annulation elle-même ne peut pas être terminée ou enregistrée (un bloc qui ne peut pas être remis, une écriture du monde qui échoue), le serveur s'arrête avec une erreur au lieu de continuer, parce que continuer pourrait écraser le seul journal de ce qui a été déplacé. Le journal d'annulation est gardé et rejoué au démarrage suivant, avant le chargement du monde. Si cela arrive, redémarrer le serveur et le signaler. Sur un monde solo, le jeu ferme le monde.
+:::
+
+- **Quantum Entangloporter radioactif.** Un gaz ordinaire ne passe plus par ce bloc : c'est l'Entangloporteur quantique de Mekanism qui le transporte.
+- **Cassé par quelqu'un d'autre.** Un Quantum Digital Miner cassé par un autre joueur ne garde plus ses fréquences (voir plus haut).
+- Sauvegarder ses mondes avant de mettre à jour des mods, comme toujours.
+
+## Compatibilité
+
+- Minecraft 1.21.1, Java 21 et NeoForge 21.1.200 ou plus récent dans la série 21.1. Installer l'addon et Mekanism sur le client et sur le serveur.
+- Mekanism 10.7.15 jusqu'à 10.7.24 exclu : les cinq builds officiels de 10.7.15 à 10.7.19, et l'édition non officielle Mekanism Overclocked (10.7.20 à 10.7.23.3).
+- Optionnels : JEI 19.25.1.332 ou plus récent, Jade 15.10 ou plus récent, WTHIT. Sans eux, rien ne change.
+- Les traductions anglaise et française sont incluses.
+
+<div class="cl-end">
+
+## La suite
+
+La raffinerie est la première d'une famille. La suite bientôt...
+
+Mekanism: Engineering est un addon non officiel, indépendant de l'équipe de Mekanism. Signaler les problèmes à [ce projet](https://gitlab.com/enzodr/mekanism-engineering/-/issues), pas à Mekanism.
+
+</div>

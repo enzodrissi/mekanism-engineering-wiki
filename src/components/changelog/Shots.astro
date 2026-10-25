@@ -1,0 +1,26 @@
+---
+// Screenshots and renders the site already has, side by side with their captions. `crop: [x, y, w, h, W, H]` shows only
+// the part (x, y, w, h) of a W × H picture: a screenshot of the whole game window keeps just the screen it is about.
+import '../../styles/changelog.css';
+import { asset } from './lib';
+interface Shot { src: string; alt: string; caption?: string; crop?: number[]; pixel?: boolean }
+interface Props { items: Shot[]; cols?: number }
+const { items, cols } = Astro.props;
+const pct = (a: number, b: number) => `${((a / b) * 100).toFixed(3)}%`;
+---
+
+<div class:list={['cl-shots not-content', { one: items.length === 1 }]} style={cols ? `--cols:${cols}` : undefined}>
+  {items.map(s => (
+    <figure class:list={[{ px: s.pixel !== false }]}>
+      {s.crop ? (
+        <div class="cl-crop" style={`aspect-ratio:${s.crop[2]} / ${s.crop[3]}`}>
+          <img src={asset(s.src)} alt={s.alt} loading="lazy" decoding="async"
+            style={`width:${pct(s.crop[4], s.crop[2])};left:-${pct(s.crop[0], s.crop[2])};top:-${pct(s.crop[1], s.crop[3])}`} />
+        </div>
+      ) : (
+        <img src={asset(s.src)} alt={s.alt} loading="lazy" decoding="async" />
+      )}
+      {s.caption && <figcaption>{s.caption}</figcaption>}
+    </figure>
+  ))}
+</div>

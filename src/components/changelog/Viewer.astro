@@ -1,0 +1,22 @@
+---
+// The site's live 3D views, placed the way the page headers place them (src/components/PageTitle.astro): the whole refinery
+// (kind refinery, with its markers, layers and bill of materials) or one block with its own animation (kind block). They load
+// when they come into sight (src/scripts/site.ts); until then, and without WebGL, the item's icon stands in.
+import '../../styles/changelog.css';
+import { tr } from '../../lib/i18n.js';
+import { icon, langOf } from './lib';
+interface Props { kind: 'refinery' | 'block'; item?: string; mode?: 'assembled' | 'exploded' | 'layers' }
+const { kind, item = '', mode = 'exploded' } = Astro.props;
+const lng = langOf(Astro);
+---
+
+{kind === 'refinery' ? (
+  <div class="not-content cl-viewer-ref" data-me3d data-kind="refinery" data-mode={mode} />
+) : (
+  <div class="me-head-visual not-content cl-viewer">
+    <div class="me-stage" data-me3d data-kind="block" data-item={item}>
+      <img src={icon(item)} alt="" />
+      <span class="me-pill me-hint">{tr(lng, '⟲ Drag to turn')}</span>
+    </div>
+  </div>
+)}

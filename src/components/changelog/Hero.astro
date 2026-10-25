@@ -1,0 +1,37 @@
+---
+// The top of a visual release note: the version's line, its two headliners as big cards, and a strip that jumps to the rest.
+import '../../styles/changelog.css';
+import { icon } from './lib';
+
+interface Head { tone?: 'q' | 't'; img: string; eyebrow: string; title: string; text: string; facts?: string[]; href: string; go: string }
+interface Jump { label: string; href: string; icon?: string; tone?: 'q' | 'g' | 't' }
+interface Props { eyebrow: string; tagline: string; safe?: string; heads: Head[]; jumpLabel: string; jumps: Jump[] }
+const { eyebrow, tagline, safe, heads, jumpLabel, jumps } = Astro.props;
+---
+
+<section class="cl-hero not-content">
+  <div class="me-eyebrow">{eyebrow}</div>
+  <p class="cl-tagline" set:html={tagline.split('\n').join('<br />')} />
+  <div class="cl-intro"><slot /></div>
+  {safe && <p class="cl-safe"><span aria-hidden="true">✓</span>{safe}</p>}
+  <div class="cl-heads">
+    {heads.map(h => (
+      <a class:list={['cl-head', h.tone ?? 'q']} href={h.href}>
+        <span class="cl-head-text">
+          <span class="me-eyebrow">{h.eyebrow}</span>
+          <b>{h.title}</b>
+          <span class="cl-head-lead">{h.text}</span>
+          {h.facts && <span class="cl-facts">{h.facts.map(f => <span>{f}</span>)}</span>}
+          <span class="cl-go">{h.go} ↓</span>
+        </span>
+        <img src={icon(h.img)} alt="" loading="eager" />
+      </a>
+    ))}
+  </div>
+  <nav class="cl-jump" aria-label={jumpLabel}>
+    <span class="me-eyebrow">{jumpLabel}</span>
+    {jumps.map(j => (
+      <a class:list={[j.tone ?? 'q']} href={j.href}>{j.icon ? <img src={icon(j.icon)} alt="" loading="lazy" /> : <span class="cl-jump-g" aria-hidden="true">#</span>}{j.label}</a>
+    ))}
+  </nav>
+</section>

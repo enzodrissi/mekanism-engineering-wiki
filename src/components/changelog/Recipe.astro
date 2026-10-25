@@ -1,0 +1,33 @@
+---
+// A crafting grid read from the mod's own recipe files (public/data/recipes.json, made by scripts/import-wiki.mjs), drawn like
+// the grids of the wiki pages. Hover or tap a slot to see the item. Nothing is drawn if the recipe is not in the mod.
+import '../../styles/changelog.css';
+import { icon, hasIcon, data, langOf } from './lib';
+interface Props { id: string }
+const { id } = Astro.props;
+const r = data('recipes.json', langOf(Astro))[id];
+type Ing = { name: string; show: string | null } | null;
+let cells: Ing[] = [], legend: [string, number][] = [];
+if (r) {
+  const rows: string[] = r.pattern.length === 1 && r.pattern[0].length === 1 ? ['   ', ` ${r.pattern[0]} `, '   '] : r.pattern.map((p: string) => p.padEnd(3));
+  while (rows.length < 3) rows.push('   ');
+  cells = rows.flatMap(row => [...row].map(c => (c === ' ' ? null : r.key[c])));
+  const counts: Record<string, number> = {};
+  for (const c of cells) if (c) counts[c.name] = (counts[c.name] || 0) + 1;
+  legend = Object.entries(counts);
+}
+const pic = (ing: Ing) => ing && ing.show && hasIcon(ing.show) ? icon(ing.show) : null;
+---
+
+{r && (
+  <div class="me-recipe cl-recipe not-content">
+    <div class="me-grid">
+      {cells.map(c => c ? (
+        <span class="me-slot" tabindex="0" data-name={c.name}>{pic(c) ? <img src={pic(c)} alt="" loading="lazy" decoding="async" /> : <b>{c.name.slice(0, 2)}</b>}</span>
+      ) : <span class="me-slot" />)}
+    </div>
+    <span class="me-arrow">→</span>
+    <span class="me-slot me-out" tabindex="0" data-name={r.name}>{hasIcon(r.result) && <img src={icon(r.result)} alt="" />}{r.count > 1 && <i>{r.count}</i>}</span>
+    <ul class="me-legend">{legend.map(([n, k]) => <li><span>{k} ×</span> {n}</li>)}</ul>
+  </div>
+)}

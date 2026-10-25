@@ -1,0 +1,16 @@
+---
+// Short words in groups, each group under its label (the ore filters of the Quantum Digital Miner's quick filters).
+import '../../styles/changelog.css';
+interface Group { label: string; items: string[]; dim?: boolean }
+interface Props { groups: Group[] }
+const { groups } = Astro.props;
+---
+
+<div class="cl-chips not-content">
+  {groups.map(g => (
+    <div class:list={['cl-chip-group', { dim: g.dim }]}>
+      <span class="me-eyebrow">{g.label}</span>
+      <ul>{g.items.map(i => <li>{i}</li>)}</ul>
+    </div>
+  ))}
+</div>

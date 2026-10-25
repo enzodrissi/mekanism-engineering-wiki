@@ -1,0 +1,17 @@
+---
+// A row of figures taken from the text around it (the site's .me-stats tiles), each with the icon of its block when it has one.
+import '../../styles/changelog.css';
+import { icon } from './lib';
+interface Stat { v: string; l: string; icon?: string }
+interface Props { items: Stat[] }
+const { items } = Astro.props;
+---
+
+<div class="me-stats cl-stats not-content">
+  {items.map(s => (
+    <div class:list={{ 'with-icon': !!s.icon }}>
+      {s.icon && <img src={icon(s.icon)} alt="" loading="lazy" />}
+      <b>{s.v}</b><span>{s.l}</span>
+    </div>
+  ))}
+</div>

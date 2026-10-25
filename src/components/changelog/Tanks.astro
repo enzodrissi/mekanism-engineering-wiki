@@ -1,0 +1,20 @@
+---
+// The four tanks of the Quantum Ore Refinery: the block, how much it holds, and what one ore takes from it.
+import '../../styles/changelog.css';
+import { icon } from './lib';
+interface Tank { icon: string; cap: string; name: string; use?: string }
+interface Props { items: Tank[]; note?: string }
+const { items, note } = Astro.props;
+---
+
+<div class="cl-cq not-content">
+  <ul class="cl-tanks">
+    {items.map(t => (
+      <li>
+        <img src={icon(t.icon)} alt="" loading="lazy" />
+        <span><b>{t.cap}</b><span>{t.name}</span>{t.use && <em>{t.use}</em>}</span>
+      </li>
+    ))}
+  </ul>
+  {note && <p class="cl-note">{note}</p>}
+</div>
