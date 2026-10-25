@@ -33,6 +33,9 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
         <a class="me-btn primary" href={`${base}/${pre}overview/`}>{t('Start here →')}</a>
         <a class="me-btn" href={`${base}/${pre}guides/first-ore-refinery/`}>{t('First refinery')}</a>
         <a class="me-btn" href="https://www.curseforge.com/minecraft/mc-mods/mekanism-engineering">CurseForge ↗</a>
+        {/* on a phone the home page has no menu, so no language menu either: this button is the way to the other language */}
+        {lng === 'fr' ? <a class="me-btn me-lang" href={`${base}/`} hreflang="en" lang="en">English</a>
+          : <a class="me-btn me-lang" href={`${base}/fr/`} hreflang="fr" lang="fr">Français</a>}
       </div>
     </div>
     <div data-me3d data-kind="refinery" data-mode="assembled" data-tags="hero">

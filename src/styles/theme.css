@@ -470,3 +470,5 @@ body:has(.me-home) .content-panel { border-top: 0; }
 
 /* the language menu shows its whole label ("Français" was cut short) */
 starlight-lang-select select { width: 8.4rem; }
+/* the home page's own language button, for phones only (the header has the menu from 50rem) */
+@media (min-width: 50rem) { .me-cta .me-lang { display: none; } }
