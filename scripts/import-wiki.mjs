@@ -23,6 +23,29 @@ const MC_1201 = { minecraft: '1.20.1', loader: 'Forge', mekanism: '1.20.1-10.4.1
   'Minecraft Java Edition': '1.20.1 exactly', Java: '17', 'Mod loader': 'Forge 47.1.106 up to, but excluding, 47.2',
   Mekanism: '10.4.13 up to, but excluding, 10.4.17' } };
 // the overview names both Minecraft versions, and its table of requirements gets a column for each
+// The refinery drawn on this site has one Energy Port, the minimum the owner set (25 Oct 2026); the mod's text describes
+// its own drawing with two (what /mekeng build and JEI place). These sentences follow the site's drawing; each is
+// changed only while the mod's text still reads that way, and a missing one is reported.
+const ONE_ENERGY_PORT = {
+  'Quantum-Ore-Refinery-Structure': [
+    ['The drawing has five Input Ports, one Output Port and two Energy Ports, and that is what `/mekeng build` builds and what JEI shows, but',
+      'The drawing has five Input Ports, one Output Port and one Energy Port (`/mekeng build` and JEI place a second Energy Port, which you may leave out), but'],
+    ['back    PI CS IP IP CS IP IP EP EP PI', 'back    PI CS IP IP CS IP IP EP CS PI'],
+    ['the two Energy Ports at the right of the back row of layer 1', 'the Energy Port at the right of the back row of layer 1'],
+    ['92 blocks are required; the optional module', '91 blocks are required, plus the optional Output Port; the optional module'],
+    ['| Ore Refinery Casing | 18 |', '| Ore Refinery Casing | 19 |'],
+    ["| Ore Refinery Energy Port | 2 | The drawing's number; at least 1 |", '| Ore Refinery Energy Port | 1 | At least 1 (`/mekeng build` and JEI place 2) |'],
+  ],
+  'Quantum-Ore-Refinery': [
+    ['92 required blocks', '91 required blocks plus the optional Output Port'],
+    ['**Energy Ports** (at least one; the drawing has two)', '**Energy Ports** (at least one)'],
+  ],
+};
+const oneEnergyPort = (md, from) => (ONE_ENERGY_PORT[from] || []).reduce((text, [was, now]) => {
+  const re = new RegExp(was.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ +/g, '\\s+'));
+  if (!re.test(text)) { console.warn(`${from}: not found, left as the mod says: ${was}`); return text; }
+  return text.replace(re, now);
+}, md);
 // "10.7.15 up to, but excluding, 10.7.20" is shortened so two columns of it stay readable on a phone
 const short = range => range.replace(/ up to, but excluding, /, ' to below ');
 const addMc1201 = md => {
@@ -247,6 +270,7 @@ for (const [from, p] of Object.entries(PAGES)) {
   // the main render of a machine page moves into the page header (3D view or render)
   if (p.ids) md = md.replace(/^!\[[^\]]*\]\(images\/[a-z_]+\.png\)\n+/m, '');
   md = rewrite(md, from, p.ids);
+  md = oneEnergyPort(md, from);
   if (from === 'Home') md = addMc1201(md);
   if (from === 'Quantum-Ore-Refinery') {
     md = md.replace(/(The time is `200 × 50\^\(−n\/8\)`[^\n]*\n[^\n]*\n)/, `$1\n<div class="me-qor-calc not-content"></div>\n`);
