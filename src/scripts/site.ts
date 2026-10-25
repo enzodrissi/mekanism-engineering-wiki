@@ -1,7 +1,6 @@
 // Interactive parts of the pages: 3D views (loaded only when they come into sight) and the refinery speed calculator.
 import levels from '../data/qor-levels.json';
 import { countTo, pop, swapIn } from './motion';
-import './stage-bg';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 let names: Promise<Record<string, { name: string; text: string; page: string | null }>> | null = null;

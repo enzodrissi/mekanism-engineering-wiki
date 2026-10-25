@@ -31,7 +31,6 @@ export default defineConfig({
         '@fontsource-variable/jetbrains-mono',
         './src/styles/theme.css',
         './src/styles/motion.css',
-        './src/styles/stage-bg.css',
       ],
       components: {
         Head: './src/components/Head.astro',
