@@ -88,12 +88,27 @@ export async function buildRefinery(base, opts) {
       const joined = obj; obj = new THREE.Group(); obj.add(joined, alone);
       Object.assign(data, { joined, alone });
     }
+    obj.traverse(m => { if (m.material) m.material.onBeforeCompile = seeThrough; });
     obj.position.set(c.dx, c.dy, c.dz);
     obj.userData = data;
     root.add(obj); blocks.push(obj);
   }
   return { root, blocks };
 }
+
+// A faded block keeps its whole shape: as it fades, its see-through and cut-out pixels fill in with a steel tint, so a
+// tank does not lose its glass and keep only its frame (which read as a stripped block, an arch with nothing inside).
+// At full opacity nothing changes.
+function seeThrough(shader) {
+  shader.fragmentShader = shader.fragmentShader.replace('#include <alphatest_fragment>', `
+    float meFade = clamp((1.0 - opacity) / 0.9, 0.0, 1.0);
+    float meTex = diffuseColor.a / max(opacity, 1e-4);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.42, 0.52, 0.56), meFade * (1.0 - meTex));
+    diffuseColor.a = mix(meTex, max(meTex, 0.6), meFade) * opacity;
+    #include <alphatest_fragment>`);
+}
+
+const DEPTH_ONLY = new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, side: THREE.DoubleSide });
 
 /** Spreads the layers apart (gap in blocks) and fades every layer but `only` (1 to 4, 0 = all). */
 export function arrange(blocks, { gap = 0, only = 0, ghost = 0.12 } = {}) {
@@ -103,7 +118,11 @@ export function arrange(blocks, { gap = 0, only = 0, ghost = 0.12 } = {}) {
     b.position.y = d.dy * (1 + gap);
     if (d.alone) { d.alone.visible = apart; d.joined.visible = !apart; }
     const dim = only && only !== d.dy + 1;
-    b.traverse(m => { if (!m.material) return;
+    b.traverse(m => { if (!m.material || m.userData.depthOnly) return;
+      // a faded block first marks only its nearest surface, then draws there: one clear see-through skin per block
+      // instead of every inner face stacked (see DEPTH_ONLY)
+      if (dim && !m.userData.skin) { m.userData.skin = new THREE.Mesh(m.geometry, DEPTH_ONLY); Object.assign(m.userData.skin, { renderOrder: 2.5, raycast() {} }); m.userData.skin.userData.depthOnly = true; m.add(m.userData.skin); }
+      if (m.userData.skin) m.userData.skin.visible = !!dim;
       if (m.userData.base === undefined) m.userData.base = { t: m.material.transparent, a: m.material.alphaTest, dw: m.material.depthWrite, ro: m.renderOrder };
       m.material.transparent = dim || m.userData.base.t; m.material.opacity = dim ? ghost : 1;
       m.material.alphaTest = dim ? 0.02 : m.userData.base.a; m.material.depthWrite = dim ? false : m.userData.base.dw; m.renderOrder = dim ? 3 : m.userData.base.ro; m.material.needsUpdate = true; });

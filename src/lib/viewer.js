@@ -276,7 +276,7 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     const gap = state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6;
     const was = glide ? blocks.map(b => b.position.y) : null, cam = glide && reframe ? camState(stage) : null;
     const fade = glide ? meshes.map(m => m.material.opacity) : null;
-    const opts = { gap, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 };
+    const opts = { gap, only: state.mode === 'layers' ? state.only : 0, ghost: 0.15 };
     arrange(blocks, opts);
     root.updateMatrixWorld(true);
     for (const b of host.querySelectorAll('.me-seg button')) b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
@@ -355,8 +355,8 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
   // the see-through blocks of the layer view need their own shaders: compiled now, while nothing moves, so the first
   // change of view does not stall
   else (window.requestIdleCallback || setTimeout)(() => {
-    arrange(blocks, { gap: 0, only: 1, ghost: 0.1 }); stage.renderer.compile(stage.scene, stage.cam);
-    arrange(blocks, { gap: state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 });
+    arrange(blocks, { gap: 0, only: 1, ghost: 0.15 }); stage.renderer.compile(stage.scene, stage.cam);
+    arrange(blocks, { gap: state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6, only: state.mode === 'layers' ? state.only : 0, ghost: 0.15 });
     root.updateMatrixWorld(true); stage.draw();
   });
   return stage;
