@@ -1,9 +1,9 @@
 // The small controls under a block's 3D view (Idle / Running, fluid choice...). One bar per view, made when a block needs one.
 const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
-/** The bar under the view; made once. */
+/** The bar under the view; made once. In a page header it spans the header's whole width, under the text and the view. */
 export function bar(host) {
-  const parent = host.parentElement;
+  const parent = host.closest('.me-head') || host.parentElement;
   let el = parent.querySelector(':scope > .me-anim-bar');
   if (!el) { el = document.createElement('div'); el.className = 'me-anim-bar not-content'; parent.append(el); }
   return el;

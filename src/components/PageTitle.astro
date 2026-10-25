@@ -15,6 +15,7 @@ const item = m?.model ?? m?.id;
 
 {
   ['', 'index', 'fr', 'fr/index'].includes(id) ? null : m ? (
+    <div class="me-head-c">
     <div class:list={['me-head', m.quantum ? 'q' : 'g', { wide: kind === 'refinery' }]}>
       <div>
         <div class="me-eyebrow">{family}{m.isNew ? ` · ${t('New')}` : ''}{m.quantum ? ' · Quantum' : ''}</div>
@@ -35,6 +36,7 @@ const item = m?.model ?? m?.id;
           <img src={`${base}/icons/mekanismengineering/${item}.png`} alt={entry.data.title} />
         </div>
       )}
+    </div>
     </div>
   ) : (
     <Default />

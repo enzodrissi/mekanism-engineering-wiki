@@ -113,6 +113,11 @@ export const FR_ANIM = {
     "En marche : le minage est bloqué, l'écran devient donc ambre. Les chiffres sont des exemples.",
   'Running: the screen shows the state, the share mined and the blocks left. When the zone is done it goes back to its resting picture. The figures are examples.':
     "En marche : l'écran montre l'état, la part minée et les blocs restants. Une fois la zone terminée, il revient à son image de repos. Les chiffres sont des exemples.",
+  'The ore flowing in is an illustration of the mining, not an effect of the game.':
+    "Le minerai qui afflue illustre le minage ; ce n'est pas un effet du jeu.",
+  'Mining illustration': 'Illustration du minage',
+  'Ore flow: on': 'Flux de minerai : activé',
+  'Ore flow: off': 'Flux de minerai : désactivé',
   'Screen state': "État de l'écran",
   'Screen: mining': 'Écran : minage',
   'Screen: warning': 'Écran : alerte',

@@ -75,10 +75,21 @@ export async function buildRefinery(base, opts) {
   const all = cells(opts), root = new THREE.Group(), blocks = [];
   for (const c of all) {
     if (!c.id) continue;
-    const v = await variantFor(base, `mekanismengineering:${c.id}`, stateOf(c, all));
-    const obj = await buildBlock(base, v.model, { x: v.x || 0, y: v.y || 0 });
+    const props = stateOf(c, all), id = `mekanismengineering:${c.id}`;
+    const v = await variantFor(base, id, props);
+    let obj = await buildBlock(base, v.model, { x: v.x || 0, y: v.y || 0 });
+    const data = { ...c, name: NAMES[c.id.replace(R, '')] };
+    // a pillar or tank joined to the same block above or below has open ends (StackableBlock): when the layers are apart,
+    // it would look stripped, so it then shows its model on its own, with both ends (see arrange)
+    if (props.up || props.down) {
+      const s = await variantFor(base, id, { ...props, up: false, down: false });
+      const alone = await buildBlock(base, s.model, { x: s.x || 0, y: s.y || 0 });
+      alone.visible = false;
+      const joined = obj; obj = new THREE.Group(); obj.add(joined, alone);
+      Object.assign(data, { joined, alone });
+    }
     obj.position.set(c.dx, c.dy, c.dz);
-    obj.userData = { ...c, name: NAMES[c.id.replace(R, '')] };
+    obj.userData = data;
     root.add(obj); blocks.push(obj);
   }
   return { root, blocks };
@@ -86,9 +97,11 @@ export async function buildRefinery(base, opts) {
 
 /** Spreads the layers apart (gap in blocks) and fades every layer but `only` (1 to 4, 0 = all). */
 export function arrange(blocks, { gap = 0, only = 0, ghost = 0.12 } = {}) {
+  const apart = gap > 0 || only > 0;
   for (const b of blocks) {
     const d = b.userData;
     b.position.y = d.dy * (1 + gap);
+    if (d.alone) { d.alone.visible = apart; d.joined.visible = !apart; }
     const dim = only && only !== d.dy + 1;
     b.traverse(m => { if (!m.material) return;
       if (m.userData.base === undefined) m.userData.base = { t: m.material.transparent, a: m.material.alphaTest, dw: m.material.depthWrite, ro: m.renderOrder };

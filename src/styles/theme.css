@@ -22,6 +22,9 @@
   --me-ink: #041018;
   --sl-content-width: 50rem;
 }
+/* big screens: a wider column, so that the 3D views and tables use the room instead of leaving it empty */
+@media (min-width: 100rem) { :root { --sl-content-width: 58rem; } }
+@media (min-width: 140rem) { :root { --sl-content-width: 64rem; } html { font-size: 18px; } }
 :root[data-theme='dark'] {
   --sl-color-accent-low: #0b3532;
   --sl-color-accent: #64d1c7;
@@ -118,7 +121,13 @@ header.header { backdrop-filter: blur(12px); }
 .me-head.g .me-eyebrow { color: var(--me-g-ink); }
 .me-head-visual > img { width: min(13rem, 60%); image-rendering: pixelated; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45)); }
 .me-head-visual .me-stage { width: 100%; height: 17rem; }
-@media (min-width: 50rem) { .me-head { grid-template-columns: 1.1fr 1fr; } .me-head-visual .me-stage { height: 20rem; } }
+/* text and view side by side only when the column is wide enough for both (a container query: the column is narrower
+   than the window when the side menus are open); the controls of an animation then run under both, centred */
+.me-head-c { container-type: inline-size; }
+.me-head > .me-anim-bar { grid-column: 1 / -1; margin-top: 0.2rem; }
+@media (min-width: 50rem) { .me-head-visual .me-stage { height: 20rem; } }
+@container (min-width: 46rem) { .me-head { grid-template-columns: 1fr 1.1fr; } .me-head-visual .me-stage { height: 23rem; } }
+@container (min-width: 60rem) { .me-head-visual .me-stage { height: 28rem; } }
 
 /* ---------- 3D stage ---------- */
 .me-stage { position: relative; touch-action: pan-y; }
