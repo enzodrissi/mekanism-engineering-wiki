@@ -1,14 +1,14 @@
 name: Build and deploy the wiki
 
 # Builds the site from the mod's GitLab repository (text, images, models, recipes) at every push, every pull request,
-# every night and on demand. It is published to GitHub Pages only from main, and only once the repository variable
+# every hour (so the site follows the mod's newest branch by itself) and on demand. It is published to GitHub Pages only from main, and only once the repository variable
 # DEPLOY is set to "on" (Settings > Secrets and variables > Actions > Variables).
 on:
   push:
     branches: [main]
   pull_request:
   schedule:
-    - cron: '17 3 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -24,8 +24,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # the branch or tag of the mod whose wiki is published
-      WIKI_REF: ${{ vars.WIKI_REF || 'wip/1.2/rqe-ecran' }}
+      # the branch or tag of the mod whose wiki is published; empty = its newest branch (scripts/import-wiki.mjs)
+      WIKI_REF: ${{ vars.WIKI_REF }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

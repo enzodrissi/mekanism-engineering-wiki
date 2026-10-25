@@ -2,7 +2,7 @@
 // The wiki text stays in GitLab (docs/wiki); this script turns it into Starlight pages, copies the images, the mod's block
 // models and textures (for the 3D views), and builds the crafting grids and the in-game texts from the mod's own data files.
 //
-//   node scripts/import-wiki.mjs                 downloads the public archive of WIKI_REF (default below)
+//   node scripts/import-wiki.mjs                 downloads the public archive of WIKI_REF, or else of the mod's newest branch (below)
 //   WIKI_ARCHIVE=path/to/archive.tar.gz node ... uses a local archive instead
 //
 // The site is in English (at the root) and in French (under /fr/). The French text of the wiki pages and release notes is
@@ -21,7 +21,29 @@ import GithubSlugger from 'github-slugger';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const PROJECT = '86415165';
-const REF = process.env.WIKI_REF || 'wip/1.2/rqe-ecran';
+const API = `https://gitlab.com/api/v4/projects/${PROJECT}`;
+const getJson = url => JSON.parse(execFileSync('curl', ['-sSfL', '--retry', '4', url], { encoding: 'utf8', maxBuffer: 64 << 20 }));
+/**
+ * The site follows the mod's newest work with no setting to change at a release: the branch of the 1.21.1 line committed to
+ * last (main, wip/* or release/*; the Minecraft 1.20.1 port branches are left out) that has a wiki. The workflow builds every
+ * hour, so a push to the mod shows up within the hour. WIKI_REF, when set, picks a branch or tag instead.
+ */
+function newestRef() {
+  const branches = [];
+  for (let page = 1; ; page++) {
+    const list = getJson(`${API}/repository/branches?per_page=100&page=${page}`);
+    branches.push(...list);
+    if (list.length < 100) break;
+  }
+  const line = branches.filter(b => /^(main$|wip\/|release\/)/.test(b.name) && !/1201|1\.20\.1|mc1\.20(?!\d)/i.test(b.name))
+    .sort((a, b) => Date.parse(b.commit.committed_date) - Date.parse(a.commit.committed_date));
+  for (const b of line.slice(0, 5)) {
+    try { if (getJson(`${API}/repository/tree?path=docs/wiki&per_page=1&ref=${encodeURIComponent(b.name)}`).length) return b.name; }
+    catch { /* no docs/wiki on that branch */ }
+  }
+  throw new Error('No branch of the mod has a wiki (docs/wiki)');
+}
+const REF = process.env.WIKI_REF || (process.env.WIKI_ARCHIVE ? 'local archive' : newestRef());
 const NS = 'mekanismengineering';
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
 const SITE_REPO = 'https://github.com/mekanism-engineering/mekanism-engineering.github.io';
@@ -495,7 +517,15 @@ write(path.join(PUB, 'data/mc.json'), JSON.stringify(bundle));
 // the version as the mod's release is named (CurseForge notes "1.2" for a jar numbered 1.2.0)
 const shortVersion = props.mod_version.replace(/\.0$/, '');
 const modVersion = changelogs.some(f => ver(f) === shortVersion) ? shortVersion : props.mod_version;
-write(path.join(ROOT, 'src/data/source.json'), JSON.stringify({ ref: REF, commit, modVersion,
+// search engines are kept away until the version the site shows is out, that is once the mod's repository has its tag
+// (v1.2, V1.2-1.21.1…): the pages then carry no noindex from the next build on
+let released = false;
+try {
+  const tag = new RegExp(`^v${modVersion.replace(/\./g, '\\.')}(-|$)`, 'i');
+  released = getJson(`${API}/repository/tags?per_page=100`).some(t => tag.test(t.name));
+} catch (e) { console.warn('Could not read the tags of the mod, the pages stay out of search engines:', e.message); }
+console.log(released ? `v${modVersion} is tagged: search engines may index the site` : `v${modVersion} is not tagged yet: noindex`);
+write(path.join(ROOT, 'src/data/source.json'), JSON.stringify({ ref: REF, commit, modVersion, released,
   minecraft: props.minecraft_version, mekanism: props.mekanism_version,
   builds: [{ minecraft: props.minecraft_version, loader: 'NeoForge', mekanism: props.mekanism_version }, { minecraft: MC_1201.minecraft, loader: MC_1201.loader, mekanism: MC_1201.mekanism }],
   imported: new Date().toISOString() }, null, 2));

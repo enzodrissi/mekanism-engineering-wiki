@@ -1,8 +1,11 @@
 ---
 import Default from '@astrojs/starlight/components/Head.astro';
+import source from '../data/source.json';
 ---
 
 <Default><slot /></Default>
+{/* kept out of search engines until the version shown is released (scripts/import-wiki.mjs) */}
+{!source.released && <meta name="robots" content="noindex" />}
 <meta name="theme-color" content="#060a11" />
 <script>
   import '../scripts/site.ts';

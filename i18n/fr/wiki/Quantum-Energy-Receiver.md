@@ -1,4 +1,4 @@
-<!-- source: 6e62af4819e42abeccd2325adc7cc62ca26f98df -->
+<!-- source: fc11d1c5a3d876e8a3bae2ac377fc2546e542cfa -->
 # Récepteur d'énergie quantique
 
 > Prélève l'énergie d'une fréquence Quantum existante et l'injecte dans la machine sur sa face de fixation.
