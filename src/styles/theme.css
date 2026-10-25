@@ -244,7 +244,10 @@ header.header { backdrop-filter: blur(12px); }
   .me-hero > .me-hero-text { grid-area: text; } .me-hero > [data-me3d] { grid-area: stage; } .me-hero > .me-cta { grid-area: cta; margin-top: 0; } }
 .me-home h2 { font: 700 1.6rem var(--me-head); margin: 2.6rem 0 0.2rem; color: var(--sl-color-white); }
 .me-home .me-sub { color: var(--sl-color-gray-3); font-size: 0.92rem; margin: 0 0 0.9rem; }
-.me-rail { display: flex; gap: 0.8rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0.3rem 0.1rem 0.8rem; scrollbar-width: thin; }
+/* the rail scrolls sideways only: overflow-x alone would make the other axis scrollable too (a card lifting on hover or
+   rising into view goes a few pixels past the rail), and a finger could then drag the rail up and down inside the page */
+.me-rail { display: flex; gap: 0.8rem; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+  padding: 0.3rem 0.1rem 0.8rem; scrollbar-width: thin; }
 .me-card { flex: none; width: 15rem; scroll-snap-align: start; border-radius: 20px; padding: 1rem; text-decoration: none; color: inherit;
   background: linear-gradient(160deg, var(--me-q1), var(--me-q2)); border: 1px solid var(--me-line); transition: transform 0.2s, border-color 0.2s; }
 .me-card.g { background: linear-gradient(160deg, var(--me-g1), var(--me-g2)); border-color: var(--me-g-line); }
@@ -278,7 +281,7 @@ header.header { backdrop-filter: blur(12px); }
    .me-tbl-facts: the facts box at the top of a machine page (labels on the left, side by side from 40rem, stacked below);
    .me-tbl-stack: a table of sentences, a list of cards below 50rem; .me-tbl-scroll: any other table. */
 .sl-markdown-content .me-tbl { --me-tbl-bg: #0a111d; --me-tbl-head: rgba(100, 209, 199, 0.07); --me-tbl-zebra: rgba(120, 170, 255, 0.035);
-  border: 1px solid var(--me-line); border-radius: 16px; overflow-x: auto; scrollbar-width: thin;
+  border: 1px solid var(--me-line); border-radius: 16px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin;
   /* the edge that hides more of the table glows while it can scroll (covers move with the content, glows stay put) */
   background:
     linear-gradient(to right, var(--me-tbl-bg) 30%, transparent) left / 2rem 100% no-repeat local,
