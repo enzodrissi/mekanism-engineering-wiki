@@ -1,4 +1,4 @@
-<!-- source: 56199d08ae988eb2f90adf0718a21d8f5d66305e -->
+<!-- source: 0ee897ac7be8a5381295caaab09c83b4182f668a -->
 # Quantum Ore Refinery : structure et pièces
 
 > Le plan fixe de 10 × 4 × 3 de la [Quantum Ore Refinery](Quantum-Ore-Refinery.md), couche par couche, avec chaque bloc et sa recette.
@@ -76,7 +76,7 @@ les mêmes qu'avant). La couche 4 est le toit.
 | Modules de traitement | 7 | Un de chaque sorte |
 | Blocs de réservoir | 8 | Deux de chacune des quatre sortes |
 | Accélérateur ou Carcasse de raffinerie de minerai | 8 | Places pour 0 à 8 accélérateurs ; chaque accélérateur raccourcit un travail (voir [Vitesse et accélérateurs](Quantum-Ore-Refinery.md#speed-and-accelerators)) |
-| Cases libres | 27 | Air, Vitre de raffinerie de minerai ou Carcasse de raffinerie de minerai |
+| Cases libres | 27 | Air, Vitre de raffinerie de minerai ou Carcasse de raffinerie de minerai ; une case libre sur la face extérieure de la boîte (19 d'entre elles) accepte n'importe quel bloc |
 | Module quantique de raffinerie de minerai | 0 ou 1 | Facultatif, dans la case marquée `QM`, ou à la place du port de sortie |
 
 Exactement 84 cases demandent un bloc précis et 8 acceptent un accélérateur ou une carcasse : 92 en tout.

@@ -1,4 +1,4 @@
-<!-- source: df736c28fce7a13eabe04a0c7621a0a22fe1c847 -->
+<!-- source: 67a581eeb21826c5663be1f8c37730e5e150ea65 -->
 # Quantum Ore Refinery
 
 > Toute la chaîne de traitement du minerai de Mekanism dans un seul multibloc : du minerai en entrée, jusqu'à cinq lingots par minerai en sortie.
@@ -178,6 +178,8 @@ pleine, absente ou supprimée, les lingots attendent dans le tampon (« Destinat
 perdu, et ils repartent dès qu'il y a de la place. Un tampon plein empêche la machine de terminer ses travaux, exactement comme une sortie pleine.
 Sans le module, ou sans fréquence, les lingots repartent par le port de sortie, et ce que le tampon contient encore
 les suit. Si la structure a aussi un Port de sortie, il sert de **tampon de secours** : ce que le tampon du module ne peut pas contenir sort par le port. Si elle n'a pas de Port de sortie, un tampon plein fait attendre la machine (« Sortie pleine »). Si elle n'a ni Port de sortie ni module lié, la machine ne travaille pas du tout (« Pas de sortie »). Un objet que la raffinerie ne fait que laisser passer ne passe jamais par le module.
+
+Les boutons **OFF** et **ON** en haut de l'écran du module l'éteignent sans le retirer : sur OFF, le module est ignoré comme s'il n'était pas posé, les lingots (et ce que le tampon contient) sortent par le Port de sortie, rien n'est envoyé et les fréquences choisies sont gardées ; sans Port de sortie, la raffinerie attend. ON est la position par défaut.
 
 ## Automatisation
 

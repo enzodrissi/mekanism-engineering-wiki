@@ -1,4 +1,4 @@
-<!-- source: 950561433901033a99d13ead89afb010235c38b3 -->
+<!-- source: cd1a7aae358148de6201458ce8ae91ad2016ce59 -->
 # Quantum Portable Teleporter
 
 > Le Téléporteur portable, en version adulte : sauter vers un Téléporteur de Mekanism, vers des coordonnées ou vers un endroit sûr au hasard.
@@ -96,8 +96,9 @@ et déjà réglé pour gagner une étape.
   - **Teleporter** : filtres Publique / Confiance / Privé sur la liste des fréquences de Téléporteur du joueur, chacune suivie de
     « prêt » ou « inactif » ; en choisir une la sélectionne exactement comme la liste de fréquences de Mekanism. Sous la liste :
     l'arrivée et « le Teleporter actif le plus proche », ou la raison du refus.
-  - **Coordonnées** : un bouton de dimension (cliquer pour faire défiler, clic droit pour revenir en arrière), les champs X/Y/Z, « Ici » pour remplir
-    la position du joueur, « Surface » pour chercher le sol le plus haut au lieu d'un Y fixe, et « Vérifier ».
+  - **Coordonnées** : un bouton de dimension qui ouvre une liste déroulante des dimensions (cinq lignes, une barre de défilement et
+    la molette pour les suivantes ; cliquer sur une ligne pour la choisir, Échap ou un clic ailleurs ferme la liste sans rien changer), les champs
+    X/Y/Z, « Ici » pour remplir la position du joueur, « Surface » pour chercher le sol le plus haut au lieu d'un Y fixe, et « Vérifier ».
   - **Aléatoire** : « Chercher » / « Chercher encore », la plage de distance configurée et, pendant la recherche ou une fois un endroit
     trouvé : l'essai qui l'a trouvé, le biome et les coordonnées, la distance, et le décompte des essais rejetés par raison
     (océan, lave, vide, autre).
