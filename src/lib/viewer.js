@@ -193,6 +193,7 @@ export async function mountBlock(host) {
   stage.resize(); stage.frame();
   host.querySelector(':scope > img')?.remove();
   const end = camState(stage);
+  host.__stage = stage; // for the tests of the animations
   host.classList.add('me-live');
   await tween(1100, t => { const k = easeOut(t); turn(stage, end, -70 * (1 - k)); stage.cam.zoom = 0.82 + 0.18 * k; stage.cam.updateProjectionMatrix(); stage.draw(); });
   // the block's own animation (src/lib/anim): what the game shows when the machine works
@@ -357,6 +358,8 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     arrange(blocks, { gap: state.mode === 'assembled' ? 0 : state.mode === 'exploded' ? 1.1 : 0.6, only: state.mode === 'layers' ? state.only : 0, ghost: 0.1 });
     root.updateMatrixWorld(true); stage.draw();
   });
+  // a job through the chain of modules (src/lib/anim/refinery-run.js); on the home page it runs alone, without controls
+  import('./anim/refinery-run.js').then(m => m.attachRun({ stage, blocks, host, hero: !!tags, base: MC })).catch(e => console.warn('refinery run', e));
   return stage;
 }
 

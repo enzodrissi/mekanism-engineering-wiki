@@ -8,7 +8,7 @@ const FLUIDS = [
   ['water', 'Water', 0x3F76E4, '#3f76e4'],
   ['lava', 'Lava', 0xFF8A24, '#ff8a24'],
   ['heavy', 'Heavy water', 0x4A5CC8, '#4a5cc8'],
-  ['none', 'No fluid', 0x54E2D5, '#54e2d5'],
+  ['none', 'Empty', 0x54E2D5, '#54e2d5'],
 ];
 
 export default async function setup({ stage, onObj, active, choice }) {
