@@ -17,6 +17,27 @@ const PROJECT = '86415165';
 const REF = process.env.WIKI_REF || 'wip/1.2/rqe-ecran';
 const NS = 'mekanismengineering';
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
+// The 1.2 also ships for Minecraft 1.20.1 with Forge, from a branch of its own whose wiki text is the same. Its requirements,
+// read from that branch's gradle.properties and META-INF/mods.toml (wip/1.2/port-1201, 25 Oct 2026):
+const MC_1201 = { minecraft: '1.20.1', loader: 'Forge', mekanism: '1.20.1-10.4.16.80', ranges: {
+  'Minecraft Java Edition': '1.20.1 exactly', Java: '17', 'Mod loader': 'Forge 47.1.106 up to, but excluding, 47.2',
+  Mekanism: '10.4.13 up to, but excluding, 10.4.17' } };
+// the overview names both Minecraft versions, and its table of requirements gets a column for each
+// "10.7.15 up to, but excluding, 10.7.20" is shortened so two columns of it stay readable on a phone
+const short = range => range.replace(/ up to, but excluding, /, ' to below ');
+const addMc1201 = md => {
+  if (md.includes(MC_1201.minecraft)) return md;
+  const said = md.replace(/for Minecraft ([\d.]+) with NeoForge/, `for Minecraft $1 with NeoForge and Minecraft ${MC_1201.minecraft} with ${MC_1201.loader}`);
+  return said.replace(/\| Component \| Accepted range \|\n\|---\|---\|\n((?:\|.*\|\n)+)/, (all, rows) => {
+    const mc = (said.match(/for Minecraft ([\d.]+) with NeoForge/) || [])[1] || 'current';
+    const out = rows.trim().split('\n').map(r => {
+      let [name, range] = r.split('|').slice(1, 3).map(c => c.trim());
+      if (name === 'NeoForge') [name, range] = ['Mod loader', `NeoForge ${range}`];
+      return `| ${name} | ${short(range)} | ${short(MC_1201.ranges[name] || '—')} |`;
+    });
+    return `| Component | Minecraft ${mc} | Minecraft ${MC_1201.minecraft} |\n|---|---|---|\n${out.join('\n')}\n\nEach Minecraft version has its own jar: take the one made for your game.\n`;
+  });
+};
 // edit and source links point to a lasting branch, not to the work branch being imported
 const EDIT_REF = process.env.WIKI_EDIT_REF || 'main';
 
@@ -226,6 +247,7 @@ for (const [from, p] of Object.entries(PAGES)) {
   // the main render of a machine page moves into the page header (3D view or render)
   if (p.ids) md = md.replace(/^!\[[^\]]*\]\(images\/[a-z_]+\.png\)\n+/m, '');
   md = rewrite(md, from, p.ids);
+  if (from === 'Home') md = addMc1201(md);
   if (from === 'Quantum-Ore-Refinery') {
     md = md.replace(/(The time is `200 × 50\^\(−n\/8\)`[^\n]*\n[^\n]*\n)/, `$1\n<div class="me-qor-calc not-content"></div>\n`);
   }
@@ -338,6 +360,8 @@ write(path.join(PUB, 'data/mc.json'), JSON.stringify(bundle));
 const shortVersion = props.mod_version.replace(/\.0$/, '');
 const modVersion = changelogs.some(f => ver(f) === shortVersion) ? shortVersion : props.mod_version;
 write(path.join(ROOT, 'src/data/source.json'), JSON.stringify({ ref: REF, commit, modVersion,
-  minecraft: props.minecraft_version, mekanism: props.mekanism_version, imported: new Date().toISOString() }, null, 2));
+  minecraft: props.minecraft_version, mekanism: props.mekanism_version,
+  builds: [{ minecraft: props.minecraft_version, loader: 'NeoForge', mekanism: props.mekanism_version }, { minecraft: MC_1201.minecraft, loader: MC_1201.loader, mekanism: MC_1201.mekanism }],
+  imported: new Date().toISOString() }, null, 2));
 console.log(`Imported ${written} pages, ${Object.keys(recipes).length} recipes, ${sorted.length} changelog versions checked.`);
 fs.rmSync(work, { recursive: true, force: true });
