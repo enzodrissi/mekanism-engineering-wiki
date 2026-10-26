@@ -215,13 +215,26 @@ header.header { backdrop-filter: blur(12px); }
 .me-acc button[aria-pressed='false'] { opacity: 0.28; filter: grayscale(1); }
 .me-acc img { width: 90%; height: auto; image-rendering: pixelated; }
 .me-calc .me-note { text-align: center; font-size: 0.78rem; color: var(--sl-color-gray-3); margin-top: 0.4rem; }
-.me-flow { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
-.me-flow span { font-size: 0.78rem; padding: 0.3rem 0.55rem; border-radius: 9px; background: rgba(91, 140, 255, 0.12); border: 1px solid var(--me-line); color: var(--sl-color-gray-1); }
-.me-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.8rem; }
+/* the steps and the numbers of the calculator sit on a regular grid: equal columns, every row full, never a card alone.
+   site.ts sets data-cols on the steps (the wide column count that leaves no short row); a narrow card has two columns, and
+   a last cell with no partner takes the rest of its row. */
+.me-calc > section { container-type: inline-size; }
+.me-flow, .me-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; margin-top: 0.8rem; }
+.me-flow > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* the ingots come first on a row of their own, the tank amounts below them two by two */
+.me-kpis > :first-child, .me-kpis > :last-child:nth-child(even) { grid-column: 1 / -1; }
+.me-flow span { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.78rem; line-height: 1.3; padding: 0.4rem 0.55rem; border-radius: 9px; background: rgba(91, 140, 255, 0.12); border: 1px solid var(--me-line); color: var(--sl-color-gray-1); }
 .me-kpis div { border-radius: 14px; padding: 0.6rem 0.75rem; background: rgba(6, 10, 17, 0.35); border: 1px solid var(--me-line); }
 :root[data-theme='light'] .me-kpis div { background: #fff; }
 .me-kpis b { font: 700 1.2rem var(--me-head); display: block; color: var(--sl-color-white); }
 .me-kpis span { font-size: 0.74rem; color: var(--sl-color-gray-3); }
+@container (min-width: 34rem) {
+  .me-flow[data-cols] { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+  .me-flow > :last-child:nth-child(odd) { grid-column: auto; }
+  .me-flow[data-cols='4'] > :last-child:nth-child(4n+1), .me-flow[data-cols='3'] > :last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+  .me-flow[data-cols='4'] > :last-child:nth-child(4n+2) { grid-column: span 3; }
+  .me-flow[data-cols='4'] > :last-child:nth-child(4n+3), .me-flow[data-cols='3'] > :last-child:nth-child(3n+2) { grid-column: span 2; }
+}
 
 /* ---------- guides: numbered steps ---------- */
 .me-steps { counter-reset: step; list-style: none; padding: 0; }
