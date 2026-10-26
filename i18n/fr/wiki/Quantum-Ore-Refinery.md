@@ -163,8 +163,8 @@ niveau que ce stock rend possible (« Débloque x3 », ...), en rouge tant que l
 ## Le module quantique
 
 
-Le **Module quantique de raffinerie de minerai** est un bloc facultatif de la structure, sur la rangée avant, deux blocs au-dessus du
-contrôleur (la structure se forme avec ou sans lui). Avec le module en place et une fréquence choisie sur son écran, les
+Le **Module quantique de raffinerie de minerai** est un bloc facultatif de la structure, au bout côté sortie, sur la rangée du milieu,
+au-dessus du Port de sortie ou à sa place (la structure se forme avec ou sans lui). Avec le module en place et une fréquence choisie sur son écran, les
 lingots vont dans le **tampon de 64 piles** du module au lieu des emplacements de sortie, et toutes les demi-secondes le tampon est envoyé
 vers la destination :
 
