@@ -85,7 +85,7 @@ Le niveau dit combien d'objets donne un minerai, exactement comme les chaînes d
   ]}
 />
 
-**Elle utilise les recettes de Mekanism, pas les siennes.** Chaque étape lit la recette de l'objet qui se présente, donc ce qu'un modpack change dans Mekanism change la raffinerie avec. Les minerais, les métaux bruts et les blocs de métal brut entrent, tout comme les minerais d'autres mods que Mekanism sait traiter. Le tag `mekanismengineering:refinery_ores` liste ce qui entre, et un datapack peut le modifier.
+**Elle utilise les recettes de Mekanism, pas les siennes.** Chaque étape lit la recette de l'objet qui se présente, donc ce qu'un modpack change dans Mekanism change la raffinerie avec. Les minerais, les métaux bruts et les blocs de métal brut entrent (y compris le bloc d'argent brut de Mekanism: More Machine et le bloc de naquadah brut de Mekanism Extras), tout comme les minerais d'autres mods que Mekanism sait traiter. Le tag `mekanismengineering:refinery_ores` liste ce qui entre, et un datapack peut le modifier.
 
 **Des piles entières à la fois.** Un travail traite une pile de jusqu'à 64 minerais. Le **x1 raffine une pile entière en un seul tick** ; les niveaux supérieurs prennent plus de temps, parce qu'ils donnent plus.
 
@@ -134,7 +134,7 @@ Accueil montre le statut, les cinq niveaux (prêt, en attente d'une ressource, e
 <div class="cl-split">
 <div>
 
-Un bloc optionnel de la structure. Avec lui, les produits vont dans un **tampon de 64 piles** et sont envoyés toutes les demi-secondes vers une **fréquence Quantum** ou vers un **QIO** choisi sur son écran (fréquences publiques, de confiance ou privées). L'onglet **Module de sortie** se trouve juste sous Accueil sur l'écran du contrôleur, et la fréquence s'y choisit. Une destination pleine ou absente garde les produits dans le tampon : rien n'est perdu. Sans le module, ou sans fréquence, les produits sortent par le port de sortie. Quand la structure a aussi un port de sortie, c'est le **tampon de secours** : ce que le tampon du module ne peut pas contenir sort par le port. Sans port de sortie, un tampon plein fait attendre la raffinerie, et rien n'est perdu.
+Un bloc optionnel de la structure. Avec lui, les produits vont dans un **tampon de 64 piles** et sont envoyés toutes les demi-secondes vers une **fréquence Quantum** ou vers un **QIO** choisi sur son écran (fréquences publiques, de confiance ou privées). L'onglet **Module de sortie** se trouve juste sous Accueil sur l'écran du contrôleur, et la fréquence s'y choisit. Une destination pleine ou absente garde les produits dans le tampon : rien n'est perdu. Sans le module, ou sans fréquence, les produits sortent par le port de sortie. Quand la structure a aussi un port de sortie, c'est le **tampon de secours** : ce que le tampon du module ne peut pas contenir sort par le port. Sans port de sortie, un tampon plein fait attendre la raffinerie, et rien n'est perdu. Un interrupteur **Off / On** sur l'écran du module l'éteint sans le casser : tant qu'il est éteint, la raffinerie travaille comme si le module n'était pas là (les produits sortent par le port de sortie) et le module garde ses fréquences pour quand on le rallume.
 
 **Rien n'est refusé.** Tout ce que la raffinerie ne sait pas traiter passe intact jusqu'à la sortie, si bien qu'un tapis d'objets mélangés peut l'alimenter sans filtre (une structure sans port de sortie le refuse).
 
@@ -159,7 +159,7 @@ La structure (10 × 4 × 3) comprend un contrôleur, des carcasses, des piliers,
     'ore_refinery_module_purification', 'ore_refinery_module_enrichment', 'ore_refinery_module_smelting', 'ore_refinery_module_quantum']}
 />
 
-La structure a 18 places où un port peut aller : huit sur chacun des deux étages inférieurs du mur arrière, entre les deux piliers, et une au pied de chaque extrémité. Le plan montre sept ports (cinq d'entrée, un de sortie, un d'énergie), mais la structure n'a besoin que d'**au moins cinq ports d'entrée et au moins un port d'énergie**, et le **port de sortie est optionnel : aucun ou un**. Le port d'énergie va sur le mur arrière ; les deux extrémités de la structure ne prennent que l'entrée d'objets ou la sortie, et le module Quantum/QIO se place côté sortie. Elle se forme d'elle-même moins d'une seconde après la pose du dernier bloc, dit quel bloc ne va pas quand elle ne se forme pas, et ne charge jamais de chunk pour vérifier. Comme les multiblocs de Mekanism, de la poudre rouge court le long de ses arêtes quand on la termine.
+La structure a 18 places où un port peut aller : huit sur chacun des deux étages inférieurs du mur arrière, entre les deux piliers, et une au pied de chaque extrémité. Le plan montre sept ports (cinq d'entrée, un de sortie, un d'énergie), mais la structure n'a besoin que d'**au moins cinq ports d'entrée et au moins un port d'énergie**, et le **port de sortie est optionnel : aucun ou un**. Le port d'énergie va sur le mur arrière ; les deux extrémités de la structure ne prennent que l'entrée d'objets ou la sortie, et le module Quantum/QIO se place côté sortie. Les cases libres à l'extérieur de la structure acceptent n'importe quel bloc, on peut donc la murer ou la couvrir comme on veut ; les cases libres à l'intérieur restent pour l'air, le verre ou la carcasse, et la case du module garde sa propre règle. Elle se forme d'elle-même moins d'une seconde après la pose du dernier bloc, dit quel bloc ne va pas quand elle ne se forme pas, et ne charge jamais de chunk pour vérifier. Comme les multiblocs de Mekanism, de la poudre rouge court le long de ses arêtes quand on la termine.
 
 <Stats items={[
   { v: '18', l: 'places où un port peut aller' },
@@ -317,6 +317,7 @@ La notification montre l'icône de la machine, un titre, une ligne de détail et
 
 ### Quantum Portable Teleporter : le dernier saut, et réglages serveur
 
+- **Choisir une dimension dans une liste.** Dans l'onglet des coordonnées, le bouton de dimension ouvre une liste déroulante (avec une barre de défilement pour les longues listes) au lieu de faire défiler les dimensions une par une ; un clic à l'extérieur ou Échap la ferme sans rien changer.
 - Il retient le dernier choix : la fréquence de Teleporter vers laquelle on a sauté, ou les coordonnées tapées, jamais les deux. Un saut aléatoire ne retient ni l'un ni l'autre. **Reprendre** remet le dernier choix et ne téléporte jamais tout seul : appuyer sur Téléporter quand on est prêt.
 - **Pour les propriétaires de serveur :** interdire l'onglet des coordonnées précises (`allowCoordinates`) ou l'onglet aléatoire (`allowRandom`), et lister les dimensions où ces deux onglets sont bloqués tant que le joueur s'y trouve (`coordinateAndRandomBlockedDimensions`). La téléportation par fréquence n'est pas concernée. Par défaut rien ne change : les deux onglets sont permis et la liste est vide.
 
@@ -330,7 +331,7 @@ Une nouvelle commande `/mekeng`, pour les opérateurs, sans rien de destructif s
 
 <div class="cl-cmds">
 
-- `/mekeng build quantum_ore_refinery` construit une raffinerie entière là où on vise (choisir son niveau, ses accélérateurs et son module, ou la construire vide), et `/mekeng remove quantum_ore_refinery` en démonte une. `/mek build quantum_ore_refinery` marche aussi, par la commande de construction de Mekanism.
+- `/mekeng build quantum_ore_refinery` construit une raffinerie entière là où on vise (choisir son niveau, ses accélérateurs et son module, ou la construire vide), et `/mekeng remove quantum_ore_refinery` en démonte une. Elle ne prend que les blocs de la raffinerie : un bloc d'un autre mod posé sur l'une de ses cases libres reste en place. `/mek build quantum_ore_refinery` marche aussi, par la commande de construction de Mekanism.
 - `/mekeng refinery check | info | fill | clear | level | alwaysrun | accelerators` inspecte et pilote une raffinerie : quelle case ne va pas, ce qu'elle contient, remplir ses réservoirs et son énergie pour un essai, vider un groupe d'emplacements.
 - `/mekeng miner info | find | list` lit les Quantum Digital Miners du serveur.
 - `/mekeng about` affiche les versions et les réglages qui comptent.

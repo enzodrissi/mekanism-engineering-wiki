@@ -85,7 +85,7 @@ The level says how many items one ore makes, exactly as Mekanism's own chains do
   ]}
 />
 
-**It uses Mekanism's recipes, not its own.** Every step reads the recipe of the item in front of it, so what a modpack changes in Mekanism changes the refinery with it. Ores, raw ores and raw blocks go in, and so do the ores of other mods that Mekanism can process. The tag `mekanismengineering:refinery_ores` lists what goes in, and a data pack can change it.
+**It uses Mekanism's recipes, not its own.** Every step reads the recipe of the item in front of it, so what a modpack changes in Mekanism changes the refinery with it. Ores, raw ores and raw blocks go in (including the raw silver block of Mekanism: More Machine and the raw naquadah block of Mekanism Extras), and so do the ores of other mods that Mekanism can process. The tag `mekanismengineering:refinery_ores` lists what goes in, and a data pack can change it.
 
 **Whole stacks at a time.** A job works a stack of up to 64 ores. The **x1 refines a whole stack in a single tick**; the higher levels take longer, because they give more.
 
@@ -134,7 +134,7 @@ Home shows the status, the five levels (ready, waiting for a resource, working),
 <div class="cl-split">
 <div>
 
-An optional block in the structure. With it, the products go to a **buffer of 64 stacks** and are sent every half second to a **Quantum frequency** or to a **QIO** you choose on its screen (public, trusted or private frequencies). The **Output module** tab sits right under Home on the controller screen, and the frequency is picked there. A full or missing destination keeps the products in the buffer: nothing is lost. Without the module, or without a frequency, the products leave by the output port. When the structure also has an output port, it is the **spare buffer**: what the module's buffer cannot hold leaves by the port. With no output port, a full buffer makes the refinery wait, and nothing is lost.
+An optional block in the structure. With it, the products go to a **buffer of 64 stacks** and are sent every half second to a **Quantum frequency** or to a **QIO** you choose on its screen (public, trusted or private frequencies). The **Output module** tab sits right under Home on the controller screen, and the frequency is picked there. A full or missing destination keeps the products in the buffer: nothing is lost. Without the module, or without a frequency, the products leave by the output port. When the structure also has an output port, it is the **spare buffer**: what the module's buffer cannot hold leaves by the port. With no output port, a full buffer makes the refinery wait, and nothing is lost. An **Off / On** switch on the module's screen turns it off without breaking it: while it is off, the refinery works as if the module were not there (the products leave by the output port) and the module keeps its frequencies for when you turn it back on.
 
 **Nothing is refused.** Anything the refinery cannot process passes through to the output untouched, so a mixed belt can feed it without a filter (a structure with no output port refuses it).
 
@@ -159,7 +159,7 @@ The structure (10 × 4 × 3) has a controller, casings, pillars, girders, convey
     'ore_refinery_module_purification', 'ore_refinery_module_enrichment', 'ore_refinery_module_smelting', 'ore_refinery_module_quantum']}
 />
 
-The structure has 18 places where a port can go: eight on each of the two lower floors of the back wall, between the two pillars, and one at the foot of each end. The drawing shows seven ports (five input, one output, one energy), but the structure needs only **at least five input ports and at least one energy port**, and the **output port is optional: none or one**. The energy port goes on the back wall; the two ends of the structure take only item input or the output, and the Quantum/QIO module sits at the output end. It forms by itself within a second of the last block being placed, tells you which block is wrong when it does not, and never loads a chunk to look. Like Mekanism's multiblocks, red dust runs along its edges when you complete it.
+The structure has 18 places where a port can go: eight on each of the two lower floors of the back wall, between the two pillars, and one at the foot of each end. The drawing shows seven ports (five input, one output, one energy), but the structure needs only **at least five input ports and at least one energy port**, and the **output port is optional: none or one**. The energy port goes on the back wall; the two ends of the structure take only item input or the output, and the Quantum/QIO module sits at the output end. The free cells on the outside of the structure take any block, so you can wall or roof it with whatever you like; the free cells inside stay for air, glass or casing, and the module's cell keeps its own rule. It forms by itself within a second of the last block being placed, tells you which block is wrong when it does not, and never loads a chunk to look. Like Mekanism's multiblocks, red dust runs along its edges when you complete it.
 
 <Stats items={[
   { v: '18', l: 'places where a port can go' },
@@ -317,6 +317,7 @@ The notification shows the machine's icon, a title, a detail line and the place:
 
 ### Quantum Portable Teleporter: your last jump, and server controls
 
+- **Pick a dimension from a list.** In the coordinates tab, the dimension button opens a drop-down list (with a scroll bar for long lists) instead of cycling through dimensions one click at a time; a click outside or Escape closes it without changing anything.
 - It remembers what you chose last: the Teleporter frequency you jumped to, or the coordinates you typed, never both. A random jump remembers neither. **Use again** puts your last choice back and never teleports by itself: press Teleport when you are ready.
 - **For server owners:** forbid the precise-coordinates tab (`allowCoordinates`) or the random tab (`allowRandom`), and list dimensions where those two tabs are blocked while the player stands in them (`coordinateAndRandomBlockedDimensions`). Teleporting by frequency is not affected. By default nothing changes: both tabs are allowed and the list is empty.
 
@@ -330,7 +331,7 @@ A new `/mekeng` command, for operators, with nothing destructive without `confir
 
 <div class="cl-cmds">
 
-- `/mekeng build quantum_ore_refinery` builds a whole refinery where you aim (choose its level, accelerators and module, or build it empty), and `/mekeng remove quantum_ore_refinery` takes one down. `/mek build quantum_ore_refinery` works too, through Mekanism's own build command.
+- `/mekeng build quantum_ore_refinery` builds a whole refinery where you aim (choose its level, accelerators and module, or build it empty), and `/mekeng remove quantum_ore_refinery` takes one down. It only takes the refinery's own blocks: a block of another mod placed on one of its free cells stays where it is. `/mek build quantum_ore_refinery` works too, through Mekanism's own build command.
 - `/mekeng refinery check | info | fill | clear | level | alwaysrun | accelerators` inspects and drives a refinery: which cell is wrong, what it holds, fill its tanks and energy for a test, empty a group of slots.
 - `/mekeng miner info | find | list` reads the Quantum Digital Miners of your server.
 - `/mekeng about` prints the versions and the settings that matter.
