@@ -39,6 +39,13 @@ function lazy3d() {
 // ---------- Quantum Ore Refinery: how long a job lasts (RefinerySpeed.ticks in the mod) ----------
 const ticks = (level: number, n: number) => level <= 1 ? 1 : Math.max(1, Math.round(200 * Math.pow(50, -n / 8) * (level - 1) / 4));
 
+// the column count (at most max) that leaves the last row fullest: the whole grid is regular, never a card alone on a row
+function fit(el: HTMLElement, n: number, max: number) {
+  let cols = Math.min(n, max);
+  if (n > max) { cols = 2; for (let c = max, best = -1; c >= 2; c--) { const r = n % c === 0 ? c : n % c; if (r > best) { best = r; cols = c; } } }
+  el.dataset.cols = String(cols); el.style.setProperty('--cols', String(cols));
+}
+
 function calc(el: HTMLElement) {
   const st = { level: 5, acc: 8 };
   // the levels as the page's own table writes them (the French table is read from the French page)
@@ -76,7 +83,9 @@ function calc(el: HTMLElement) {
       : L('{acc} of 8 Ore Refinery Accelerators · tap one to add or remove', { acc: st.acc });
     $('section:last-child h3').textContent = L('One iron ore at x{level}', { level: st.level });
     const flow = $('.me-flow').innerHTML, kpis = [...el.querySelectorAll('.me-kpis div')].map(d => d.textContent);
-    $('.me-flow').innerHTML = row.chain.split(/, (?![^(]*\))/).map(c => c.replace(/^(then|puis) /, '')).map(c => `<span>${c[0].toUpperCase() + c.slice(1)}</span>`).join('');
+    const steps = row.chain.split(/, (?![^(]*\))/).map(c => c.replace(/^(then|puis) /, ''));
+    $('.me-flow').innerHTML = steps.map(c => `<span>${c[0].toUpperCase() + c.slice(1)}</span>`).join('');
+    fit($('.me-flow'), steps.length, 4);
     const takes = /^(nothing|rien)$/.test(row.takes) ? [] : row.takes.split(/, (?=\d)/);
     $('.me-kpis').innerHTML = `<div><b>${row.ingots}</b><span>${L(row.ingots > 1 ? 'ingots from one ore' : 'ingot from one ore')}</span></div>`
       + (takes.length ? takes.map(x => { const m = x.match(/^([\d,  ]+ mB) (.+)$/); return m ? `<div><b>${m[1]}</b><span>${m[2].replace(/^(de |d['’])/, '')}</span></div>` : `<div><span>${x}</span></div>`; }).join('')
@@ -97,8 +106,42 @@ function calc(el: HTMLElement) {
   show();
 }
 
+// ---------- grids of cards and chips: regular, never a card alone on the last row ----------
+// These grids fill the width by themselves (auto-fill / auto-fit). The column count that leaves the last row fullest is
+// chosen among the ones that fit (at most 40 % fewer), and a last card with no partner takes the rest of its row. An icon
+// strip keeps its small cells and only changes its column count.
+const CARDS = '.me-bom ul:not(.me-bom-notes), .me-tiles, .me-stats, .cl-jump, .cl-facts, .cl-more-p', STRIPS = '.cl-parts ul';
+function balance(grid: HTMLElement, strip: boolean) {
+  const kids = [...grid.children].filter((k): k is HTMLElement => k instanceof HTMLElement && !k.classList.contains('me-eyebrow') && getComputedStyle(k).display !== 'none');
+  grid.style.gridTemplateColumns = ''; kids.forEach(k => (k.style.gridColumn = ''));
+  const widths = getComputedStyle(grid).gridTemplateColumns.split(' ').map(parseFloat).filter(w => w > 0);
+  const tracks = widths.length, n = kids.length;
+  if (tracks < 2 || n <= tracks) return;
+  let cols = tracks, best = n % tracks || tracks;
+  for (let c = tracks - 1; c >= Math.max(2, Math.ceil(tracks * 0.6)); c--) { const r = n % c || c; if (r > best) { best = r; cols = c; } }
+  if (cols !== tracks) grid.style.gridTemplateColumns = `repeat(${cols}, ${strip ? widths[0] + 'px' : 'minmax(0, 1fr)'})`;
+  const rem = n % cols;
+  if (rem && !strip) kids[n - 1].style.gridColumn = `span ${cols - rem + 1}`;
+}
+// some grids are made by scripts after the page loads (the bill of materials), so new ones are picked up as they appear
+const watched = new WeakSet<Element>();
+function balanceAll() {
+  const scan = () => {
+    for (const [sel, strip] of [[CARDS, false], [STRIPS, true]] as const)
+      document.querySelectorAll<HTMLElement>(sel).forEach(grid => {
+        if (watched.has(grid)) return;
+        watched.add(grid);
+        let width = -1;
+        new ResizeObserver(() => { const w = Math.round(grid.clientWidth); if (w !== width) { width = w; balance(grid, strip); } }).observe(grid);
+      });
+  };
+  scan();
+  new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+}
+
 function init() {
   lazy3d();
+  balanceAll();
   document.querySelectorAll<HTMLElement>('.me-qor-calc').forEach(calc);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
