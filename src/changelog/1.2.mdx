@@ -418,6 +418,7 @@ The block now carries **radioactive chemicals only** (Spent Nuclear Waste and an
 - The front screen no longer shows an energy warning while the miner is mining normally; the warning now appears only when the miner really ran short.
 - One damaged entry in the mined-zone history no longer causes the others to be lost.
 - Relocation is safer. A move whose new platform cannot be fully placed fails and is undone, leaving the world as it was. An undo that cannot put a block back keeps its record and asks for recovery instead of silently losing it. A refused removal no longer leaves a second miner behind. A damaged undo record is refused before anything is written.
+- Moving a miner on Windows no longer fails the first time an antivirus or file indexer briefly holds one of the files the move saves (the undo record, the list of miners and the player's data). The replacement of the file is now tried up to three times, 20 milliseconds apart. If it is still refused after the third try, the server stops with an error, as described under "Good to know".
 
 </Card>
 

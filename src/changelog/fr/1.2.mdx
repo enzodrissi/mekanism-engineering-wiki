@@ -418,6 +418,7 @@ Le bloc transporte maintenant **uniquement des produits chimiques radioactifs** 
 - L'écran de façade n'affiche plus d'alerte d'énergie pendant un minage normal ; l'alerte n'apparaît maintenant que si le mineur a vraiment manqué d'énergie.
 - Une entrée abîmée dans l'historique des zones minées ne fait plus perdre les autres.
 - La relocalisation est plus sûre. Un déplacement dont la nouvelle plateforme ne peut pas être posée en entier échoue et est annulé, et le monde reste tel qu'il était. Une annulation qui ne peut pas remettre un bloc garde son journal et demande une récupération au lieu de le perdre en silence. Un retrait refusé ne laisse plus un second mineur derrière lui. Un journal d'annulation abîmé est refusé avant toute écriture.
+- Sous Windows, déplacer un mineur n'échoue plus dès la première fois qu'un antivirus ou un indexeur de fichiers tient un instant l'un des fichiers que le déplacement enregistre (le journal d'annulation, la liste des mineurs et les données du joueur). Le remplacement du fichier est maintenant tenté jusqu'à trois fois, à 20 millisecondes d'intervalle. S'il est encore refusé au troisième essai, le serveur s'arrête avec une erreur, comme décrit dans « Bon à savoir ».
 
 </Card>
 
