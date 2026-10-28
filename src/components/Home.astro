@@ -67,7 +67,10 @@ const short = (s = '') => (s.length > 110 ? s.slice(0, s.lastIndexOf(' ', 106)) 
                   <li><span class="me-feature-num">{i + 1}</span><div><b>{title}</b><p set:html={say} /></div></li>
                 ))}
               </ul>
-              <a class="me-btn primary" href={`${base}/${mb.doc.id}/`}>{mb.open} →</a>
+              <div class="me-news-btns">
+                <a class="me-btn primary" href={`${base}/${mb.doc.id}/`}>{mb.open} →</a>
+                <a class="me-btn" href={`${base}/${mb.doc.id}/#how-to-build-it`}>{t('How to build it')} ↓</a>
+              </div>
             </div>
           </article>
         )}

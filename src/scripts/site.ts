@@ -12,6 +12,7 @@ async function mount3d(el: HTMLElement) {
   const viewer = await import('../lib/viewer.js');
   try {
     if (el.dataset.kind === 'block') await viewer.mountBlock(el);
+    else if (el.dataset.kind === 'build') await (await import('../lib/build.js')).mountBuild(el, { blocks: await blockNames() });
     else {
       const tags = el.dataset.tags === 'hero' ? [
         [(d: any) => /controller/.test(d.id), L('Controller')],

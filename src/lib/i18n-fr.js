@@ -4,6 +4,68 @@ import { FR_ANIM } from './i18n-fr-anim.js';
 
 export const FR = {
   ...FR_ANIM,
+  // how to build the refinery, block by block (src/lib/build.js, PageTitle.astro)
+  'How to build it': 'Comment la construire',
+  'Block by block, in an order that is easy in game. Stand in front of the controller: left and right are yours, and layer 1 is the bottom one. Only the kind of block matters in each cell, not the way it faces.':
+    'Bloc par bloc, dans un ordre simple à suivre en jeu. On se tient devant le contrôleur : la gauche et la droite sont celles du joueur, et la couche 1 est celle du bas. Seule compte la sorte de bloc dans chaque case, pas le sens dans lequel il est tourné.',
+  'Parts of the build': 'Parties de la construction',
+  'Controller row': 'Rangée du contrôleur',
+  'Layer 1': 'Couche 1',
+  'Layer 2': 'Couche 2',
+  'Layer 3': 'Couche 3',
+  'Roof': 'Toit',
+  'Quantum Module': 'Module quantique',
+  'optional': 'facultatif',
+  '{n} blocks': '{n} blocs',
+  '▶ Play': '▶ Lecture',
+  '❚❚ Pause': '❚❚ Pause',
+  'Step': 'Étape',
+  'Step {i}': 'Étape {i}',
+  'Step {i} of {n}': 'Étape {i} sur {n}',
+  '{n}st from the left': '{n}re en partant de la gauche',
+  '{n}nd from the left': '{n}e en partant de la gauche',
+  '{n}rd from the left': '{n}e en partant de la gauche',
+  '{n}th from the left': '{n}e en partant de la gauche',
+  'left end': 'bout gauche',
+  'right end': 'bout droit',
+  'front row': 'rangée de devant',
+  'middle row': 'rangée du milieu',
+  'back row': 'rangée du fond',
+  'Front': 'Devant',
+  'Middle': 'Milieu',
+  'Back': 'Fond',
+  'Free cell': 'Case libre',
+  'seen from above': 'vue de dessus',
+  '▲ You stand here, facing the controller': '▲ Le joueur ici, face au contrôleur',
+  'Last required block. The structure forms: redstone dust runs along its edges, or the controller\'s screen says "Multiblock formed".':
+    'Dernier bloc obligatoire. La structure se forme : de la poudre de redstone court le long de ses arêtes, ou l’écran du contrôleur affiche « Multibloc formé ».',
+  'Place it first. It turns to face you, and the whole structure stands behind it and to its right. The drawing turns with it and is never mirrored.':
+    'Le poser en premier. Il se tourne vers le joueur, et toute la structure se dresse derrière lui et sur sa droite. Le plan tourne avec lui et n’est jamais mis en miroir.',
+  'The seven process modules sit right of the controller, in this order: Dissolution, Washing, Crystallization, Injection, Purification, Enrichment, Smelting.':
+    'Les sept modules de traitement suivent le contrôleur vers la droite, dans cet ordre : dissolution, lavage, cristallisation, injection, purification, enrichissement, fonte.',
+  'A corner post. The four corners are columns of four pillars, which join the ones above and below.':
+    'Un poteau d’angle. Les quatre angles sont des colonnes de quatre piliers, qui se raccordent à ceux du dessus et du dessous.',
+  'At an end of the middle row, an Input Port works on items only: a Configurator will not turn it to fluids or gases there.':
+    'À un bout de la rangée du milieu, un Port d’entrée fonctionne avec les objets seulement : un Configurateur ne le fait pas passer aux fluides ni aux gaz à cet endroit.',
+  'You need at least five Input Ports. Any cell of the back row of layers 1 and 2 takes one. A Configurator turns each one to Items, Fluids or Gases.':
+    'Il faut au moins cinq Ports d’entrée. Toute case de la rangée du fond des couches 1 et 2 en accepte un. Un Configurateur fait passer chacun en Objets, Fluides ou Gaz.',
+  'You need at least one. It goes on the back row of layer 1 or 2, never at an end of the middle row. It takes Joules or Forge Energy.':
+    'Il en faut au moins un. Il se pose sur la rangée du fond de la couche 1 ou 2, jamais à un bout de la rangée du milieu. Il accepte des joules ou du Forge Energy.',
+  'Optional, at most one. The ingots leave here. Without it, the refinery needs a Quantum Module with a frequency.':
+    'Facultatif, un au plus. Les lingots sortent par ici. Sans lui, la raffinerie a besoin d’un module quantique réglé sur une fréquence.',
+  'This back cell also takes any port, if you want more Input or Energy Ports.':
+    'Cette case du fond accepte aussi n’importe quel port, pour ajouter des Ports d’entrée ou d’énergie.',
+  'The body of the multiblock.': 'Le corps du multibloc.',
+  'The conveyors run along the front, right above the controller and the modules.':
+    'Les tapis courent sur le devant, juste au-dessus du contrôleur et des modules.',
+  'Each tank is two blocks high: this is its bottom half. The empty cells of this middle row stay free (air, Ore Refinery Glass or a casing).':
+    'Chaque réservoir est haut de deux blocs : voici sa moitié du bas. Les cases vides de cette rangée du milieu restent libres (air, Vitre de raffinerie de minerai ou carcasse).',
+  'The top half of the tank, on the bottom half.': 'La moitié du haut du réservoir, posée sur celle du bas.',
+  'One of eight accelerator places. Each accelerator makes a job shorter; a casing fits here too.':
+    'L’une des huit places d’accélérateur. Chaque accélérateur raccourcit un travail ; une carcasse convient aussi.',
+  'The roof. A girder turns to follow the axis it is placed on.': 'Le toit. Une poutre se tourne selon l’axe où on la pose.',
+  'Optional. It goes here, above the Output Port, or in its place. Choose a frequency on its screen and the ingots go to a Quantum or QIO network.':
+    'Facultatif. Il se pose ici, au-dessus du Port de sortie, ou à sa place. Choisir une fréquence sur son écran envoie les lingots vers un réseau Quantum ou QIO.',
   // 3D views
   'Drag to turn the 3D view': 'Faire glisser pour tourner la vue 3D',
   '⟲ Drag to turn': '⟲ Glisser pour tourner',

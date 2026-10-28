@@ -37,6 +37,13 @@ const feats = featuresOf(id.replace(/^fr\//, ''), lang === 'fr' ? 'fr' : 'en').f
         ))}
       </div>
       {kind === 'refinery' && <div class="not-content" data-me3d data-kind="refinery" data-mode="exploded" />}
+      {kind === 'refinery' && (
+        <section class="me-build not-content" id="how-to-build-it" aria-labelledby="how-to-build-it-h">
+          <h2 id="how-to-build-it-h">{t('How to build it')}</h2>
+          <p class="me-build-lead">{t('Block by block, in an order that is easy in game. Stand in front of the controller: left and right are yours, and layer 1 is the bottom one. Only the kind of block matters in each cell, not the way it faces.')}</p>
+          <div data-me3d data-kind="build"><div class="me-stage"><div class="me-loading">{t('Loading the 3D view…')}</div></div></div>
+        </section>
+      )}
       {kind === 'block' && (
         <div class="me-head-visual not-content">
           <div class="me-stage" data-me3d data-kind="block" data-item={scene?.item ?? item} data-focus={scene?.focus}>
