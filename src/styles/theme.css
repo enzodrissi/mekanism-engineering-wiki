@@ -264,16 +264,32 @@ header.header { backdrop-filter: blur(12px); }
 .me-lv { display: flex; gap: 0.35rem; justify-content: center; margin-top: 1.6rem; }
 .me-lv button { all: unset; cursor: pointer; width: 2.8rem; text-align: center; padding: 0.45rem 0; border-radius: 11px; border: 1px solid var(--me-line); font: 700 0.85rem var(--sl-font-mono); color: var(--sl-color-gray-2); }
 .me-lv button[aria-pressed='true'] { background: linear-gradient(135deg, var(--me-teal), #4a84ec); color: var(--me-ink); border-color: transparent; }
-.me-acc { display: grid; grid-template-columns: repeat(8, minmax(0, 2.1rem)); gap: 2px; justify-content: center; margin-top: 0.9rem; }
-.me-acc button { all: unset; cursor: pointer; width: 100%; aspect-ratio: 1; max-width: 2.1rem; border-radius: 8px; display: grid; place-items: center; transition: opacity 0.15s, filter 0.15s; }
-.me-acc button[aria-pressed='false'] { opacity: 0.28; filter: grayscale(1); }
+.me-acc-h { display: flex; justify-content: center; align-items: baseline; gap: 0.5rem; margin-top: 1rem; font: 600 0.66rem var(--sl-font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-color-gray-3); }
+.me-acc-h b { font: 700 0.8rem var(--sl-font-mono); color: var(--sl-color-accent); letter-spacing: 0; }
+/* the eight accelerators are buttons: a slot each, lit when the accelerator is in, an empty dashed slot when it is out */
+.me-acc { display: grid; grid-template-columns: repeat(8, minmax(0, 2.5rem)); gap: 4px; justify-content: center; margin-top: 0.4rem; }
+.me-acc button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; aspect-ratio: 1; border-radius: 9px; display: grid; place-items: center;
+  border: 1px solid var(--me-teal); background: rgba(100, 209, 199, 0.12); box-shadow: 0 0 8px rgba(100, 209, 199, 0.25); transition: transform 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.me-acc button[aria-pressed='false'] { border: 1px dashed var(--me-line); background: rgba(6, 10, 17, 0.35); box-shadow: none; }
+:root[data-theme='light'] .me-acc button[aria-pressed='false'] { background: #e6ebf3; }
+.me-acc button[aria-pressed='false'] img { opacity: 0.3; filter: grayscale(1); }
+.me-acc button:hover { transform: translateY(-2px); border-color: var(--me-teal); box-shadow: 0 4px 12px rgba(100, 209, 199, 0.35); }
+.me-acc button:focus-visible { outline: 2px solid var(--me-teal); outline-offset: 2px; }
+.me-acc-tip { margin: 0.45rem 0 0; text-align: center; font-size: 0.76rem; color: var(--sl-color-accent); }
+/* the two cards side by side share their rows: titles, picture, controls and notes on the same lines */
+@media (min-width: 50rem) {
+  .me-calc { grid-template-rows: repeat(4, auto); }
+  .me-calc > section { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+  .me-calc .me-gauge { align-self: center; }
+  .me-calc .me-note, .me-calc .me-ctl, .me-calc h3 { align-self: start; }
+  .me-calc .me-flow { align-content: center; }
+}
 .me-acc img { width: 90%; height: auto; image-rendering: pixelated; }
 .me-calc .me-note { text-align: center; font-size: 0.78rem; color: var(--sl-color-gray-3); margin-top: 0.4rem; }
 /* the steps and the numbers of the calculator sit on a regular grid: equal columns, every row full, never a card alone.
    site.ts sets data-cols on the steps (the wide column count that leaves no short row); a narrow card has two columns, and
    a last cell with no partner takes the rest of its row. */
-.me-calc > section { container-type: inline-size; }
-.me-flow, .me-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; margin-top: 0.8rem; }
+.me-flow, .me-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; margin-top: 0.8rem; align-content: start; }
 .me-flow > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 /* the ingots come first on a row of their own, the tank amounts below them two by two */
 .me-kpis > :first-child, .me-kpis > :last-child:nth-child(even) { grid-column: 1 / -1; }
@@ -282,13 +298,12 @@ header.header { backdrop-filter: blur(12px); }
 :root[data-theme='light'] .me-kpis div { background: #fff; }
 .me-kpis b { font: 700 1.2rem var(--me-head); display: block; color: var(--sl-color-white); }
 .me-kpis span { font-size: 0.74rem; color: var(--sl-color-gray-3); }
-@container (min-width: 34rem) {
-  .me-flow[data-cols] { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
-  .me-flow > :last-child:nth-child(odd) { grid-column: auto; }
-  .me-flow[data-cols='4'] > :last-child:nth-child(4n+1), .me-flow[data-cols='3'] > :last-child:nth-child(3n+1) { grid-column: 1 / -1; }
-  .me-flow[data-cols='4'] > :last-child:nth-child(4n+2) { grid-column: span 3; }
-  .me-flow[data-cols='4'] > :last-child:nth-child(4n+3), .me-flow[data-cols='3'] > :last-child:nth-child(3n+2) { grid-column: span 2; }
-}
+/* a card at least 34rem wide (data-wide, set by site.ts: a container query would stop the two cards from sharing their rows) */
+.me-calc > [data-wide] .me-flow[data-cols] { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+.me-calc > [data-wide] .me-flow > :last-child:nth-child(odd) { grid-column: auto; }
+.me-calc > [data-wide] .me-flow[data-cols='4'] > :last-child:nth-child(4n+1), .me-calc > [data-wide] .me-flow[data-cols='3'] > :last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+.me-calc > [data-wide] .me-flow[data-cols='4'] > :last-child:nth-child(4n+2) { grid-column: span 3; }
+.me-calc > [data-wide] .me-flow[data-cols='4'] > :last-child:nth-child(4n+3), .me-calc > [data-wide] .me-flow[data-cols='3'] > :last-child:nth-child(3n+2) { grid-column: span 2; }
 
 /* ---------- guides: numbered steps ---------- */
 .me-steps { counter-reset: step; list-style: none; padding: 0; }
@@ -411,7 +426,6 @@ main:has(.me-head.g) .sl-markdown-content .me-tbl .me-facts td:first-child { col
 :root[data-theme='dark'] { --sl-color-bg-nav: #080d16; }
 .me-stage .me-hint { top: calc(100% + 0.35rem); bottom: auto; }
 .me-ref .me-stage, .me-head-visual .me-stage, .me-hero .me-stage { margin-bottom: 2.4rem; }
-.me-calc { align-items: start; }
 .me-texts summary { display: flex; align-items: center; gap: 0.5rem; list-style: none; }
 .me-texts summary::-webkit-details-marker { display: none; }
 .me-texts summary::before { content: ''; flex: none; width: 0.4rem; height: 0.4rem; border: solid var(--sl-color-accent); border-width: 0 2px 2px 0; transform: rotate(-45deg); transition: transform 0.15s; margin-right: 0.2rem; }
@@ -432,7 +446,7 @@ body:has(.me-home) .sl-container { max-width: min(96rem, 100%); }
     border: 1px solid var(--me-line); background: rgba(8, 13, 22, 0.9); color: var(--sl-color-white); cursor: pointer; font-size: 1.1rem; }
   .me-rail-btn:hover { border-color: var(--me-teal); }
   :root[data-theme='light'] .me-rail-btn { background: rgba(255, 255, 255, 0.94); box-shadow: 0 4px 14px rgba(20, 40, 80, 0.15); }
-  .me-rail-btn.prev { left: -1.2rem; } .me-rail-btn.next { right: -1.2rem; }
+  .me-rail-btn.prev { left: -0.6rem; } .me-rail-btn.next { right: -0.6rem; }
 }
 @media (max-width: 50rem) { .sl-markdown-content .me-stack td + td { margin-top: 0.35rem; } }
 .content-panel:has(> .sl-container:empty) { display: none; }
@@ -640,11 +654,11 @@ starlight-lang-select select { width: 8.4rem; }
 .me-home .me-news h2 { margin: 0.4rem 0 0; font-size: clamp(1.55rem, 4vw, 2.3rem); line-height: 1.12; letter-spacing: -0.03em; }
 .me-news-grid { display: grid; gap: 1rem; margin-top: 1.1rem; }
 @media (min-width: 48rem) { .me-news-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.me-news-card { container-type: inline-size; display: flex; flex-direction: column; min-width: 0; border-radius: 20px; overflow: hidden; background: var(--me-f-card); border: 1px solid var(--me-t-line); }
+.me-news-card { display: flex; flex-direction: column; min-width: 0; border-radius: 20px; overflow: hidden; background: var(--me-f-card); border: 1px solid var(--me-t-line); }
 .me-news-visual { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: 1px solid var(--me-t-line);
   background: radial-gradient(70% 80% at 30% 40%, rgba(100, 209, 199, 0.22), transparent 70%), linear-gradient(160deg, #13274a, #060a11); }
 /* real screens of the game, animated (Home.astro): the pixels kept sharp, the whole window shown on the card's glow */
-.me-news-anim { display: grid; place-items: center; padding: clamp(0.6rem, 3cqi, 1.2rem); aspect-ratio: 4 / 3; }
+.me-news-anim { display: grid; place-items: center; padding: clamp(0.6rem, 3%, 1.2rem); aspect-ratio: 4 / 3; }
 .me-news-anim picture { display: contents; }
 .me-news-anim img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; border-radius: 6px;
   filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55)); transition: transform 0.3s; }
@@ -663,6 +677,17 @@ starlight-lang-select select { width: 8.4rem; }
 .me-news-body > .me-btn { margin-top: auto; align-self: flex-start; }
 .me-news-btns { margin-top: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.5rem; }
 .me-news-btns .me-btn { justify-content: center; }
+/* side by side, the two cards share their rows: picture, labels, title, lead, points and buttons on the same lines */
+@media (min-width: 48rem) {
+  .me-news-grid { grid-template-rows: repeat(6, auto); }
+  .me-news-card { display: grid; grid-row: span 6; grid-template-rows: subgrid; row-gap: 0; }
+  .me-news-body { display: contents; }
+  .me-news-body > *, .me-news-body > h3 { margin-inline: 1.1rem; }
+  .me-news-body > .me-news-points { align-self: start; align-content: start; }
+  .me-news-body > .me-eyebrow { padding-top: 1rem; }
+  .me-news-body > :last-child { margin-bottom: 1.15rem; align-self: end; }
+  .me-news-body > .me-btn { justify-self: start; }
+}
 .me-news-all { display: flex; width: fit-content; margin: 1rem auto 0; padding: 0.45rem 0.9rem; border-radius: 99px; border: 1px solid var(--me-f-line);
   font: 600 0.78rem var(--sl-font-mono); letter-spacing: 0.04em; color: var(--sl-color-accent); text-decoration: none; background: var(--me-glass); transition: border-color 0.15s, transform 0.15s; }
 .me-news-all:hover { border-color: var(--me-teal); transform: translateY(-1px); color: var(--sl-color-accent); }

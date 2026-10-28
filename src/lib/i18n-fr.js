@@ -135,6 +135,8 @@ export const FR = {
   'per x{level} job · {s} s': 'par traitement en x{level} · {s} s',
   'The x1 works a whole stack in one tick, whatever the accelerators.': 'Le x1 traite une pile entière en un tick, quels que soient les accélérateurs.',
   '{acc} of 8 Ore Refinery Accelerators · tap one to add or remove': '{acc} accélérateurs sur 8 · en toucher un pour l’ajouter ou le retirer',
+  'Tap an accelerator to add or remove it': 'Toucher un accélérateur pour l’ajouter ou le retirer',
+  'Each accelerator makes the job shorter.': 'Chaque accélérateur raccourcit le travail.',
   'One iron ore at x{level}': 'Un minerai de fer en x{level}',
   'ingot from one ore': 'lingot par minerai',
   'ingots from one ore': 'lingots par minerai',

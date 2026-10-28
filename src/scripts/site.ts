@@ -58,8 +58,10 @@ function calc(el: HTMLElement) {
       <path d="M20 120 A90 90 0 0 1 200 120" fill="none" stroke="rgba(120,150,200,.18)" stroke-width="14" stroke-linecap="round"/>
       <path class="me-arc" d="M20 120 A90 90 0 0 1 200 120" fill="none" stroke="url(#me-g)" stroke-width="14" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="0"/></svg>
       <b></b><small></small></div>
-    <div class="me-lv" role="group" aria-label="${L('Level')}">${[1, 2, 3, 4, 5].map(l => `<button type="button" data-l="${l}">x${l}</button>`).join('')}</div>
+    <div class="me-ctl"><div class="me-lv" role="group" aria-label="${L('Level')}">${[1, 2, 3, 4, 5].map(l => `<button type="button" data-l="${l}">x${l}</button>`).join('')}</div>
+    <div class="me-acc-h"><span>${L('Accelerators')}</span><b></b></div>
     <div class="me-acc" role="group" aria-label="${L('Accelerators')}">${Array.from({ length: 8 }, (_, i) => `<button type="button" data-a="${i + 1}" title="${L('Accelerator {n}', { n: i + 1 })}"><img src="${accIcon}" alt="${L('Accelerator {n}', { n: i + 1 })}"></button>`).join('')}</div>
+    <p class="me-acc-tip">${L('Tap an accelerator to add or remove it')}</p></div>
     <p class="me-note"></p></section>
     <section class="me-glass"><h3></h3><div class="me-flow"></div><div class="me-kpis"></div>
     <p class="me-note" style="text-align:left">${L('Iron ore, Mekanism\'s default recipes, from the table above. A job takes a stack of up to 64 ore.')}</p></section>`;
@@ -80,8 +82,9 @@ function calc(el: HTMLElement) {
       if (!first && b.getAttribute('aria-pressed') !== on) pop(b, 30 * n++);
       b.setAttribute('aria-pressed', on);
     });
+    $('.me-acc-h b').textContent = `${st.acc} / 8`;
     $('.me-note').textContent = st.level === 1 ? L('The x1 works a whole stack in one tick, whatever the accelerators.')
-      : L('{acc} of 8 Ore Refinery Accelerators · tap one to add or remove', { acc: st.acc });
+      : L('Each accelerator makes the job shorter.');
     $('section:last-child h3').textContent = L('One iron ore at x{level}', { level: st.level });
     const flow = $('.me-flow').innerHTML, kpis = [...el.querySelectorAll('.me-kpis div')].map(d => d.textContent);
     const steps = row.chain.split(/, (?![^(]*\))/).map(c => c.replace(/^(then|puis) /, ''));
@@ -98,6 +101,25 @@ function calc(el: HTMLElement) {
     }
     first = false;
   }
+  // side by side, the steps and the numbers keep the height of the level that needs the most, so the two cards keep their
+  // lines and the buttons stay under the pointer whatever the level (one above the other, nothing moves above the buttons)
+  function reserve() {
+    const keep = { ...st }, boxes = [$('.me-flow'), $('.me-kpis')];
+    boxes.forEach(b => (b.style.minHeight = ''));
+    const [a, b2] = el.querySelectorAll('section');
+    if (a.getBoundingClientRect().top !== b2.getBoundingClientRect().top) return;
+    const tall = boxes.map(() => 0);
+    for (const l of [1, 2, 3, 4, 5]) { st.level = l; first = true; show(); boxes.forEach((b, i) => (tall[i] = Math.max(tall[i], b.offsetHeight))); }
+    Object.assign(st, keep); first = true; show();
+    boxes.forEach((b, i) => (b.style.minHeight = `${tall[i]}px`));
+  }
+  let width = 0;
+  new ResizeObserver(() => {
+    if (el.clientWidth === width) return;
+    width = el.clientWidth;
+    el.querySelectorAll('section').forEach(c => c.toggleAttribute('data-wide', c.clientWidth >= 34 * 16));
+    reserve();
+  }).observe(el);
   el.addEventListener('click', e => {
     const b = (e.target as HTMLElement).closest('button'); if (!b) return;
     if (b.dataset.l) { if (+b.dataset.l !== st.level) pop(b); st.level = +b.dataset.l; }
