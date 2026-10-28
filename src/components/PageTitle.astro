@@ -44,6 +44,7 @@ const feats = featuresOf(id.replace(/^fr\//, ''), lang === 'fr' ? 'fr' : 'en').f
           <div data-me3d data-kind="build"><div class="me-stage"><div class="me-loading">{t('Loading the 3D view…')}</div></div></div>
         </section>
       )}
+      {kind === 'refinery' && <div class="not-content" data-me-bom />}
       {kind === 'block' && (
         <div class="me-head-visual not-content">
           <div class="me-stage" data-me3d data-kind="block" data-item={scene?.item ?? item} data-focus={scene?.focus}>

@@ -248,7 +248,8 @@ export async function mountRefinery(host, { blocks: names = {}, mode = 'exploded
     return { b, el, label: L(label) };
   }) : [];
   if (markers) host.querySelector('.me-legend').innerHTML = marks.map((m, i) => `<li><i>${i + 1}</i>${m.label}</li>`).join('');
-  if (markers) host.append(billOfMaterials(blocks, names));
+  // a page may give the bill of materials its own place (the refinery's page puts it after "How to build it")
+  if (markers) (document.querySelector('[data-me-bom]') || host).append(billOfMaterials(blocks, names));
   const tagEls = (tags || []).map(([f, label]) => {
     const b = blocks.find(x => f(x.userData)); const el = document.createElement('span');
     el.className = 'me-tag'; el.textContent = label; stageEl.appendChild(el); return { b, el };

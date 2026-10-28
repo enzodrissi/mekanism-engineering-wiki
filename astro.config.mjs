@@ -37,6 +37,8 @@ export default defineConfig({
         './src/styles/theme.css',
         './src/styles/motion.css',
       ],
+      // the refinery's "How to build it" (PageTitle.astro) is listed in "On this page", right after the overview
+      routeMiddleware: './src/routeData.ts',
       components: {
         Head: './src/components/Head.astro',
         Header: './src/components/Header.astro',
