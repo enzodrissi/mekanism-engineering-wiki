@@ -1,4 +1,4 @@
-<!-- source: 0ee897ac7be8a5381295caaab09c83b4182f668a -->
+<!-- source: 19d029dfdd6932a0ab37bb0298206b8e0c6e2b00 -->
 # Quantum Ore Refinery : structure et pièces
 
 > Le plan fixe de 10 × 4 × 3 de la [Quantum Ore Refinery](Quantum-Ore-Refinery.md), couche par couche, avec chaque bloc et sa recette.
@@ -77,7 +77,7 @@ les mêmes qu'avant). La couche 4 est le toit.
 | Blocs de réservoir | 8 | Deux de chacune des quatre sortes |
 | Accélérateur ou Carcasse de raffinerie de minerai | 8 | Places pour 0 à 8 accélérateurs ; chaque accélérateur raccourcit un travail (voir [Vitesse et accélérateurs](Quantum-Ore-Refinery.md#speed-and-accelerators)) |
 | Cases libres | 27 | Air, Vitre de raffinerie de minerai ou Carcasse de raffinerie de minerai ; une case libre sur la face extérieure de la boîte (19 d'entre elles) accepte n'importe quel bloc |
-| Module quantique de raffinerie de minerai | 0 ou 1 | Facultatif, dans la case marquée `QM`, ou à la place du port de sortie |
+| Module quantique de raffinerie de minerai | 0 ou 1 | Facultatif, dans la case marquée `QM` ou à la place du port de sortie, et dans aucune autre case |
 
 Exactement 84 cases demandent un bloc précis et 8 acceptent un accélérateur ou une carcasse : 92 en tout.
 
@@ -103,8 +103,8 @@ est au choix** dans le cadre de ces règles :
   le Port d'énergie dans la moitié droite de la rangée du fond de la couche 1 (la case voisine est une carcasse).
 - **Ports d'entrée** (`IP`, cinq ou plus) : un Configurateur fait passer chacun par **Objets** (affiché en rouge), **Fluides** (violet) et
   **Gaz** (jaune). Voir [Automatisation](Quantum-Ore-Refinery.md#automation).
-- **Module quantique** : un au plus. Il prend la place du Port de sortie (la structure n'a alors pas de Port de sortie et
-  envoie ses produits vers une fréquence Quantum ou un QIO) ou la case au-dessus (`QM`). S'il y a aussi un Port de sortie, le port
+- **Module quantique** : un au plus, et seulement dans l'une de ces deux cases. Il prend la place du Port de sortie (la structure n'a alors pas de Port de sortie et
+  envoie ses produits vers une fréquence Quantum ou un QIO) ou la case au-dessus (`QM`) ; dans toute autre case, il n'est pas compté. S'il y a aussi un Port de sortie, le port
   sert de tampon de secours : ce que le module ne peut pas contenir sort par le port.
 - Un port appartient à une seule raffinerie.
 

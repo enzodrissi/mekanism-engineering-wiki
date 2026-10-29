@@ -1,4 +1,4 @@
-<!-- source: cd1a7aae358148de6201458ce8ae91ad2016ce59 -->
+<!-- source: ad21deb6d356039dbb1cc41f6abdf60e115a8ce2 -->
 # Quantum Portable Teleporter
 
 > Le Téléporteur portable, en version adulte : sauter vers un Téléporteur de Mekanism, vers des coordonnées ou vers un endroit sûr au hasard.
@@ -35,11 +35,11 @@ L'énergie n'est prise qu'au moment du saut lui-même : vérifier une destinatio
 rien, même sans se téléporter ensuite. En mode Créatif, le saut est gratuit. Un court temps de recharge suit chaque saut avant
 de pouvoir sauter à nouveau, et la recherche aléatoire a son propre temps de recharge entre deux recherches.
 
-Le téléporteur garde **une dernière destination**, c'est-à-dire ce qui a été *choisi*, et non l'endroit d'arrivée :
+Le téléporteur garde **une dernière destination** : ce qui a été *choisi* ou, après un saut aléatoire, l'endroit où l'on est arrivé :
 
 - après un saut vers des **coordonnées**, la dimension et les coordonnées tapées (et si « Surface » était activé) ;
 - après un saut vers un **Téléporteur**, la fréquence visée (une fréquence reste une fréquence) ;
-- un saut **aléatoire** ne garde ni l'un ni l'autre : un endroit au hasard n'est pas un choix. Le panneau latéral continue d'afficher la précédente.
+- après un saut **aléatoire**, le téléporteur garde la dimension et les coordonnées de l'endroit d'arrivée (« Surface » désactivé), si bien que le panneau latéral n'affiche jamais une ancienne fréquence ; **Reprendre** remplit alors l'onglet « Coordonnées » avec elles.
 
 Les deux n'existent jamais ensemble : un saut vers des coordonnées oublie la fréquence, et inversement. La dernière destination est
 affichée à part, sur le côté de l'écran, et nommée dans l'infobulle de l'objet. **Reprendre** remet en place ce qui avait été choisi : il repasse
