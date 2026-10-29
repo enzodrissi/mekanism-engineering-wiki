@@ -37,7 +37,8 @@ function newestRef() {
   const line = branches.filter(b => /^(main$|wip\/|release\/)/.test(b.name) && !/1201|1\.20\.1|mc1\.20(?!\d)/i.test(b.name))
     .sort((a, b) => Date.parse(b.commit.committed_date) - Date.parse(a.commit.committed_date));
   for (const b of line.slice(0, 5)) {
-    try { if (getJson(`${API}/repository/tree?path=docs/wiki&per_page=1&ref=${encodeURIComponent(b.name)}`).length) return b.name; }
+    // a wiki without the refinery page is an older line's (main carries the 1.1.1 docs): the site cannot be built from it
+    try { if (getJson(`${API}/repository/tree?path=docs/wiki&per_page=100&ref=${encodeURIComponent(b.name)}`).some(f => f.name === 'Quantum-Ore-Refinery.md')) return b.name; }
     catch { /* no docs/wiki on that branch */ }
   }
   throw new Error('No branch of the mod has a wiki (docs/wiki)');
