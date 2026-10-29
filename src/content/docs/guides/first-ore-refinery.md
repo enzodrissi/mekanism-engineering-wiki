@@ -19,7 +19,7 @@ any block to see its name. The full drawing, the block counts and every recipe a
 1. Place the **Quantum Ore Refinery Controller** first. It sits on the bottom front row, second block from the left as
    you face it, and turns to face you when you place it: the structure stands **behind** it and to its right.
 2. Build the rest: casing, pillars, girders, conveyors, the ports (at least five Input Ports, at least one Energy Port
-   and, if you want one, an Output Port), seven process modules, four tank cells of two blocks each, and as many accelerators as you like (up to eight). An accelerator place may also hold a plain casing.
+   and at most one Output Port, which a Quantum Module can replace, see step 6), seven process modules, four tank cells of two blocks each, and as many accelerators as you like (up to eight). An accelerator place may also hold a plain casing.
 3. While something is wrong, the controller's screen says which block is wrong or missing and where. When the last
    block goes in, the screen says "Multiblock formed" (and redstone dust runs along the edges, if Mekanism's effect is
    on).
@@ -33,9 +33,12 @@ once a second and never loads a chunk to do it.
 
 1. Bring **energy** to an Energy Port (Joules or Forge Energy, from a cable or an energy block).
 2. Feed **ore** to an Input Port in its default **Items** mode, or put ore in the nine ore slots by hand.
-3. Take the ingots from the Output Port with a pipe, hopper or chest placed against it.
+3. Give the ingots a way out: take them from the **Output Port** with a pipe, hopper or chest placed against it, or use
+   the Quantum Module of [step 6](#6-send-the-ingots-to-your-network-optional). **The refinery needs one of the two**:
+   with neither, it forms but the screen reads "No output" and nothing is worked.
 
-Levels **x1** and **x2** need no chemical at all, so this is already a working refinery.
+Levels **x1** and **x2** need no chemical at all, but with the default settings the refinery does not start yet: it waits
+for everything the **x5** needs (the screen reads "Waiting for level"). Step 3 shows how to make it work at once.
 
 ## 3. Choose how it works
 
@@ -73,11 +76,13 @@ Each accelerator place that holds an **Ore Refinery Accelerator** makes a job sh
 
 ## 6. Send the ingots to your network (optional)
 
-Add the **Ore Refinery Quantum Module** at the output end of the structure, in the place of the Output Port or in the
-cell right above it (see [Structure and parts](../../quantum-ore-refinery/structure/#ports)), and choose a frequency on its
+Add the **Ore Refinery Quantum Module** at the output end of the structure, in **one of two cells only**: the place of
+the Output Port, or the cell right above it. Put it nowhere else, and use one module at most (see
+[Structure and parts](../../quantum-ore-refinery/structure/#ports)). Then choose a frequency on its
 screen: the ingots then go to a Quantum (Inventory) frequency or into a QIO network, every half second, through a
 buffer of 64 stacks. Nothing is lost when the destination is full. See
-[The Quantum Module](../../quantum-ore-refinery/#the-quantum-module).
+[The Quantum Module](../../quantum-ore-refinery/#the-quantum-module). If the structure keeps its Output Port too, the
+port is the spare buffer: what the module's buffer cannot hold goes out by the port.
 
 ## Next
 

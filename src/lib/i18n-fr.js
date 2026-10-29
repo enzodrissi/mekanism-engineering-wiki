@@ -64,8 +64,8 @@ export const FR = {
   'One of eight accelerator places. Each accelerator makes a job shorter; a casing fits here too.':
     'L’une des huit places d’accélérateur. Chaque accélérateur raccourcit un travail ; une carcasse convient aussi.',
   'The roof. A girder turns to follow the axis it is placed on.': 'Le toit. Une poutre se tourne selon l’axe où on la pose.',
-  'Optional. It goes here, above the Output Port, or in its place. Choose a frequency on its screen and the ingots go to a Quantum or QIO network.':
-    'Facultatif. Il se pose ici, au-dessus du Port de sortie, ou à sa place. Choisir une fréquence sur son écran envoie les lingots vers un réseau Quantum ou QIO.',
+  'Optional, at most one. It goes in one of two cells only: here, above the Output Port, or in the Output Port\'s place. Nowhere else. Choose a frequency on its screen and the ingots go to a Quantum or QIO network.':
+    'Facultatif, un au plus. Il se pose dans l’une de deux cellules seulement : ici, au-dessus du Port de sortie, ou à la place du Port de sortie. Nulle part ailleurs. Choisir une fréquence sur son écran envoie les lingots vers un réseau Quantum ou QIO.',
   // 3D views
   'Drag to turn the 3D view': 'Faire glisser pour tourner la vue 3D',
   '⟲ Drag to turn': '⟲ Glisser pour tourner',

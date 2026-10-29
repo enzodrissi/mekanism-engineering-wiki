@@ -16,9 +16,7 @@ Installer ces éléments **à la fois sur le client et sur le serveur** : ce n'e
 | Minecraft Java Edition | 1.21.1 exactement |
 | Java | 21 |
 | NeoForge | 21.1.200 jusqu'à 21.2 exclu |
-| Mekanism | 10.7.15 jusqu'à 10.7.20 exclu |
-
-<!-- PENDING MERGE (branch wip/1.2/overclocked): the accepted range becomes 10.7.15 up to, but excluding, 10.7.24 (10.7.20 to 10.7.23.3 is the unofficial Mekanism Overclocked fork). Change this line only once the branch is merged and the compatibility jobs have run. -->
+| Mekanism | 10.7.15 jusqu'à 10.7.24 exclu |
 
 
 Mettre les jars de Mekanism et de Mekanism: Engineering dans `mods/`. Ne garder qu'une seule version de chaque mod. Mekanism Generators, Tools et Additions sont facultatifs. Une version de Mekanism hors de la plage acceptée est refusée au démarrage au lieu d'être chargée.

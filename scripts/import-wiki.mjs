@@ -54,6 +54,31 @@ const MC_1201 = { minecraft: '1.20.1', loader: 'NeoForge', mekanism: '1.20.1-10.
   Mekanism: '10.4.13 up to, but excluding, 10.4.17' }, rangesFr: {
   'Minecraft Java Edition': '1.20.1 exactement', Java: '17', 'Chargeur de mods': 'NeoForge 47.1.106 jusqu\'à 47.2 exclu (pas Forge)',
   Mekanism: '10.4.13 jusqu\'à 10.4.17 exclu' } };
+// The accepted Mekanism range of the 1.21.1 line is the one the jar declares (neoforge.mods.toml), never a copy typed in the wiki text:
+// the overview page once said "up to, but excluding, 10.7.20" while the jar accepted everything below 10.7.24.
+const mekanismRange = () => {
+  const m = rd('src/main/resources/META-INF/neoforge.mods.toml').match(/modId="mekanism"[^[]*?versionRange="\[([^,\]]+),([^)\]]+)\)"/);
+  if (!m) throw new Error('neoforge.mods.toml declares no version range for Mekanism');
+  return { from: m[1], below: m[2] };
+};
+// What the 1.2 release notes say of that range (src/changelog/1.2.mdx, "Compatible with Mekanism Overclocked"): the five official builds
+// and the unofficial fork that keeps the mod id 'mekanism'. Added to the overview only while the range reaches the fork and the page does not name it.
+const OFFICIAL_BUILDS = '10.7.15 to 10.7.19', FORK_BUILDS = '10.7.20 to 10.7.23.3', FORK_BELOW = '10.7.24';
+const MEK_TEXT = {
+  en: { row: ({ from, below }) => `| Mekanism | ${from} up to, but excluding, ${below} |`,
+    after: /A version of Mekanism outside the accepted range is refused at startup rather than loaded\./,
+    note: ` The five official builds, ${OFFICIAL_BUILDS}, are the supported ones; ${FORK_BUILDS} is the unofficial Mekanism Overclocked edition, which loads too.` },
+  fr: { row: ({ from, below }) => `| Mekanism | ${from} jusqu'à ${below} exclu |`,
+    after: /Une version de Mekanism hors de la plage acceptée est refusée au démarrage au lieu d'être chargée\./,
+    note: ` Les cinq builds officiels, ${OFFICIAL_BUILDS.replace(' to ', ' à ')}, sont ceux qui sont pris en charge ; ${FORK_BUILDS.replace(' to ', ' à ')} est l'édition non officielle Mekanism Overclocked, qui se charge aussi.` },
+};
+const fixMekanismRange = (md, lng = 'en') => {
+  const T = MEK_TEXT[lng], range = mekanismRange();
+  const row = /^\| Mekanism \| [^|\n]*\|$/m;
+  if (!row.test(md)) throw new Error(`Home (${lng}): no Mekanism row in the table of requirements`);
+  md = md.replace(row, T.row(range));
+  return range.below === FORK_BELOW && !md.includes('Overclocked') ? md.replace(T.after, s => s + T.note) : md;
+};
 // the overview names both Minecraft versions, and its table of requirements gets a column for each
 // "10.7.15 up to, but excluding, 10.7.20" is shortened so two columns of it stay readable on a phone
 const short = range => range.replace(/ up to, but excluding, /, ' to below ');
@@ -92,7 +117,7 @@ if (!archive) {
   execFileSync('curl', ['-sSfL', '--retry', '4', '-o', archive, url], { stdio: 'inherit' });
 }
 const KEEP = ['docs/wiki/', 'docs/publication/CURSEFORGE_CHANGELOG_', 'docs/publication/assets/gallery/', 'docs/publication/assets/engineering-avatar.png',
-  `src/main/resources/assets/${NS}/`, `src/main/resources/data/${NS}/recipe/`, 'gradle.properties', 'LICENSE'];
+  `src/main/resources/assets/${NS}/`, `src/main/resources/data/${NS}/recipe/`, 'src/main/resources/META-INF/neoforge.mods.toml', 'gradle.properties', 'LICENSE'];
 await tar.x({ file: archive, cwd: work, filter: p => KEEP.some(k => p.split('/').slice(1).join('/').startsWith(k)) });
 const top = fs.readdirSync(work).find(d => fs.statSync(path.join(work, d)).isDirectory());
 const SRC = path.join(work, top);
@@ -360,7 +385,7 @@ for (const [from, p0] of Object.entries(PAGES)) {
   // the main render of a machine page moves into the page header (3D view or render)
   if (p.ids) md = md.replace(/^!\[[^\]]*\]\(images\/[a-z_]+\.png\)\n+/m, '');
   md = rewrite(md, from, p.ids);
-  if (from === 'Home') md = addMc1201(md, LNG);
+  if (from === 'Home') md = addMc1201(fixMekanismRange(md, LNG), LNG);
   if (from === 'Quantum-Ore-Refinery') {
     // the speed calculator comes after the paragraph that gives the formula
     md = fr ? md.replace(/(^[^\n]*`200 × 50\^\(−n\/8\)`[^\n]*\n(?:[^\n]+\n)*)/m, `$1\n<div class="me-qor-calc not-content"></div>\n`)

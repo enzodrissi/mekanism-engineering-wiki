@@ -60,7 +60,7 @@ function note(s, i, list) {
   if (id.startsWith('tank_')) return L('The top half of the tank, on the bottom half.');
   if (id === 'accelerator') return L('One of eight accelerator places. Each accelerator makes a job shorter; a casing fits here too.');
   if (id === 'girder') return L('The roof. A girder turns to follow the axis it is placed on.');
-  if (id === 'module_quantum') return L('Optional. It goes here, above the Output Port, or in its place. Choose a frequency on its screen and the ingots go to a Quantum or QIO network.');
+  if (id === 'module_quantum') return L('Optional, at most one. It goes in one of two cells only: here, above the Output Port, or in the Output Port\'s place. Nowhere else. Choose a frequency on its screen and the ingots go to a Quantum or QIO network.');
   return '';
 }
 

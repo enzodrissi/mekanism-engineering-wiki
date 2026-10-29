@@ -21,7 +21,7 @@ chacune d'elles, et toucher un bloc pour voir son nom. Le plan complet, le nombr
    en partant de la gauche quand on lui fait face, et se tourne vers le joueur au moment où on le pose : la structure se
    dresse **derrière** lui et sur sa droite.
 2. Construire le reste : carcasses, piliers, poutres, tapis, les ports (au moins cinq ports d'entrée, au moins un port
-   d'énergie et, si on le souhaite, un port de sortie), sept modules de traitement, quatre cellules de réservoir de deux blocs chacune, et autant d'accélérateurs qu'on le souhaite (jusqu'à huit). Un emplacement d'accélérateur peut aussi accueillir une simple carcasse.
+   d'énergie et au plus un port de sortie, que le module quantique peut remplacer, voir l'étape 6), sept modules de traitement, quatre cellules de réservoir de deux blocs chacune, et autant d'accélérateurs qu'on le souhaite (jusqu'à huit). Un emplacement d'accélérateur peut aussi accueillir une simple carcasse.
 3. Tant qu'un élément est incorrect, l'écran du contrôleur indique quel bloc est incorrect ou manquant, et où. Quand le
    dernier bloc est posé, l'écran affiche « Multibloc formé » (et de la poudre de redstone court le long des arêtes, si
    l'effet de Mekanism est activé).
@@ -36,9 +36,14 @@ environ une fois par seconde et ne charge jamais de chunk pour le faire.
 1. Amener de l'**énergie** à un port d'énergie (Joules ou Forge Energy, depuis un câble ou un bloc d'énergie).
 2. Fournir le **minerai** à un port d'entrée dans son mode par défaut **Objets**, ou placer le minerai à la main dans
    les neuf emplacements de minerai.
-3. Récupérer les lingots au port de sortie avec un tuyau, un entonnoir ou un coffre placé contre lui.
+3. Donner une sortie aux lingots : les récupérer au **port de sortie** avec un tuyau, un entonnoir ou un coffre placé
+   contre lui, ou utiliser le module quantique de l'[étape 6](#6-envoyer-les-lingots-vers-son-réseau-facultatif).
+   **La raffinerie a besoin de l'un des deux** : sans port de sortie ni module quantique réglé, la structure se forme,
+   mais l'écran affiche « Pas de sortie » et rien n'est traité.
 
-Les niveaux **x1** et **x2** ne demandent aucun produit chimique : la raffinerie fonctionne donc déjà.
+Les niveaux **x1** et **x2** ne demandent aucun produit chimique, mais avec les réglages par défaut la raffinerie ne
+démarre pas encore : elle attend tout ce que demande le **x5** (l'écran affiche « Attend le niveau »). L'étape 3
+montre comment la faire travailler tout de suite.
 
 ## 3. Choisir son fonctionnement
 
@@ -78,11 +83,13 @@ sont plus rapides. Essayer :
 
 ## 6. Envoyer les lingots vers son réseau (facultatif)
 
-Ajouter le **Module quantique de raffinerie de minerai** à l'extrémité de sortie de la structure, à la place du port de
-sortie ou dans la cellule juste au-dessus (voir [Structure et pièces](../../quantum-ore-refinery/structure/#ports)), puis
-choisir une fréquence sur son écran : les lingots partent alors vers une fréquence quantique (d'inventaire) ou dans un
+Ajouter le **Module quantique de raffinerie de minerai** à l'extrémité de sortie de la structure, dans **l'une de deux
+cellules seulement** : la place du port de sortie, ou la cellule juste au-dessus. Ne le poser nulle part ailleurs, et
+n'en mettre qu'un (voir [Structure et pièces](../../quantum-ore-refinery/structure/#ports)). Choisir ensuite une
+fréquence sur son écran : les lingots partent alors vers une fréquence quantique (d'inventaire) ou dans un
 réseau QIO, toutes les demi-secondes, en passant par un tampon de 64 piles. Rien n'est perdu quand la destination est
-pleine. Voir [Le module quantique](../../quantum-ore-refinery/#le-module-quantique).
+pleine. Voir [Le module quantique](../../quantum-ore-refinery/#le-module-quantique). Si la structure garde aussi son port de
+sortie, celui-ci sert de tampon de secours : ce que le tampon du module ne peut pas contenir sort par le port.
 
 ## Ensuite
 
