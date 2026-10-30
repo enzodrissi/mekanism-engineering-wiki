@@ -37,14 +37,20 @@ function newestRef() {
   const line = branches.filter(b => /^(main$|wip\/|release\/)/.test(b.name) && !/1201|1\.20\.1|mc1\.20(?!\d)/i.test(b.name))
     .sort((a, b) => Date.parse(b.commit.committed_date) - Date.parse(a.commit.committed_date));
   for (const b of line.slice(0, 5)) {
-    // a wiki without the refinery page is an older line's (main carries the 1.1.1 docs): the site cannot be built from it
-    try { if (getJson(`${API}/repository/tree?path=docs/wiki&per_page=100&ref=${encodeURIComponent(b.name)}`).some(f => f.name === 'Quantum-Ore-Refinery.md')) return b.name; }
-    catch { /* no docs/wiki on that branch */ }
+    // a wiki without the refinery page is an older line's (main carries the 1.1.1 docs): the site cannot be built from it.
+    // The import also reads the mod's language file at src/main/resources/assets/<ns>/lang: a branch that keeps its resources
+    // elsewhere (the Stonecutter layout, versions/<mc>/...) is skipped until this script reads that layout.
+    try {
+      const ref = encodeURIComponent(b.name);
+      if (getJson(`${API}/repository/tree?path=docs/wiki&per_page=100&ref=${ref}`).some(f => f.name === 'Quantum-Ore-Refinery.md')
+        && getJson(`${API}/repository/files/${encodeURIComponent(`src/main/resources/assets/${NS}/lang/en_us.json`)}?ref=${ref}`).file_name) return b.name;
+    }
+    catch { /* no docs/wiki, or no language file at the expected place, on that branch */ }
   }
   throw new Error('No branch of the mod has a wiki (docs/wiki)');
 }
-const REF = process.env.WIKI_REF || (process.env.WIKI_ARCHIVE ? 'local archive' : newestRef());
 const NS = 'mekanismengineering';
+const REF = process.env.WIKI_REF || (process.env.WIKI_ARCHIVE ? 'local archive' : newestRef());
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
 const SITE_REPO = 'https://github.com/mekanism-engineering/mekanism-engineering.github.io';
 // The 1.2 also ships for Minecraft 1.20.1, with NeoForge's 1.20.1 build (neo_version 1.20.1-47.1.106, ModDevGradle legacyforge), from a
