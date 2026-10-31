@@ -38,18 +38,27 @@ function newestRef() {
     .sort((a, b) => Date.parse(b.commit.committed_date) - Date.parse(a.commit.committed_date));
   for (const b of line.slice(0, 5)) {
     // a wiki without the refinery page is an older line's (main carries the 1.1.1 docs): the site cannot be built from it.
-    // The import also reads the mod's language file at src/main/resources/assets/<ns>/lang: a branch that keeps its resources
-    // elsewhere (the Stonecutter layout, versions/<mc>/...) is skipped until this script reads that layout.
+    // The import also reads the mod's language file: at src/main/resources/assets/<ns>/lang, or in the Stonecutter layout of the
+    // 1.2.1 line, at versions/<mc>/src-overrides/main/resources/assets/<ns>/lang (RESOURCE_ROOTS below). A branch with it in neither
+    // place is skipped.
     try {
       const ref = encodeURIComponent(b.name);
-      if (getJson(`${API}/repository/tree?path=docs/wiki&per_page=100&ref=${ref}`).some(f => f.name === 'Quantum-Ore-Refinery.md')
-        && getJson(`${API}/repository/files/${encodeURIComponent(`src/main/resources/assets/${NS}/lang/en_us.json`)}?ref=${ref}`).file_name) return b.name;
+      if (!getJson(`${API}/repository/tree?path=docs/wiki&per_page=100&ref=${ref}`).some(f => f.name === 'Quantum-Ore-Refinery.md')) continue;
+      for (const root of RESOURCE_ROOTS)
+        try { if (getJson(`${API}/repository/files/${encodeURIComponent(`${root}/assets/${NS}/lang/en_us.json`)}?ref=${ref}`).file_name) return b.name; }
+        catch { /* not in that layout */ }
     }
-    catch { /* no docs/wiki, or no language file at the expected place, on that branch */ }
+    catch { /* no docs/wiki on that branch */ }
   }
   throw new Error('No branch of the mod has a wiki (docs/wiki)');
 }
 const NS = 'mekanismengineering';
+// Where the mod keeps its resources (lang, recipes, neoforge.mods.toml, models...). Until the 1.2.1 line they sit in
+// src/main/resources. The Stonecutter layout (one source tree for 1.20.1 and 1.21.1) keeps what is shared there and what is
+// specific to a Minecraft version in versions/<mc>/src-overrides/main/resources; the site shows the 1.21.1 one, which wins
+// over the shared file of the same name.
+const STONECUTTER_RESOURCES = 'versions/1.21.1/src-overrides/main/resources';
+const RESOURCE_ROOTS = ['src/main/resources', STONECUTTER_RESOURCES];
 const REF = process.env.WIKI_REF || (process.env.WIKI_ARCHIVE ? 'local archive' : newestRef());
 const GITLAB = 'https://gitlab.com/enzodr/mekanism-engineering';
 const SITE_REPO = 'https://github.com/mekanism-engineering/mekanism-engineering.github.io';
@@ -124,10 +133,16 @@ if (!archive) {
   execFileSync('curl', ['-sSfL', '--retry', '4', '-o', archive, url], { stdio: 'inherit' });
 }
 const KEEP = ['docs/wiki/', 'docs/publication/CURSEFORGE_CHANGELOG_', 'docs/publication/assets/gallery/', 'docs/publication/assets/engineering-avatar.png',
-  `src/main/resources/assets/${NS}/`, `src/main/resources/data/${NS}/recipe/`, 'src/main/resources/META-INF/neoforge.mods.toml', 'gradle.properties', 'LICENSE'];
+  `src/main/resources/assets/${NS}/`, `src/main/resources/data/${NS}/recipe/`, 'src/main/resources/META-INF/neoforge.mods.toml', 'gradle.properties', 'LICENSE', 'versions/1.21.1/gradle.properties',
+  `${STONECUTTER_RESOURCES}/assets/${NS}/`, `${STONECUTTER_RESOURCES}/data/${NS}/recipe/`, `${STONECUTTER_RESOURCES}/META-INF/neoforge.mods.toml`];
 await tar.x({ file: archive, cwd: work, filter: p => KEEP.some(k => p.split('/').slice(1).join('/').startsWith(k)) });
 const top = fs.readdirSync(work).find(d => fs.statSync(path.join(work, d)).isDirectory());
 const SRC = path.join(work, top);
+// Stonecutter layout: lay the 1.21.1 resources over the shared ones, so that everything below reads src/main/resources as before
+if (fs.existsSync(path.join(SRC, STONECUTTER_RESOURCES))) {
+  fs.cpSync(path.join(SRC, STONECUTTER_RESOURCES), path.join(SRC, 'src/main/resources'), { recursive: true, force: true });
+  console.log('Stonecutter layout: the resources of versions/1.21.1 are laid over src/main/resources');
+}
 const rd = p => fs.readFileSync(path.join(SRC, p), 'utf8');
 const commit = top.split('-').pop();
 console.log('Source', REF, commit.slice(0, 8));
@@ -161,7 +176,10 @@ const LANG = { en: lang, fr: JSON.parse(rd(`src/main/resources/assets/${NS}/lang
 // Mekanism's and Minecraft's names, from their French language files (Mekanism 10.7.19, Minecraft 1.21.1)
 const VENDOR = { en: vendorNames, fr: JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/item-names.fr.json'), 'utf8')) };
 const pre = () => (LNG === 'fr' ? '/fr' : '');
-const props = Object.fromEntries(rd('gradle.properties').split('\n').filter(l => l.includes('=')).map(l => l.split('=').map(s => s.trim())));
+// the Stonecutter layout keeps the version numbers of each Minecraft version in versions/<mc>/gradle.properties (the root file has the build settings)
+const propsOf = text => Object.fromEntries(text.split('\n').filter(l => l.includes('=')).map(l => l.split('=').map(s => s.trim())));
+const props = { ...propsOf(rd('gradle.properties')), ...(fs.existsSync(path.join(SRC, 'versions/1.21.1/gradle.properties')) ? propsOf(rd('versions/1.21.1/gradle.properties')) : {}) };
+if (!props.mod_version) throw new Error('gradle.properties declares no mod_version');
 
 const nameOf = id => {
   const [ns, p] = id.split(':');
